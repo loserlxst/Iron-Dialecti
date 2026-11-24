@@ -1,4 +1,4 @@
-/* IRON DIALECTIC — dev console for recording videos. Toggle with the backquote key (`). Cheats only touch the player. */
+/* IRON DIALECTIC — dev console for recording videos. Toggle with the backquote key (`), or five quick taps on the date. Cheats only touch the player. */
 (function () {
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
@@ -63,7 +63,7 @@
   document.body.appendChild(box);
   function render() {
     const hudOff = !!document.getElementById('hud').style.visibility;
-    box.innerHTML = '<h4>DEV CONSOLE <small>(` to close)</small></h4>' +
+    box.innerHTML = '<h4>DEV CONSOLE <small>(` or five taps on the date to close)</small></h4>' +
       Object.keys(toggles).map((k) => '<button data-dt="' + k + '" class="' + ((k === 'hud' ? hudOff : Dev[k]) ? 'on' : '') + '">' + toggles[k][0] + '</button>').join('') +
       '<button data-ds class="' + (Dev.strike ? 'on' : '') + '">Click-to-strike: ' + (Dev.strike || 'off') + '</button><hr>' +
       actions.map((a, k) => '<button data-da="' + k + '">' + a[0] + '</button>').join('') +
@@ -78,8 +78,16 @@
     else actions[+b.dataset.da][1]();
     render(); refresh();
   });
+  const toggle = () => { box.hidden = !box.hidden; if (!box.hidden) render(); };
   document.addEventListener('keydown', (e) => {
     if (e.key !== '`' || (e.target.tagName === 'INPUT' && e.target.type === 'text')) return;
-    box.hidden = !box.hidden; if (!box.hidden) render();
+    toggle();
+  });
+  /* Phones have no backquote key: five quick taps on the date in the top bar. */
+  let taps = [];
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest || !e.target.closest('#t-date')) return;
+    const t = Date.now(); taps = taps.filter((x) => t - x < 2000); taps.push(t);
+    if (taps.length >= 5) { taps = []; toggle(); }
   });
 })();
