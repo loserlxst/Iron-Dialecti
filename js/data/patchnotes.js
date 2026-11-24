@@ -3,6 +3,15 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '24 November 2026', title: 'Life after a destiny, and longer trees', items: [
+      'Reaching a destiny no longer ends your country’s road. It opens a new programme tree named after the state you became: 91 trees, one for every destiny, eleven programmes each.',
+      'Each tree starts with a first act, then splits into two roads of four that rule each other out, such as conquest or consolidation, the world or home. A finale of two follows whichever road you took.',
+      'The end of each road and the end of the finale each give your country a title it keeps, such as “Emperor of Two Seas” or “The Restored Throne”. Their bonuses last fifty years.',
+      'If the regime that reached the destiny falls, its tree closes with it. Other countries walk their own trees too.',
+      'Every national tree and every family tree gains a branch for the 1960s and 1970s: oil booms, space programmes, guest workers, student revolts and the like, with two roads to choose between.',
+      'Every ideology tree gains five programmes after its 1958 pair, from 1964 on.',
+      '1,366 new programmes in all. A full playthrough of the shortest national tree now takes about 32 years instead of 23.',
+    ] },
     { date: '23 November 2026', title: 'Every system plays its own way', items: [
       'Marxist-Leninist states have yearly plan quotas. Miss one and you can report false figures, but a war tends to find them out.',
       'Democracies make dated promises that voters judge at the next election; democratic socialists who keep too many test the officers’ patience.',

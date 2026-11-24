@@ -74,6 +74,10 @@ if (mode === 'trees') {
   }
   const it = ID.FOCUS.ideos; const ks = Object.keys(it);
   console.log('ideology trees: ' + ks.length + ', programmes each ' + Math.min(...ks.map((k) => it[k].length)) + '–' + Math.max(...ks.map((k) => it[k].length)));
+  // a destiny tree played through: its first act, the longer of its two roads, and the finale
+  const af = ID.FOCUS.after || {}, dk = Object.keys(af);
+  const dy = dk.map((k) => { const d = (re) => af[k].filter((f) => re.test(f.id)).reduce((s, f) => s + f.days, 0); return (d(/_(r|f\d)$/) + Math.max(d(/_a\d$/), d(/_b\d$/))) * P / 360; });
+  if (dk.length) console.log('destiny trees: ' + dk.length + ', programmes each ' + Math.min(...dk.map((k) => af[k].length)) + '–' + Math.max(...dk.map((k) => af[k].length)) + '; one road and the finale take ' + Math.min(...dy).toFixed(1) + '–' + Math.max(...dy).toFixed(1) + ' years');
   console.log('fewest programmes: ' + Math.min(...out.map((r) => r[1])) + '; shortest playthrough: ' + Math.min(...out.map((r) => r[2])).toFixed(1) + ' years');
   process.exit(0);
 }

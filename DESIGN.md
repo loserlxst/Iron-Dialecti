@@ -92,6 +92,11 @@ with destinies of their own, so every country on every map has somewhere to go. 
 Three Continents also has a motto, an anthem (generated from its name), a short history and two
 national spirits; titles ("Victor over Hesperia", "Born of Revolution") accumulate as it plays.
 
+A destiny is no longer the end of the road (session 15). Each one opens a tree of eleven, named for the state it
+made: a first act, then two roads of four that rule each other out, each ending in a title the country keeps, and a
+finale of two after either road. The tree closes if the destiny lapses. The same session gave every national and
+family tree a branch for the 1960s and 1970s, and every ideology tree five programmes after its 1958 pair.
+
 ### Knowing what to do (added in session 6)
 A collapsing state should feel dangerous, never baffling. The **Report** reads the country the way a
 cabinet would: it ranks what is wrong, names the cause (the biggest drag on stability, the worst
@@ -318,6 +323,8 @@ js/data/oldlands.js   the Old Lands: national layer, identities, oil fields, fro
 js/data/oldtrees.js   the Old Lands' programme trees, destinies, projects and foreign programmes
 js/data/dispatches.js the third shelf of ordinary dispatches, and the sovereignty dispatches
 js/data/trees2.js     longer trees: a nine-programme branch per national tree, late ideology pairs
+js/data/afterdest.js  the tree each destiny opens (ID.FOCUS.after), shown as its own tab while the destiny holds
+js/data/trees3.js     the late century: a 1960s–70s branch per national and family tree, five more per ideology tree
 js/ui/sovereignty.js  the Sovereignty panel (key U), its Report items and handbook page
 js/ui/nation.js       Nation screen and superevents; scenes.js paints their scenes
 js/ui/tray.js         dispatch tray (ordinary dispatches wait while the clock runs)

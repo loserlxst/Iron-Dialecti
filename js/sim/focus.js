@@ -33,7 +33,11 @@
     for (const k in ID.FOCUS.families || {}) for (const f of ID.FOCUS.families[k]) { all[f.id] = f; f.tree = 'fam:' + k; }
     for (const b in ID.FOCUS.projects || {}) for (const f of ID.FOCUS.projects[b]) { all[f.id] = f; f.tree = b; if (nat[b]) nat[b][f.id] = f; }
     for (const k in ID.FOCUS.secret || {}) for (const f of ID.FOCUS.secret[k]) { all[f.id] = f; f.tree = 'secret:' + k; }
+    for (const k in ID.FOCUS.after || {}) for (const f of ID.FOCUS.after[k]) { all[f.id] = f; f.tree = 'dest:' + k; }
   }
+  /* The tree a reached destiny opens (data/afterdest.js); gone while the destiny has lapsed. */
+  const destActive = (n) => (n.destiny && !n.destiny.lapsed ? n.destiny : null);
+  Fo.afterTree = (n) => { const d = destActive(n); return d && ID.FOCUS.after && ID.FOCUS.after[d.id]; };
   /* Names in family trees carry {A} and {N}: the state's adjective and name. */
   Fo.sub = (t, n) => (t ? String(t).replace(/\{A\}/g, n.adj).replace(/\{N\}/g, n.base) : '');
   Fo.nm = (f, n) => Fo.sub(f.name, n);
@@ -46,6 +50,7 @@
     const out = [];
     if (n.tree && ID.FOCUS.nations[n.tree]) out.push({ key: 'nat', name: n.adj + ' programme', list: n.nq && ID.FOCUS.projects && ID.FOCUS.projects[n.tree] ? natFull(n.tree) : ID.FOCUS.nations[n.tree] });
     else { const fam = ID.ideo(n).family, L = ID.FOCUS.families && ID.FOCUS.families[fam]; if (L) out.push({ key: 'nat', name: n.adj + ' programme', fam, list: L }); }
+    const AT = Fo.afterTree(n); if (AT) { if (!all) index(); out.push({ key: 'dest', name: n.destiny.name, list: AT }); }
     const IT = ID.FOCUS.ideos && ID.FOCUS.ideos[n.ideo];
     if (IT) { if (!all) index(); out.push({ key: 'ideo', name: ID.ideo(n).name, list: IT }); }
     const sec = ID.Secret && ID.Secret.tree(n); if (sec) { if (!all) index(); out.push(sec); }
@@ -73,6 +78,7 @@
       if (p.cur === f.id) return 'Under way.';
       if (!(f.crisis && c && !c.crisis)) return f.crisis ? 'Another emergency measure is under way.' : 'Another programme is under way.';
     }
+    if (f.afterDest && (!destActive(n) || n.destiny.id !== f.afterDest)) return 'Only for the state its destiny made.';
     if (f.excl) for (const x of f.excl) if (p.done[x] != null) return 'Ruled out: you chose ' + Fo.nm(Fo.def(x), n) + '.';
     if (f.dest && n.destiny && !n.destiny.lapsed && n.destiny.id !== f.id) return 'You have already reached a destiny: ' + n.destiny.name + '.';
     if (n.destiny && !n.destiny.lapsed && !f.dest && !f.secret) for (const x of f.fx || []) if (x[0] === 'ideology' && x[1] !== n.destiny.ideo) return 'Ruled out: the ' + n.destiny.name + ' will not unmake itself.';
@@ -172,6 +178,7 @@
     ID.chron(G, 'destiny', old + ' becomes ' + n.destiny.name + ': ' + n.destiny.title + '.', n.id);
     if (ID.Press) ID.Press.destiny(G, n, old, { art: d.art, quote: S(d.quote) });
     if (n.id === G.player && !G.autoPlayer && !G.headless) { (G.superq = G.superq || []).push({ kind: 'destiny', nation: n.id, focus: f.id }); G.uiDirty = true; }
+    if (n.id === G.player && Fo.afterTree(n)) ID.news(G, 'A new programme tree opens: ' + n.destiny.name + '.', 'good', n.id);
     if (!G.headless) G.dirtyAll = true;
   };
   /* Titles a state earns: shown on the Nation screen and in the chronicle. Newest first, four at most. */
@@ -221,7 +228,7 @@
     const wantArmy = n.nwars || n.a.threatened, hungry = ID.Economy.harvest(n) < 1.02;
     const f = G.rng.weighted(av, (x) => {
       let w = x.tree === 'general' ? 1 : x.crisis ? 5 : x.ideoTree ? 2.5 : 3;
-      if (x.tree !== 'general' && !x.crisis && !x.ideoTree && !x.proj && hist) w = x.hist ? 40 : G.story && G.story.loose ? 0.25 : 0;
+      if (x.tree !== 'general' && !x.crisis && !x.ideoTree && !x.proj && !x.afterDest && hist) w = x.hist ? 40 : G.story && G.story.loose ? 0.25 : 0;
       if (x.repeat) w *= 0.45;
       if (x.dest) w *= 3;
       if (typeof x.ai === 'function') w *= x.ai(n, G); else if (x.ai != null) w *= x.ai;
@@ -411,6 +418,7 @@
     protector: (G, n) => protector(G, n),
     note2: (G, n, f) => D().note(G, n, tgt(G, f[1]), f[2]),
     subvertNb: (G, n, f) => { for (const k in G.border[n.id] || {}) { const t = G.nations[+k]; if (t && t.alive && t !== n && !ID.sameBloc(G, n.id, t.id)) subvert(G, n, t, f[1]); } },
+    epithet: (G, n, f) => ID.addEpithet(G, n, Fo.sub(f[1], n)),
   };
   Fo.DESC = {
     ideology: (f, n) => (n && n.ideo === f[1] ? { t: 'Confirms the ' + ID.IDEOLOGIES[f[1]].name + ' regime', good: true } : { t: 'The regime becomes ' + ID.IDEOLOGIES[f[1]].name, good: null }),
@@ -426,6 +434,7 @@
     civilwar: (f) => ({ t: 'Civil war against ' + ID.IDEOLOGIES[f[1]].name, good: false }),
     protector: () => ({ t: 'Alliance with a friendly great power', good: true }),
     subvertNb: () => ({ t: 'Agitation in every neighbouring state', good: true }),
+    epithet: (f, n) => ({ t: 'Remembered as “' + (n ? Fo.sub(f[1], n) : f[1]) + '”', good: true }),
     note2: (f) => ({ t: { treaty: 'Proposes a treaty to ', cede: 'Demands provinces from ', bloc: 'Invites into our alliance: ', aid: 'Offers aid to ', toll: 'Names a toll for ', concession: 'Asks for an oil concession from ', base: 'Asks for a base in ', arms: 'Offers arms to ' }[f[2]] + f[1], good: null }),
   };
 

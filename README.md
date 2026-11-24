@@ -182,6 +182,7 @@ node tools/history.js --runs 3 --verbose        # The Three Continents in histor
 node tools/history.js --runs 3 --free           # the same world with no storyline
 node tools/metrics.js events|pacing|human|trees|tables   # event variety, war pacing, tree sizes, ideology tables
 node tools/ideocheck.js [ideo,...] [years]      # every ideology fully wired; force some on states and run the world
+node tools/afterdest.js                         # destiny trees and late branches: effects, layout, roads, titles, lapse, AI
 ```
 
 Ideologies, events, programmes and the storyline are plain data: add an ideology by adding one
