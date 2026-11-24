@@ -58,7 +58,9 @@ exists in the sandbox for headless browser checks (use puppeteer-core from npm o
 - **`js/sim` and `js/data` never touch the DOM.** The UI reads the game object `G` and calls
   sim functions. Keep it that way so the Node tools keep working.
 - `G` is one plain object made by `ID.newGame(opts)` (`sim/world.js`). `ID.setPlayer(G, id,
-  ideoOverride)` hands a nation to the human. `ID.Game.tick(G)` advances one day.
+  ideoOverride)` hands a nation to the human. `ID.rewriteRegime(G, n, ideo)` gives any nation another
+  system before the start; the setup screen keeps the choices in `S.ideos` and rebuilds the world from
+  its seed with them applied. `ID.Game.tick(G)` advances one day.
 - Time: 1 tick = 1 day, 30-day months, 360-day years, 1910 → 1976. Monthly logic runs in
   `ID.Game.month`. Eras at 1910 / 1925 / 1940 / 1957.
 - Map: `G.W × G.H` tiles (std 384×216). Typed arrays indexed by `y*W+x`: `terrain`, `river`,

@@ -541,9 +541,14 @@
   ID.setPlayer = function (G, id, ideoOverride) {
     if (G.player && G.nations[G.player]) G.nations[G.player].ai = true;
     const n = G.nations[id]; G.player = id; n.ai = false;
-    if (ideoOverride && ideoOverride !== n.ideo) {
-      const I = ID.IDEOLOGIES[ideoOverride];
-      n.laws = {}; ID.applyIdeology(G, n, ideoOverride, true);
+    ID.rewriteRegime(G, n, ideoOverride);
+  };
+
+  /* Before the game starts: give a nation a different system of government, as if it had always had it. */
+  ID.rewriteRegime = function (G, n, ideo) {
+    if (ideo && ideo !== n.ideo) {
+      const I = ID.IDEOLOGIES[ideo];
+      n.laws = {}; ID.applyIdeology(G, n, ideo, true);
       n.fervor = I.legit.fervor ? 70 : 12; n.particip = I.control.type === 'assembly' ? 78 : I.legit.particip ? 60 : 35;
       n.tradition = I.family === 'conservative' ? 72 : I.family === 'liberal' ? 42 : I.family === 'socialist' || I.family === 'anarchist' ? 8 : 32;
       n.charisma = I.legit.charisma ? 66 : 45; n.mob = Math.min(n.mob, ID.maxMob(n)); n.troops = n.pop * n.mob;

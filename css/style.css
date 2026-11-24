@@ -284,6 +284,7 @@ table.t td.n, table.t th.n { text-align: right; font-variant-numeric: tabular-nu
 .nrow { display: grid; grid-template-columns: 28px 1fr auto; gap: 2px 8px; align-items: center; padding: 6px 8px; border: 2px solid transparent; border-bottom-color: var(--paper3); cursor: pointer; background: transparent; width: 100%; text-align: left; }
 .nrow:hover { background: var(--paper2); } .nrow.on { border-color: var(--ink); background: var(--paper2); box-shadow: 3px 3px 0 var(--red); }
 .nrow b { font-weight: 600; } .nrow small { grid-column: 2 / span 2; font-size: 13.5px; color: var(--ink2); }
+.govrow { display: grid; grid-template-columns: 28px 1fr 200px; gap: 8px; align-items: center; padding: 4px 8px; border-bottom: 1px solid var(--paper3); } .govrow b { font-weight: 600; }
 .stars { font-size: 13px; letter-spacing: 1px; color: var(--red); white-space: nowrap; }
 .pickcard { position: absolute; right: 16px; top: 16px; width: 380px; max-height: calc(100vh - 32px); overflow-y: auto; background: var(--paper); border: 3px solid var(--ink); box-shadow: 8px 8px 0 var(--red); z-index: 41; padding: 12px 14px; user-select: text; -webkit-user-select: text; scrollbar-width: thin; }
 .pickcard h2 { font: 800 30px/1 var(--cond); margin-bottom: 2px; }

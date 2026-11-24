@@ -3,6 +3,11 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '24 November 2026', title: 'Rewrite the world before you start', items: [
+      'On the new campaign screen, “Rewrite other countries’ governments” lets you choose the starting system of every country, not only your own.',
+      'Each country starts with laws, a leader, politics and relations to match. “Restore history” puts them all back.',
+      'Not available in challenges.',
+    ] },
     { date: '24 November 2026', title: 'Life after a destiny, and longer trees', items: [
       'Reaching a destiny no longer ends your country’s road. It opens a new programme tree named after the state you became: 91 trees, one for every destiny, eleven programmes each.',
       'Each tree starts with a first act, then splits into two roads of four that rule each other out, such as conquest or consolidation, the world or home. A finale of two follows whichever road you took.',

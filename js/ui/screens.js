@@ -87,17 +87,20 @@
   };
 
   /* ---------------------------------------------------------------- campaign setup */
-  const S = (Sc.S = { scenario: 'meridia', seed: 0, size: 'std', difficulty: 'iron', nation: 0, ideo: null, challenge: null, startYear: 0, ironman: false, retry: false, historical: true });
+  const S = (Sc.S = { scenario: 'meridia', seed: 0, size: 'std', difficulty: 'iron', nation: 0, ideos: {}, challenge: null, startYear: 0, ironman: false, retry: false, historical: true });
   let SG = null;
   function genSetup() {
     const opts = { scenario: S.scenario, seed: S.seed, size: S.size, difficulty: S.difficulty, headless: false, startYear: S.startYear || 0, challenge: S.challenge, ironman: S.ironman, historical: S.historical && !S.challenge, loose: S.loose !== false };
     SG = ID.newGame(opts); SG.paused = true;
+    /* Governments the player rewrote: the world is rebuilt from its seed and each one applied, so going back to the historical system is exact. */
+    SG.baseIdeo = {}; for (const n of SG.nations) if (n) SG.baseIdeo[n.id] = n.ideo;
+    for (const id in S.ideos) if (SG.nations[id] && SG.nations[id].alive) ID.rewriteRegime(SG, SG.nations[id], S.ideos[id]);
     R.setMode('political'); R.setGame(SG); R.quiet = true;
     const ns = ID.alive(SG);
     if (!SG.nations[S.nation] || !SG.nations[S.nation].alive) S.nation = (ns.find((n) => n.tutorial) || ns[0]).id;
   }
   Sc.setup = function (o) {
-    Object.assign(S, { scenario: 'meridia', seed: (Math.random() * 1e6) | 0, size: 'std', difficulty: 'iron', nation: 0, ideo: null, challenge: null, startYear: 0, ironman: false, retry: false, historical: S.historical !== false }, o || {});
+    Object.assign(S, { scenario: 'meridia', seed: (Math.random() * 1e6) | 0, size: 'std', difficulty: 'iron', nation: 0, ideos: {}, govOpen: false, challenge: null, startYear: 0, ironman: false, retry: false, historical: S.historical !== false }, o || {});
     ID.Main.mode = 'setup'; ID.Main.bg = null; UI.G = null; UI.closeModal();
     $('#hud').hidden = true; $('#coach').hidden = true;
     genSetup();
@@ -106,8 +109,8 @@
     const n = SG.nations[S.nation]; R.focus(n.capital); R.selected = n.capital;
   };
   function stars(d) { return '<span class="stars"' + tip('Difficulty of the starting situation') + '>' + '★'.repeat(d) + '☆'.repeat(5 - d) + '</span>'; }
-  function ideoSelect(cur, base) {
-    let h = '<select data-change="pickIdeo" id="sel-ideo" style="width:100%">';
+  function ideoSelect(cur, base, id) {
+    let h = '<select data-change="pickIdeo" data-n="' + id + '"' + (id === S.nation ? ' id="sel-ideo"' : '') + ' style="width:100%"' + tip('System of government at the start') + '>';
     for (const fam in ID.FAMILIES) {
       h += '<optgroup label="' + ID.FAMILIES[fam].name + '">';
       for (const I of ID.IDEO_LIST.filter((i) => i.family === fam)) h += '<option value="' + I.id + '"' + (I.id === cur ? ' selected' : '') + '>' + esc(I.name) + (I.id === base ? ' (historical)' : '') + '</option>';
@@ -116,7 +119,7 @@
     return h + '</select>';
   }
   function renderSetup() {
-    const t = $('#title'); t.hidden = false; t.className = 'screen setup';
+    const t = $('#title'), old = t.querySelector('.pick .db'), top = old ? old.scrollTop : 0; t.hidden = false; t.className = 'screen setup';
     const ns = ID.alive(SG).slice(); if (S.scenario === 'random') ns.sort((a, b) => b.tiles - a.tiles);
     const ch = S.challenge ? ID.CHALLENGES.find((c) => c.id === S.challenge) : null;
     let h = '<div class="pick"><div class="dh"><h2>' + (ch ? esc(ch.name) : 'New campaign') + '</h2><button class="x" data-act="toTitle"' + tip('Back to the title screen') + '>✕</button></div><div class="db">';
@@ -140,19 +143,31 @@
       const sit = ID.SITUATIONS[n.sit] || ID.SITUATIONS.middling;
       h += '<button class="nrow' + (n.id === S.nation ? ' on' : '') + '" data-act="pickNation" data-a="' + n.id + '">' + ID.Flags.html(n, 'mini') + '<b>' + esc(n.base) + '</b>' + stars(sit.diff) + '<small>' + esc(ID.IDEOLOGIES[n.ideo].name) + ' · ' + esc(sit.name.toLowerCase()) + '</small></button>';
     }
-    h += '</div></div><div class="ft">' + btn('Begin', 'begin', null, { cls: 'big red' }) + '<span class="sp"></span>' + btn('Back', 'toTitle', null, { cls: 'ghost' }) + '</div></div>';
+    h += '</div>';
+    if (!ch) {
+      const others = ns.filter((n) => n.id !== S.nation), changed = others.filter((n) => n.ideo !== SG.baseIdeo[n.id]).length;
+      h += '<div class="field"><label>Other governments</label>' + btn((S.govOpen ? 'Hide' : 'Rewrite other countries’ governments') + (changed ? ' <small>' + changed + ' changed</small>' : ''), 'govToggle', null, { cls: 'ghost' });
+      if (S.govOpen) {
+        h += '<small>Each country starts under the system you pick, with its laws, leader and politics to match.</small>';
+        for (const n of others) h += '<div class="govrow">' + ID.Flags.html(n, 'mini') + '<b>' + esc(n.base) + '</b>' + ideoSelect(n.ideo, SG.baseIdeo[n.id], n.id) + '</div>';
+        if (changed) h += btn('Restore history', 'govReset', null, { cls: 'ghost sm' });
+      }
+      h += '</div>';
+    }
+    h += '</div><div class="ft">' + btn('Begin', 'begin', null, { cls: 'big red' }) + '<span class="sp"></span>' + btn('Back', 'toTitle', null, { cls: 'ghost' }) + '</div></div>';
     if (!UI.compact) h += '<div class="pickcard" id="pickcard">' + pickCard() + '</div>';
     t.innerHTML = h;
+    const db = t.querySelector('.pick .db'); if (db) db.scrollTop = top;
   }
   function pickCard() {
     const n = SG.nations[S.nation]; if (!n) return '';
-    const ideo = S.ideo || n.ideo, I = ID.IDEOLOGIES[ideo], sit = ID.SITUATIONS[n.sit] || ID.SITUATIONS.middling, M = ID.ECON[I.econ.model];
+    const ideo = n.ideo, I = ID.IDEOLOGIES[ideo], sit = ID.SITUATIONS[n.sit] || ID.SITUATIONS.middling, M = ID.ECON[I.econ.model];
     const fl = ID.Flags.html({ id: n.id, base: n.base, ideo, color: n.color }, 'pflag');
     let h = '<div class="row nw" style="align-items:flex-start;gap:10px">' + fl + '<h2>' + esc(ID.nationTitle(n, ideo)) + '</h2></div><div class="row" style="margin:4px 0 8px">' + UI.ideoTag(ideo) + stars(sit.diff) + '<b style="font-size:14px">' + esc(sit.name) + '</b></div>';
     h += '<p class="lead">' + esc(n.blurb || sit.text) + '</p>';
     if (n.blurb) h += '<p class="lead dim" style="font-size:14px">' + esc(sit.text) + '</p>';
     h += UI.kv([['Land', Math.round((n.tiles / SG.landCount) * 100) + '% of the world'], ['People', ID.fmtPop(n.pop)], ['Troops', ID.fmtPop(n.troops)], ['Factories', n.nb[ID.B.FACTORY] + ''], ['Neighbours', Object.keys(SG.border[n.id] || {}).length + '']]);
-    h += '<div class="field" style="margin-top:10px"><label>System of government</label>' + ideoSelect(ideo, n.ideo) + '<small>' + (S.retry ? '<b class="bad">Try a different system this time.</b> ' : '') + 'Start under the historical regime, or rewrite it. Every system plays differently.</small></div>';
+    h += '<div class="field" style="margin-top:10px"><label>System of government</label>' + ideoSelect(ideo, SG.baseIdeo[n.id], n.id) + '<small>' + (S.retry ? '<b class="bad">Try a different system this time.</b> ' : '') + 'Start under the historical regime, or rewrite it. Every system plays differently.</small></div>';
     h += '<p class="lead"><b>' + esc(I.name) + '.</b> ' + esc(I.short) + '</p>';
     h += UI.kv([['Economy', esc(M.name)], ['Government', esc(ID.CONTROL[I.control.type].name)], ['Legitimacy from', Object.keys(I.legit).sort((a, b) => I.legit[b] - I.legit[a]).slice(0, 2).map((k) => ID.LEGIT[k].name.toLowerCase()).join(', ')]]);
     h += '<ul class="plus">' + I.perks.slice(0, 3).map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul><ul class="minus">' + I.flaws.slice(0, 3).map((p) => '<li>' + esc(p) + '</li>').join('') + '</ul>';
@@ -164,23 +179,29 @@
   Sc.relayout = function () { if (ID.Main.mode === 'setup' && SG) renderSetup(); else if (ID.Main.mode === 'title' && !$('#title').hidden && !$('#title').classList.contains('setup')) { const f = $('#title .foot'); if (f) f.textContent = (UI.touch ? 'Plays with tap, drag and pinch; press and hold anything to have it explained.' : 'Plays entirely with left-click, drag, scroll and keys.') + ' Saves stay in this browser.'; } };
   Sc.pickAt = function (i) {
     if (!SG || i < 0) return; const o = SG.owner[i]; if (!o) return;
-    S.nation = o; S.ideo = null; R.selected = SG.nations[o].capital; renderSetup(); ID.Audio.play('click');
+    S.nation = o; R.selected = SG.nations[o].capital; renderSetup(); ID.Audio.play('click');
   };
   acts.newGame = () => Sc.setup({});
-  acts.setScen = (a) => { S.scenario = a; S.nation = 0; S.ideo = null; genSetup(); renderSetup(); };
-  acts.setSize = (a) => { S.size = a; S.nation = 0; genSetup(); renderSetup(); };
+  acts.setScen = (a) => { S.scenario = a; S.nation = 0; S.ideos = {}; genSetup(); renderSetup(); };
+  acts.setSize = (a) => { S.size = a; S.nation = 0; S.ideos = {}; genSetup(); renderSetup(); };
   acts.setDiff = (a) => { S.difficulty = a; renderSetup(); };
   acts.setHist = (a) => { if (a === true || a === false) { S.historical = a; } else { S.historical = a !== 'free'; S.loose = a !== 'strict'; } genSetup(); renderSetup(); };
-  acts.seed = (v) => { S.seed = (parseInt(v, 10) >>> 0) || ID.hashStr(String(v)); S.nation = 0; genSetup(); renderSetup(); };
-  acts.reroll = () => { S.seed = (Math.random() * 1e6) | 0; S.nation = 0; genSetup(); renderSetup(); };
-  acts.pickNation = (a) => { S.nation = a; S.ideo = null; const n = SG.nations[a]; R.focus(n.capital); R.selected = n.capital; renderSetup(); };
-  acts.pickIdeo = (v) => { S.ideo = v; $('#pickcard').innerHTML = pickCard(); };
+  acts.seed = (v) => { S.seed = (parseInt(v, 10) >>> 0) || ID.hashStr(String(v)); S.nation = 0; S.ideos = {}; genSetup(); renderSetup(); };
+  acts.reroll = () => { S.seed = (Math.random() * 1e6) | 0; S.nation = 0; S.ideos = {}; genSetup(); renderSetup(); };
+  acts.pickNation = (a) => { S.nation = a; const n = SG.nations[a]; R.focus(n.capital); R.selected = n.capital; renderSetup(); };
+  acts.pickIdeo = (v, el) => {
+    const id = +el.dataset.n;
+    if (v === SG.baseIdeo[id]) delete S.ideos[id]; else S.ideos[id] = v;
+    genSetup(); renderSetup();
+  };
+  acts.govToggle = () => { S.govOpen = !S.govOpen; renderSetup(); };
+  acts.govReset = () => { for (const id in S.ideos) if (+id !== S.nation) delete S.ideos[id]; genSetup(); renderSetup(); };
   acts.begin = () => {
     const G = SG; if (!G) return;
     G.difficulty = S.difficulty; G.challenge = S.challenge; G.ironman = !!S.ironman;
     const n = G.nations[S.nation];
-    ID.setPlayer(G, n.id, S.ideo && S.ideo !== n.ideo ? S.ideo : null);
-    n.a.startIdeo = n.ideo;
+    ID.setPlayer(G, n.id);
+    n.a.startIdeo = n.ideo; delete G.baseIdeo;
     Sc.applyChallenge(G, true);
     G.paused = true; G.speed = 3; R.selected = -1;
     ID.chron(G, 'start', 'You take charge of ' + n.name + '.', n.id);
