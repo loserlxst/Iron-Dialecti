@@ -3,6 +3,9 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '24 November 2026', title: 'Small things', items: [
+      'The dev console can now be opened on phones and tablets too, for those who know where to look.',
+    ] },
     { date: '24 November 2026', title: 'Rewrite the world before you start', items: [
       'On the new campaign screen, “Rewrite other countries’ governments” lets you choose the starting system of every country, not only your own.',
       'Each country starts with laws, a leader, politics and relations to match. “Restore history” puts them all back.',
