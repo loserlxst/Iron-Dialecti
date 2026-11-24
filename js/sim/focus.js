@@ -429,7 +429,7 @@
     op: (f) => ({ t: 'Relations with ' + f[1] + ' ' + (f[2] > 0 ? '+' : '−') + Math.abs(f[2]), good: f[2] > 0 }),
     build: (f) => ({ t: (f[2] || 1) > 1 ? f[2] + ' new ' + BN(f[1], f[2]) : 'A new ' + BN(f[1], 1), good: true }),
     techUp: (f) => ({ t: '+1 ' + TECHN[f[1]] + ' technology', good: true }),
-    law: (f) => ({ t: 'Law: ' + ID.LAWS[f[1]].opts[f[2]].name + ' (if the regime allows it)', good: null }),
+    law: (f) => ({ t: 'Law: ' + (f[1] === 'recruit' ? ID.RECRUIT[f[2]] : ID.LAWS[f[1]].opts[f[2]]).name + ' (if the regime allows it)', good: null }),
     subvert: (f) => ({ t: 'Agitation in ' + f[1], good: true }),
     civilwar: (f) => ({ t: 'Civil war against ' + ID.IDEOLOGIES[f[1]].name, good: false }),
     protector: () => ({ t: 'Alliance with a friendly great power', good: true }),

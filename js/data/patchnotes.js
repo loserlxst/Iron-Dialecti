@@ -3,8 +3,10 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
-    { date: '24 November 2026', title: 'Small things', items: [
+    { date: '24 November 2026', title: 'Small things and fixes', items: [
       'The dev console can now be opened on phones and tablets too, for those who know where to look.',
+      'Fixed: while an expansion into the hinterland was under way, the War tab showed whichever tab you had open before.',
+      'Fixed: the same could happen to the Regime tab in Baskhar, because of one programme that changes the recruitment law.',
     ] },
     { date: '24 November 2026', title: 'Rewrite the world before you start', items: [
       'On the new campaign screen, “Rewrite other countries’ governments” lets you choose the starting system of every country, not only your own.',
