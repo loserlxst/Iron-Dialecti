@@ -82,7 +82,7 @@
       (last ? btn('Continue <small>' + esc(idx[last].name) + ', ' + esc(idx[last].date) + '</small>', 'loadSlot', last, { cls: 'big red' }) : '') +
       btn('New campaign <small>1910–1976</small>', 'newGame', null, { cls: 'big' + (last ? '' : ' red') }) +
       btn('Learn to play <small>guided, 15 minutes</small>', 'tutorial', null, { cls: 'big' }) +
-      '<div class="row">' + btn('Load', 'loadMenu', null, { cls: 'ghost' }) + btn('Challenges <small>' + unlocked + ' / ' + ID.CHALLENGES.length + '</small>', 'challenges', null, { cls: 'ghost' }) + btn('Records <small>' + meta.runs.length + '</small>', 'records', null, { cls: 'ghost' }) + btn('Handbook', 'handbookT', null, { cls: 'ghost' }) + btn('Settings', 'settings', null, { cls: 'ghost' }) + '<a class="b ghost" href="https://discord.gg/bURjWZdgy7" target="_blank" rel="noopener" style="text-decoration:none">Discord</a></div>' +
+      '<div class="row">' + btn('Load', 'loadMenu', null, { cls: 'ghost' }) + btn('Challenges <small>' + unlocked + ' / ' + ID.CHALLENGES.length + '</small>', 'challenges', null, { cls: 'ghost' }) + btn('Records <small>' + meta.runs.length + '</small>', 'records', null, { cls: 'ghost' }) + btn('Handbook', 'handbookT', null, { cls: 'ghost' }) + btn('Patch notes', 'patchNotes', null, { cls: 'ghost' }) + btn('Settings', 'settings', null, { cls: 'ghost' }) + '<a class="b ghost" href="https://discord.gg/bURjWZdgy7" target="_blank" rel="noopener" style="text-decoration:none">Discord</a></div>' +
       '</div><div class="foot">' + (UI.touch ? 'Plays with tap, drag and pinch; press and hold anything to have it explained.' : 'Plays entirely with left-click, drag, scroll and keys.') + ' Saves stay in this browser.</div>';
   };
 
@@ -266,6 +266,9 @@
       ID.CHALLENGES.map((c) => { const ok = c.unlock(meta); return '<div class="dec"><h4>' + esc(c.name) + '</h4><p>' + esc(ok ? c.desc : 'Locked. ' + c.hint) + '</p><span></span>' + btn(ok ? 'Play' : 'Locked', 'playChallenge', c.id, { cls: 'sm red', off: ok ? '' : c.hint }) + '</div>'; }).join('') +
       '<div class="row">' + btn('Back', 'closeModal', null, { cls: 'ghost' }) + '</div></div></div>', 'menu');
   };
+  acts.patchNotes = () => UI.modal('<div class="dlg wide"><div class="dhd"><div class="k">PATCH NOTES</div></div><div class="dbd">' +
+    (ID.PATCH_NOTES || []).map((p) => '<div style="margin-bottom:14px"><h4>' + esc(p.title) + ' <small class="dim">' + esc(p.date) + '</small></h4><ul style="margin:6px 0 0 18px">' + p.items.map((t) => '<li>' + esc(t) + '</li>').join('') + '</ul></div>').join('') +
+    '<div class="row">' + btn('Back', 'closeModal', null, { cls: 'ghost' }) + '</div></div></div>', 'menu');
   acts.playChallenge = (id) => {
     const c = ID.CHALLENGES.find((x) => x.id === id), s = c.setup;
     const o = { scenario: s.scenario === 'random' ? 'random' : 'meridia', difficulty: s.difficulty, challenge: c.id, startYear: s.startYear || 0, ironman: !!s.ironman };
