@@ -104,6 +104,10 @@
         : mode === 'install' ? The(L) + ' has laid down its arms. ' + The(W) + ' has installed a government of its own choosing in the capital and bound the country to its bloc.'
           : The(L) + ' has laid down its arms, paid an indemnity to ' + the(W) + ' and been left its borders.' });
   };
+  Pr.pocket = function (G, W, L, troops, near) {
+    Pr.add(G, { w: major(G, W) || major(G, L) ? 3 : 2, kind: 'war', a: W.id, b: L.id, both: 1, art: 'war', title: 'A ' + L.adj + ' army surrenders' + (near ? ' at ' + near : ''), key: 'pocket' + L.id, gap: 120,
+      text: 'Cut off from the sea and from home, ' + ID.fmtPop(troops) + ' ' + L.adj + ' troops' + (near ? ' around ' + near : '') + ' have laid down their arms to ' + the(W) + '. They held out for weeks on dwindling rations; the columns of prisoners are being marched inland. ' + The(L) + ' calls it a regrouping.' });
+  };
   Pr.civil = function (G, n, R, share, why, sponsor) {
     const sp = sponsor && G.nations[sponsor] ? G.nations[sponsor] : null;
     Pr.add(G, { w: major(G, n) ? 4 : 3, kind: 'rev', a: n.id, b: R.id, art: 'revolution', title: 'Civil war in ' + n.base,

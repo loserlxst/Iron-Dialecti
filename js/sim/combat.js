@@ -71,16 +71,21 @@
     return (ID.ideo(n).doctrine.styles[style] || 0) > 0;
   };
 
+  /* An attack belongs to one connected piece of its owner's land (a.ck, kept by updateSupply): the main
+     territory, or a pocket. It advances only from tiles of that piece, so the troops in a pocket stay there. */
+  const pieceTest = (G, a) => { const own = G.owner, f = a.from, ck = a.ck, comp = G._comp; return ck == null || ck < 0 || !comp ? (q) => own[q] === f : (q) => own[q] === f && comp[q] === ck; };
+  /* Where the attack drives: an encircled pocket breaks out toward its own lines, a pocket toward its own objective. */
+  C.attackObj = (G, A, a) => (a.enc && a.bo >= 0 ? a.bo : a.pk >= 0 && a.pobj >= 0 && G.owner[a.pobj] === a.to ? a.pobj : C.objOf(G, A, a.to));
   function seedFrontier(G, a) {
-    const W = G.W, H = G.H, own = G.owner, f = a.from, t = a.to, mark = G._mark, rng = G.rng, terr = G.terrain;
-    const ob = C.objOf(G, G.nations[f], t), ox = ob % W, oy = (ob / W) | 0; a.obj = ob;
+    const W = G.W, H = G.H, own = G.owner, t = a.to, mark = G._mark, rng = G.rng, terr = G.terrain, mine = pieceTest(G, a);
+    const ob = C.attackObj(G, G.nations[a.from], a), ox = ob % W, oy = (ob / W) | 0; a.obj = ob;
     a.heap.clear();
     const stamp = a.id;
     for (let y = 0; y < H; y++) {
       const row = y * W;
       for (let x = 0; x < W; x++) {
         const i = row + x; if (own[i] !== t) continue;
-        if ((x > 0 && own[i - 1] === f) || (x < W - 1 && own[i + 1] === f) || (y > 0 && own[i - W] === f) || (y < H - 1 && own[i + W] === f)) {
+        if ((x > 0 && mine(i - 1)) || (x < W - 1 && mine(i + 1)) || (y > 0 && mine(i - W)) || (y < H - 1 && mine(i + W))) {
           mark[i] = stamp; a.heap.push(a.base + TERR[terr[i]].cost * (0.5 + rng.next()) + (ob >= 0 ? C.OBJK * (Math.abs(x - ox) + Math.abs(y - oy)) : 0), i);
         }
       }
@@ -89,13 +94,13 @@
   }
 
   function seedWild(G, a) {
-    const W = G.W, H = G.H, own = G.owner, f = a.from, mark = G._mark, rng = G.rng, terr = G.terrain;
+    const W = G.W, H = G.H, own = G.owner, mark = G._mark, rng = G.rng, terr = G.terrain, mine = pieceTest(G, a);
     a.heap.clear();
     for (let y = 0; y < H; y++) {
       const row = y * W;
       for (let x = 0; x < W; x++) {
         const i = row + x; if (own[i] !== 0 || terr[i] === T.SEA) continue;
-        if ((x > 0 && own[i - 1] === f) || (x < W - 1 && own[i + 1] === f) || (y > 0 && own[i - W] === f) || (y < H - 1 && own[i + W] === f)) {
+        if ((x > 0 && mine(i - 1)) || (x < W - 1 && mine(i + 1)) || (y > 0 && mine(i - W)) || (y < H - 1 && mine(i + W))) {
           mark[i] = a.id; a.heap.push(a.base + TERR[terr[i]].cost * (0.5 + rng.next()), i);
         }
       }
@@ -115,18 +120,18 @@
     const S = ID.STYLES[a.style] || ID.STYLES.advance;
     const rate = BASE_RATE * 1.0 * Math.sqrt(Math.min(heap.size, 500) + 4) * clamp(0.4 + a.troops / 160, 0.4, 1.8) * S.speed;
     a.prog = Math.min(a.prog + rate, 40);
-    const atk = Math.max(0.4, A.a.atk || 1);
+    const atk = Math.max(0.4, A.a.atk || 1), mine = pieceTest(G, a), comp = G._comp;
     let n = 0;
     while (a.prog > 0 && heap.size && n < 80) {
       const i = heap.pop(); const pr = heap.topP;
       if (own[i] !== 0 || terr[i] === T.SEA) continue;
       const x = i % W, y = (i / W) | 0;
-      if (!((x > 0 && own[i - 1] === a.from) || (x < W - 1 && own[i + 1] === a.from) || (y > 0 && own[i - W] === a.from) || (y < H - 1 && own[i + W] === a.from))) { mark[i] = 0; continue; }
+      if (!((x > 0 && mine(i - 1)) || (x < W - 1 && mine(i + 1)) || (y > 0 && mine(i - W)) || (y < H - 1 && mine(i + W)))) { mark[i] = 0; continue; }
       const tr = TERR[terr[i]];
       const la = Math.max(0.008, (C.WILD_LOSS * tr.def * (G.river[i] ? 1.2 : 1) / atk) * S.lossA * (tr.rough ? A.a.rough : 1) ** -1);
       a.troops -= la; A.pop -= la * 0.6; A.losses += la * 0.6;
       a.prog -= tr.cost * (G.river[i] ? 1.3 : 1); a.taken++; n++;
-      ID.setOwner(G, i, a.from);
+      ID.setOwner(G, i, a.from); if (comp && a.ck >= 0) comp[i] = a.ck; a.last = i;
       const np = pr + 0.01;
       if (x > 0 && own[i - 1] === 0 && terr[i - 1] !== T.SEA && mark[i - 1] !== a.id) { mark[i - 1] = a.id; heap.push(np + TERR[terr[i - 1]].cost * (0.6 + 0.8 * rng.next()), i - 1); }
       if (x < W - 1 && own[i + 1] === 0 && terr[i + 1] !== T.SEA && mark[i + 1] !== a.id) { mark[i + 1] = a.id; heap.push(np + TERR[terr[i + 1]].cost * (0.6 + 0.8 * rng.next()), i + 1); }
@@ -140,39 +145,80 @@
   C.canExpand = (G, n) => (G.wildB && G.wildB[n.id] > 0 ? '' : 'No unclaimed land borders yours. Reach it by sea with a landing.');
 
   /* Launch or reinforce a land attack (to = 0: expand into unclaimed land). Returns the attack, or a string explaining why not. */
-  C.launch = function (G, from, to, troops, style, quiet) {
+  /* anchor >= 0: the attack (or expansion) of the piece of land that holds that tile (a landing, a pocket, a colony).
+     Without it, the main army from the main territory; with no front there, a convoy to a pocket that has one. */
+  C.launch = function (G, from, to, troops, style, quiet, anchor) {
+    if (!G._comps) C.updateSupply(G);
+    if (!G._mark) G._mark = new Int32Array(G.N);
+    const A = G.nations[from];
+    const pk = anchor != null && anchor >= 0 && G.owner[anchor] === from && G._comp[anchor] !== G._main[from] ? anchor : -1;
+    const ck = pk >= 0 ? G._comp[pk] : G._main[from];
+    const mk = (s) => ({ id: G.nextId++, from, to, troops, committed: troops, style: s, heap: new ID.Heap(), prog: 0, base: G.tick, scan: 0, idle: 0, amphib: 0, taken: 0, pk, ck });
+    const find = () => G.attacks.find((x) => x.from === from && x.to === to && (pk >= 0 ? x.pk >= 0 && x.ck === ck : !(x.pk >= 0)));
     if (to === 0) {
-      const A = G.nations[from]; if (!A || !A.alive) return 'No such state.';
-      const why = quiet ? '' : C.canExpand(G, A); if (why) return why;
-      troops = Math.min(troops, A.troops); if (troops < 1) return 'No troops to commit.';
-      let a = null; for (const x of G.attacks) if (x.from === from && x.to === 0) { a = x; break; }
+      if (!A || !A.alive) return 'No such state.';
+      const why = quiet || pk >= 0 ? '' : C.canExpand(G, A); if (why) return why;
+      troops = Math.min(troops, A.troops); if (troops < 1 && pk < 0) return 'No troops to commit.';
+      let a = find();
       if (a) { a.troops += troops; a.committed += troops; a.idle = 0; }
-      else {
-        if (!G._mark) G._mark = new Int32Array(G.N);
-        a = { id: G.nextId++, from, to: 0, troops, committed: troops, style: 'advance', heap: new ID.Heap(), prog: 0, base: G.tick, scan: 0, idle: 0, amphib: 0, taken: 0 };
-        seedWild(G, a); G.attacks.push(a);
-      }
+      else { a = mk('advance'); seedWild(G, a); G.attacks.push(a); }
       A.troops -= troops;
       return a;
     }
-    const A = G.nations[from], D = G.nations[to];
+    const D = G.nations[to];
     if (!A || !D || !D.alive) return 'No such target.';
     if (!ID.atWar(G, from, to)) return 'You are not at war with ' + D.name + '.';
     if (!C.styleOk(A, style)) style = 'advance';
     troops = Math.min(troops, A.troops);
     if (troops < 1) return 'No troops to commit.';
-    let a = null;
-    for (const x of G.attacks) if (x.from === from && x.to === to) { a = x; break; }
-    if (a) { a.troops += troops; a.style = style; a.committed += troops; a.idle = 0; }
-    else {
-      a = { id: G.nextId++, from, to, troops, committed: troops, style, heap: new ID.Heap(), prog: 0, base: G.tick, scan: 0, idle: 0, amphib: 0, taken: 0 };
-      if (!G._mark) G._mark = new Int32Array(G.N);
-      seedFrontier(G, a);
-      if (!a.heap.size && !quiet) return 'No land front with ' + D.name + '. Use a naval landing.';
-      G.attacks.push(a);
+    let a = find();
+    if (pk < 0 && (!a || (!a.heap.size && a.idle > 0))) {
+      // no front from the main territory: the troops can only go by sea, to a piece of ours that touches the enemy
+      if (!a) { a = mk(style); seedFrontier(G, a); }
+      if (!a.heap.size) {
+        const p = C.seaPiece(G, A, to);
+        if (p >= 0) return C.relief(G, A, to, p, troops, style);
+        if (G.attacks.some((x) => x.from === from && x.to === to && x.enc)) return 'Our pocket in ' + D.name + ' is encircled: nothing reaches it until the ring is broken. Land elsewhere, or break through to it.';
+        if (!quiet) return 'No land front with ' + D.name + '. Use a naval landing.';
+      }
+      if (G.attacks.indexOf(a) < 0) { a.troops = 0; a.committed = 0; G.attacks.push(a); }
     }
+    if (a && G.attacks.indexOf(a) >= 0) { a.troops += troops; a.style = style; a.committed += troops; a.idle = 0; }
+    else { a = mk(style); seedFrontier(G, a); G.attacks.push(a); }
     A.troops -= troops;
     return a;
+  };
+
+  /* ---------------------------------------------------------------- the sea lift to pockets */
+  /* The piece of A's land (not the main territory) that touches enemy `to` and can be reached by sea: the one with the longest front. */
+  C.seaPiece = function (G, A, to) {
+    const L = G._comps || []; let best = -1, bw = 0;
+    for (let id = 0; id < L.length; id++) { const c = L[id]; if (c.o !== A.id || c.st !== 2 || !c.adj || !c.adj[to]) continue; if (c.adj[to] > bw) { bw = c.adj[to]; best = id; } }
+    return best;
+  };
+  /* Troops a day the sea lift carries to one pocket: more through its ports, a seafaring system and logistics; less against a strong navy. */
+  C.liftCap = function (G, A, to, id) {
+    const c = G._comps && G._comps[id], D = G.nations[to];
+    const ports = c ? c.ports || 0 : 0, cr = D ? C.crossing(A, D) : { ratio: 0 };
+    return 0.8 * (1 + 1.5 * ports) * (ID.ideo(A).doctrine.naval || 1) * Math.max(0.3, 1 + ID.mod(A, 'navy')) * (A.a.dp && A.a.dp.logistics ? 1.5 : 1) / (1 + cr.ratio);
+  };
+  /* Send reinforcements to a pocket by sea: limited by the lift (a month of it at most is banked), they sail as boats. */
+  C.relief = function (G, A, to, id, troops, style) {
+    const c = G._comps[id]; if (!c || c.st !== 2) return 'That pocket is cut off: nothing reaches it until the ring is broken.';
+    const cap = C.liftCap(G, A, to, id), L = A.lift || (A.lift = {}), k = c.portI >= 0 ? c.portI : c.beachI >= 0 ? c.beachI : c.shore;
+    if (k == null || k < 0) return 'The pocket has no coast to land on.';
+    const prev = L[k] || { v: cap * 10, t: G.tick };
+    const v = Math.min(cap * 30, prev.v + cap * Math.max(0, G.tick - prev.t));
+    const send = Math.min(troops, v, A.troops);
+    if (send < 0.5) return 'The ships are already carrying all they can to the pocket: about ' + ID.fmtPop(cap) + ' troops a day.';
+    const plan = C.planBoat(G, A, k, true); if (typeof plan === 'string') return plan;
+    for (const q in L) if (G.owner[q] !== A.id) delete L[q];
+    L[k] = { v: v - send, t: G.tick };
+    A.troops -= send;
+    const bt = { id: G.nextId++, owner: A.id, troops: send, style: C.styleOk(A, style) ? style : 'advance', path: plan.path, pos: 0, target: k, relief: to };
+    G.boats.push(bt);
+    if (A.id === G.player) ID.sfx(G, 'boat');
+    return bt;
   };
 
   C.cancel = function (G, a) {
@@ -200,6 +246,14 @@
       return;
     }
     a.idle = 0;
+    // an encircled pocket bleeds every day, first men and then nerve, and can only try to break out
+    let encK = 1;
+    if (a.enc) {
+      const days = G.tick - a.enc, l = a.troops * Math.min(0.02, 0.003 + days * 0.00006) * (a.out ? 1.5 : 1);
+      a.troops -= l; A.pop -= l * 0.5; A.losses += l; A.casM += l; D.kills += l * 0.5;
+      encK = Math.max(0.2, 1 - days / 120) * (a.out ? 1.5 : 1);
+      if (a.troops < 0.5) { endAttack(G, a, false); return; }
+    }
     const S = ID.STYLES[a.style], e = ID.ideo(A).doctrine.styles[a.style] || 1;
     if (S.goldDay) { A.gold -= S.goldDay * (1 + a.troops / 400); if (A.gold < -50) a.style = 'advance'; }
 
@@ -225,12 +279,13 @@
     let spd = Ad.speed * (1 + ID.mod(A, 'speed')) * (1 + lure);
     if (Ad.blitz && war && G.tick - war.start < 150) spd *= 1 + Ad.blitz;
     if ((C.POSTURE[D.posture] || {}).depth) spd *= 1.06;
-    const ob = C.objOf(G, A, a.to); if (ob !== a.obj) { a.obj = ob; a.scan = -999; }
+    const ob = C.attackObj(G, A, a); if (ob !== a.obj) { a.obj = ob; a.scan = -999; }
     if (ob >= 0) spd *= 1.1; // a Schwerpunkt: faster, with exposed flanks
     if (a.surge > G.tick) spd *= 1.25;
-    const rate = BASE_RATE * Math.sqrt(Math.min(heap.size, 500) + 4) * clamp(0.25 + 0.6 * ratio, 0.3, 1.8) * S.speed * e * share * (1 + 0.04 * A.tech.mil) * spd;
+    const rate = BASE_RATE * Math.sqrt(Math.min(heap.size, 500) + 4) * clamp(0.25 + 0.6 * ratio, 0.3, 1.8) * S.speed * e * share * (1 + 0.04 * A.tech.mil) * spd * encK;
     a.prog = Math.min(a.prog + rate, 40);
     const dd = D.troops / Math.max(D.tiles, 40);
+    const mine = pieceTest(G, a), comp = G._comp, bo = a.enc ? a.bo : -1, bx = bo % W, by = (bo / W) | 0;
     const atk = A.a.atk * e, def = D.a.def * C.underdog(A, D);
     const igT = S.ignoreTerrain || 0, igF = S.ignoreFort || 0;
     const holdFast = Dd.holdFast && ratio > 1 ? 1 + Dd.holdFast : 1;
@@ -242,12 +297,23 @@
     const cutK = Dd.logistics ? 0.55 : 0.25;
     let libN = 0;
     const holy = ID.ideo(A).flags.holyWar && (D.laws.religion === 'secular' || D.laws.religion === 'atheism') ? 1.2 : 1;
+    // the AI keeps its front broad: a tile with fewer than two of our tiles beside it waits (no thin salients it cannot hold)
+    const thin = A.id !== G.player, fr = a.from;
+    let np = 0;
+    const push = (q, qx, qy) => {
+      if (own[q] !== a.to || mark[q] === a.id) return;
+      mark[q] = a.id;
+      let p = np + TERR[terr[q]].cost * (0.6 + 0.8 * rng.next()) + (hk ? hk * (Math.abs(qx - ox) + Math.abs(qy - oy)) : 0);
+      if (thin) { const c = (qx > 0 && own[q - 1] === fr) + (qx < W - 1 && own[q + 1] === fr) + (qy > 0 && own[q - W] === fr) + (qy < H - 1 && own[q + W] === fr); if (c < 2) p += (2 - c) * 0.7; }
+      heap.push(p, q);
+    };
     let n = 0;
     while (a.prog > 0 && heap.size && n < 60) {
       const i = heap.pop(); const pr = heap.topP;
       if (own[i] !== a.to) continue;
       const x = i % W, y = (i / W) | 0;
-      if (!((x > 0 && own[i - 1] === a.from) || (x < W - 1 && own[i + 1] === a.from) || (y > 0 && own[i - W] === a.from) || (y < H - 1 && own[i + W] === a.from))) { mark[i] = 0; continue; }
+      if (!((x > 0 && mine(i - 1)) || (x < W - 1 && mine(i + 1)) || (y > 0 && mine(i - W)) || (y < H - 1 && mine(i + W)))) { mark[i] = 0; continue; }
+      if (bo >= 0) { const d = Math.abs(x - bx) + Math.abs(y - by); if (d >= a.bd) { mark[i] = 0; continue; } a.bd = d; } // a breakout only moves toward home
       const tr = TERR[terr[i]];
       const P = G.provinces[G.prov[i]];
       const fort = G.fortCov[i] === a.to;
@@ -273,14 +339,14 @@
       D.troops -= ld; D.pop -= ld; D.losses += ld; A.kills += ld; D.casM += ld;
       a.prog -= cost; a.taken++; n++;
       if (war) { if (war.a === a.from) war.ta++; else war.tb++; }
-      ID.setOwner(G, i, a.from);
-      if (i === a.obj) { C.objectiveTaken(G, a, A, D, i); }
+      ID.setOwner(G, i, a.from); if (comp && a.ck >= 0) comp[i] = a.ck; a.last = i;
+      if (i === a.obj && !a.enc) { C.objectiveTaken(G, a, A, D, i); }
       if (Ad.liberate && ++libN % 18 === 0 && ID.docSeed) ID.docSeed(G, D, A.ideo, 9, 1, A.id); // revolutionary war: the front raises the enemy's workers
-      const hi0 = hk ? hk * (Math.abs(x - ox) + Math.abs(y - oy)) : 0, np = pr + 0.01 - hi0;
-      if (x > 0 && own[i - 1] === a.to && mark[i - 1] !== a.id) { mark[i - 1] = a.id; heap.push(np + TERR[terr[i - 1]].cost * (0.6 + 0.8 * rng.next()) + (hk ? hk * (Math.abs(x - 1 - ox) + Math.abs(y - oy)) : 0), i - 1); }
-      if (x < W - 1 && own[i + 1] === a.to && mark[i + 1] !== a.id) { mark[i + 1] = a.id; heap.push(np + TERR[terr[i + 1]].cost * (0.6 + 0.8 * rng.next()) + (hk ? hk * (Math.abs(x + 1 - ox) + Math.abs(y - oy)) : 0), i + 1); }
-      if (y > 0 && own[i - W] === a.to && mark[i - W] !== a.id) { mark[i - W] = a.id; heap.push(np + TERR[terr[i - W]].cost * (0.6 + 0.8 * rng.next()) + (hk ? hk * (Math.abs(x - ox) + Math.abs(y - 1 - oy)) : 0), i - W); }
-      if (y < H - 1 && own[i + W] === a.to && mark[i + W] !== a.id) { mark[i + W] = a.id; heap.push(np + TERR[terr[i + W]].cost * (0.6 + 0.8 * rng.next()) + (hk ? hk * (Math.abs(x - ox) + Math.abs(y + 1 - oy)) : 0), i + W); }
+      np = pr + 0.01 - (hk ? hk * (Math.abs(x - ox) + Math.abs(y - oy)) : 0);
+      if (x > 0) push(i - 1, x - 1, y);
+      if (x < W - 1) push(i + 1, x + 1, y);
+      if (y > 0) push(i - W, x, y - 1);
+      if (y < H - 1) push(i + W, x, y + 1);
       if (a.troops <= 0.5) break;
     }
     if (n && !G.headless && (a.from === G.player || a.to === G.player) && (G.tick & 3) === 0) ID.sfx(G, 'tick');
@@ -332,10 +398,10 @@
   C.isBeach = (G, i) => { const L = G.beach; if (L) for (const b of L) if (b.i === i && G.owner[i] === b.o) return true; return false; };
 
   /* Plan a route from one of n's ports to the coast tile `target`. Returns {path} or a reason string. */
-  C.planBoat = function (G, n, target) {
+  C.planBoat = function (G, n, target, relief) {
     if (!n.nb[B.PORT]) return 'You need a port to launch a landing.';
     if (G.terrain[target] === T.SEA) return 'Pick a coastal land tile.';
-    if (G.owner[target] === n.id && G.cut[target] !== 1) return 'That coast is already yours.';
+    if (!relief && G.owner[target] === n.id) return 'That coast is already yours.';
     const tsea = ID.seaNeighbors(G, target);
     if (!tsea.length) return 'A landing needs a coastal tile.';
     const range = C.navalRange(G, n);
@@ -401,13 +467,34 @@
     }
     return got;
   }
+  /* New land taken from the sea: if it touches the main territory it joins it, else it is a piece of its own
+     (a fresh entry in G._comps until the next supply pass), with its own attack. Returns the anchor tile. */
+  function newPiece(G, o, tiles) {
+    if (!G._comps) C.updateSupply(G);
+    const comp = G._comp, main = G._main[o], W = G.W, own = G.owner;
+    let id = -1;
+    for (const t of tiles) for (const q of [t - 1, t + 1, t - W, t + W]) if (q >= 0 && q < G.N && own[q] === o && comp[q] === main && main >= 0) id = main;
+    if (id < 0) { id = G._comps.length; G._comps.push({ o, size: tiles.length, st: 2, start: tiles[0], ports: 0, portI: -1, beachT: G.tick, beachI: tiles[0], shore: tiles[0], adj: {} }); }
+    for (const t of tiles) comp[t] = id;
+    return id === main ? -1 : tiles[0];
+  }
   function landBoat(G, bt) {
     const A = G.nations[bt.owner]; if (!A.alive) return;
     const to = G.owner[bt.target];
+    if (bt.relief != null) { // reinforcements for a pocket: the enemy navy may meet them, and the beach may be gone
+      const E = G.nations[bt.relief];
+      if (E && E.alive && ID.atWar(G, A.id, E.id)) { const cr = C.crossing(A, E); if (cr.sunk > 0.02) { const s = bt.troops * cr.sunk * 0.8 * (0.6 + 0.4 * G.rng.next()); bt.troops -= s; A.pop -= s; A.losses += s; A.casM += s; E.kills += s; } }
+      if (to === bt.owner && E && E.alive && ID.atWar(G, A.id, E.id)) { A.troops += bt.troops; C.launch(G, A.id, E.id, bt.troops, bt.style, true, bt.target); }
+      else if (to === bt.owner) A.troops += bt.troops;
+      else { const lost = bt.troops * 0.4; A.troops += bt.troops - lost; A.pop -= lost; A.losses += lost; if (A.id === G.player) ID.news(G, 'The pocket’s harbour has fallen: the convoy turns back with ' + ID.fmtPop(lost) + ' lost.', 'war', A.id); }
+      return;
+    }
     if (!to && G.terrain[bt.target] !== T.SEA) {
-      for (const q of seize(G, bt.target, 0, 9)) ID.setOwner(G, q, bt.owner);
+      const got = seize(G, bt.target, 0, 9);
+      for (const q of got) ID.setOwner(G, q, bt.owner);
       C.addBeach(G, bt.target, bt.owner);
-      const a = C.launch(G, bt.owner, 0, 0, 'advance', true);
+      const pk = newPiece(G, bt.owner, got);
+      const a = C.launch(G, bt.owner, 0, 0, 'advance', true, pk);
       A.troops += bt.troops;
       if (a && typeof a !== 'string') { a.troops += bt.troops * 0.9; a.committed += bt.troops; A.troops -= bt.troops * 0.9; seedWild(G, a); }
       ID.fx(G, 'land', bt.target);
@@ -445,7 +532,8 @@
     C.addBeach(G, bt.target, bt.owner);
     ID.recalcBorders(G);
     A.troops += bt.troops - cost;
-    const a = D.alive ? C.launch(G, bt.owner, to, bt.troops - cost, bt.style, true) : null;
+    const pk = newPiece(G, bt.owner, beach);
+    const a = D.alive ? C.launch(G, bt.owner, to, bt.troops - cost, bt.style, true, pk) : null;
     if (a && typeof a !== 'string') { a.amphib = Math.round(12 / naval); a.surge = Math.max(a.surge || 0, G.tick + 30); seedFrontier(G, a); }
     ID.news(G, A.adj + ' troops land on the coast of ' + D.name + ' and hold a beachhead.', 'war', A.id, D.id);
     if (D.id === G.player) { ID.headline(G, { kicker: 'Invasion from the sea', title: 'They are ashore', sub: A.name + ' has landed troops on our coast. Take the beach back and the landing starves.', a: A.id, b: D.id, tone: 'war' }); }
@@ -654,8 +742,24 @@
   }
 
   /* ---------------------------------------------------------------- supply & encirclement */
+  C.BEACH_DAYS = 120; // a contested beach carries a pocket this long; after that it needs a captured port
+  C.BLOCKADE = 3;     // an enemy navy this many times stronger than ours closes the sea to a pocket
+  /* Days a pocket holds before it surrenders (cutAge counts in tens of days). */
+  C.holdOf = (G, n, id) => {
+    const fl = ID.ideo(n).flags; let h = (fl.noDecap || fl.partisans ? 12 : 4) * (n.a.dp && n.a.dp.logistics ? 2 : 1);
+    for (const a of G.attacks) if (a.from === n.id && a.ck === id && a.holdX) h += a.holdX;
+    return h;
+  };
+  /* What the map and the war panel show about the pocket an attack stands in: {enc, days, troops, why, sea, lift}. */
+  C.pocketInfo = function (G, a) {
+    const c = G._comps && G._comps[a.ck]; if (!c || !(a.pk >= 0)) return null;
+    const n = G.nations[a.from], enc = c.st === 1;
+    const days = enc ? Math.max(0, (C.holdOf(G, n, a.ck) - G.cutAge[c.start]) * 10) : 0;
+    return { enc, days, troops: a.troops, why: c.why || '', sea: c.portI >= 0 ? 'port' : c.beachT >= 0 ? 'beach' : '', beachLeft: c.beachT >= 0 && !c.hasPort ? Math.max(0, C.BEACH_DAYS - (G.tick - c.beachT)) : -1, lift: a.to ? C.liftCap(G, n, a.to, a.ck) : 0, at: a.pk };
+  };
+  ID.placeName = (G, i) => { const P = G.provinces[G.prov[i]]; return (P && P.name) || ''; };
   C.updateSupply = function (G) {
-    const W = G.W, H = G.H, N = G.N, own = G.owner;
+    const W = G.W, N = G.N, own = G.owner;
     const comp = G._comp || (G._comp = new Int32Array(N)), stack = G._stack || (G._stack = new Int32Array(N));
     comp.fill(-1);
     const comps = [];
@@ -663,28 +767,59 @@
     for (const n of G.nations) if (n && n.alive) caps[n.id] = n.capital;
     for (let s = 0; s < N; s++) {
       const o = own[s]; if (!o || comp[s] >= 0) continue;
-      const id = comps.length; let sp = 0, size = 0, hasCap = false, hasPort = false;
+      const id = comps.length; let sp = 0, size = 0, hasCap = false, ports = 0, portI = -1;
       stack[sp++] = s; comp[s] = id; const cap = caps[o];
       while (sp) {
         const c = stack[--sp]; size++;
         if (c === cap) hasCap = true;
-        if (G.bld[c] === B.PORT && G.hp[c]) hasPort = true;
+        if (G.bld[c] === B.PORT && G.hp[c]) { ports++; portI = c; }
         const x = c % W;
         if (x > 0 && own[c - 1] === o && comp[c - 1] < 0) { comp[c - 1] = id; stack[sp++] = c - 1; }
         if (x < W - 1 && own[c + 1] === o && comp[c + 1] < 0) { comp[c + 1] = id; stack[sp++] = c + 1; }
         if (c >= W && own[c - W] === o && comp[c - W] < 0) { comp[c - W] = id; stack[sp++] = c - W; }
         if (c < N - W && own[c + W] === o && comp[c + W] < 0) { comp[c + W] = id; stack[sp++] = c + W; }
       }
-      comps.push({ o, size, hasCap, hasPort, start: s, st: 0 });
+      comps.push({ o, size, hasCap, hasPort: ports > 0, ports, portI, start: s, st: 0, beachT: -1, beachI: -1, shore: -1, win: 0 });
     }
     // main component per nation
     const main = new Int32Array(G.nations.length).fill(-1);
     comps.forEach((c, id) => { if (c.hasCap) main[c.o] = id; });
     comps.forEach((c, id) => { if (main[c.o] < 0 || (!comps[main[c.o]].hasCap && c.size > comps[main[c.o]].size)) main[c.o] = id; });
+    G._comps = comps; G._main = main;
     const beach = G.beach || (G.beach = []);
-    for (let k = beach.length - 1; k >= 0; k--) { const b = beach[k]; if (own[b.i] !== b.o || comp[b.i] < 0) { beach.splice(k, 1); continue; } comps[comp[b.i]].hasBeach = true; }
-    comps.forEach((c, id) => { c.st = main[c.o] === id ? 0 : c.hasPort || c.hasBeach ? 2 : 1; });
-    const cut = G.cut, age = G.cutAge;
+    for (let k = beach.length - 1; k >= 0; k--) { const b = beach[k]; if (own[b.i] !== b.o || comp[b.i] < 0) { beach.splice(k, 1); continue; } const c = comps[comp[b.i]]; if (b.t > c.beachT) { c.beachT = b.t; c.beachI = b.i; c.beachB = b; } }
+    const cut = G.cut, age = G.cutAge, vis = G._vis || (G._vis = new Int32Array(N));
+    // every piece apart from the main territory: who touches it, where its shore is, who rules the sea around it
+    for (let id = 0; id < comps.length; id++) {
+      const c = comps[id]; if (main[c.o] === id) continue;
+      const n = G.nations[c.o], stp = (G._visS = (G._visS || 0) + 1), tiles = [], adj = {};
+      let sp = 0, shore = -1, wasMain = 0; stack[sp++] = c.start; vis[c.start] = stp;
+      while (sp) {
+        const t = stack[--sp]; tiles.push(t); if (cut[t] === 0) wasMain++;
+        if (shore < 0 && G.coast[t]) shore = t;
+        const x = t % W;
+        for (const q of [x > 0 ? t - 1 : -1, x < W - 1 ? t + 1 : -1, t >= W ? t - W : -1, t < N - W ? t + W : -1]) {
+          if (q < 0) continue; const oo = own[q];
+          if (oo === c.o) { if (comp[q] === id && vis[q] !== stp) { vis[q] = stp; stack[sp++] = q; } }
+          else if (oo && G.warM[c.o * MAXN + oo]) adj[oo] = (adj[oo] || 0) + 1;
+        }
+      }
+      c.tiles = tiles; c.adj = adj; c.shore = shore; c.fromMain = wasMain * 2 > tiles.length;
+      let win = 0, wb = 0; for (const k in adj) if (adj[k] > wb) { wb = adj[k]; win = +k; }
+      c.win = win;
+      if (!win) { // nobody contests it: supplied over its own shore, as in peacetime (an inland enclave stays cut, but nobody besieges it)
+        if (shore < 0 && !c.hasPort) { c.st = 1; continue; }
+        c.st = 2;
+        if (c.beachB) c.beachB.t = G.tick; else if (!c.hasPort) { C.addBeach(G, shore, c.o); c.beachI = shore; }
+        c.beachT = c.beachI >= 0 ? G.tick : -1;
+        continue;
+      }
+      let nav = 0; for (const k in adj) { const r = C.seaPower(G.nations[k]) / Math.max(0.5, C.seaPower(n)); if (r > nav) nav = r; }
+      c.navy = nav;
+      const beachOK = c.beachT >= 0 && G.tick - c.beachT < C.BEACH_DAYS;
+      c.st = shore >= 0 && nav < C.BLOCKADE && (c.hasPort || beachOK) ? 2 : 1;
+      c.why = c.st === 2 ? '' : shore < 0 ? 'shore' : nav >= C.BLOCKADE ? 'navy' : c.beachT >= 0 ? 'beach' : c.fromMain ? 'land' : 'harbour';
+    }
     let anyCut = false;
     for (let i = 0; i < N; i++) {
       const k = comp[i]; if (k < 0) { cut[i] = 0; continue; }
@@ -693,41 +828,98 @@
       cut[i] = st;
       if (st === 1) { if (age[i] < 250) age[i]++; anyCut = true; } else age[i] = 0;
     }
+    pieces(G, comps, main);
     if (!anyCut) return;
-    // pockets: an overseas holding no enemy touches is supplied over its own beach; an encircled one collapses
+    // encircled pockets: the besieger pays while they hold, and they surrender in the end
     for (let id = 0; id < comps.length; id++) {
-      const c = comps[id]; if (c.st !== 1) continue;
-      const n = G.nations[c.o]; if (!n.alive) continue;
-      const fl = ID.ideo(n).flags; const hold = (fl.noDecap || fl.partisans ? 12 : 4) * (n.a.dp && n.a.dp.logistics ? 2 : 1);
-      // collect tiles + adjacent enemies
-      const tiles = []; const adj = {}; let sp = 0, shore = -1; stack[sp++] = c.start; comp[c.start] = -2;
-      while (sp) {
-        const t = stack[--sp]; tiles.push(t); const x = t % W;
-        if (shore < 0 && G.coast[t]) shore = t;
-        for (const q of [x > 0 ? t - 1 : -1, x < W - 1 ? t + 1 : -1, t >= W ? t - W : -1, t < N - W ? t + W : -1]) {
-          if (q < 0) continue; const oo = own[q];
-          if (oo === c.o) { if (comp[q] === id) { comp[q] = -2; stack[sp++] = q; } }
-          else if (oo && G.warM[c.o * MAXN + oo]) adj[oo] = (adj[oo] || 0) + 1;
-        }
-      }
-      let win = 0, wb = 0; for (const k in adj) if (adj[k] > wb) { wb = adj[k]; win = +k; }
-      if (!win) { if (shore >= 0) { C.addBeach(G, shore, c.o); for (const t of tiles) { cut[t] = 2; age[t] = 0; if (!G.headless && G.mapMode === 'supply') G.dirty.push(t); } } continue; }
-      if (!n.nwars || !(c.size <= 4 || age[c.start] >= hold)) continue;
-      const share = tiles.length / Math.max(1, n.tiles);
-      const lost = n.troops * Math.min(0.9, share * 0.9);
-      n.troops -= lost; n.pop -= lost * 0.3; n.losses += lost; n.casM += lost * 0.6; G.nations[win].kills += lost;
-      const war = ID.Diplomacy.warOf(G, win, c.o);
-      for (const t of tiles) ID.setOwner(G, t, win);
-      if (war) { if (war.a === win) war.ta += tiles.length; else war.tb += tiles.length; }
-      if (tiles.length > 60) {
-        ID.news(G, 'Encircled: a ' + n.adj + ' pocket of ' + tiles.length + ' tiles surrenders to ' + G.nations[win].name + ' with ' + ID.fmtPop(lost) + ' troops.', 'war', win, n.id);
-        if (n.id === G.player) { ID.sfx(G, 'bad'); ID.logGrief(n, G.tick, 'A pocket was encircled and ' + ID.fmtPop(lost) + ' troops surrendered.'); }
-        if (win === G.player) ID.sfx(G, 'good');
-        G.nations[win].glory = Math.min(100, G.nations[win].glory + 3); n.glory -= 3;
-      }
-      if (n.tiles <= 0) ID.Diplomacy.eliminate(G, n, G.nations[win]);
+      const c = comps[id]; if (c.st !== 1 || !c.win) continue;
+      const n = G.nations[c.o]; if (!n.alive || !n.nwars) continue;
+      let give = false, held = 0;
+      for (const a of G.attacks) if (a.from === c.o && a.ck === id) { held += a.troops; if (a.give) give = true; }
+      if (held > 0.5) { const Wn = G.nations[c.win]; Wn.we = Math.min(100, Wn.we + 0.12); }
+      if (!(give || c.size <= 4 || age[c.start] >= C.holdOf(G, n, id))) continue;
+      surrender(G, c, id, n, G.nations[c.win], give);
     }
   };
+  /* Attacks follow the pieces: a pocket's attack keeps its anchor, joins the main army when the ring is broken,
+     is lost when its last ground falls; a salient cut off takes its share of the troops with it. */
+  function pieces(G, comps, main) {
+    const own = G.owner, comp = G._comp, W = G.W;
+    for (let k = G.attacks.length - 1; k >= 0; k--) {
+      const a = G.attacks[k];
+      if (a.pk >= 0) {
+        let t = own[a.pk] === a.from ? a.pk : a.last >= 0 && own[a.last] === a.from ? a.last : -1;
+        if (t < 0) for (const v of a.heap.v) { for (const q of [v - 1, v + 1, v - W, v + W]) if (q >= 0 && q < G.N && own[q] === a.from && comp[q] >= 0 && comp[q] !== main[a.from]) { t = q; break; } if (t >= 0) break; }
+        if (t < 0) { // overrun: the last of the pocket is gone
+          G.attacks.splice(k, 1);
+          const A = G.nations[a.from], D = G.nations[a.to];
+          if (D && a.troops > 0.5) { D.kills += a.troops; D.cnt.prisoners = (D.cnt.prisoners || 0) + a.troops; }
+          if (A && (A.id === G.player || a.to === G.player) && a.troops >= 1) ID.news(G, 'The last ' + A.adj + ' pocket ' + (D ? 'in ' + D.name + ' ' : '') + 'is overrun: ' + ID.fmtPop(a.troops) + ' troops are taken.', A.id === G.player ? 'war' : 'good', A.id, a.to);
+          continue;
+        }
+        a.ck = comp[t]; a.pk = comps[a.ck].start; // anchor on a tile the piece surely holds
+        if (a.ck === main[a.from]) { a.pk = -1; a.enc = 0; a.out = 0; a.holdX = 0; }
+      } else a.ck = main[a.from];
+    }
+    // one attack per piece and enemy
+    const seen = {};
+    for (let k = G.attacks.length - 1; k >= 0; k--) {
+      const a = G.attacks[k], key = a.from + ':' + a.to + ':' + a.ck, b = seen[key];
+      if (!b) { seen[key] = a; continue; }
+      b.troops += a.troops; b.committed += a.committed; if (!(a.pk >= 0)) { b.pk = -1; b.enc = 0; }
+      G.attacks.splice(k, 1);
+    }
+    // a salient just cut off: the troops on that stretch of the front are inside it
+    for (const a of G.attacks.slice()) {
+      if (a.pk >= 0 || !a.to || a.troops < 4) continue;
+      for (let id = 0; id < comps.length; id++) {
+        const c = comps[id]; if (c.o !== a.from || main[a.from] === id || !c.fromMain || !c.adj || !c.adj[a.to] || c.size < 5) continue;
+        if (seen[a.from + ':' + a.to + ':' + id]) continue;
+        const share = Math.min(0.6, c.adj[a.to] / Math.max(1, ID.borders(G, a.from, a.to) + c.adj[a.to]));
+        const tr = a.troops * share; if (tr < 1) continue;
+        a.troops -= tr;
+        const p = { id: G.nextId++, from: a.from, to: a.to, troops: tr, committed: tr, style: a.style, heap: new ID.Heap(), prog: 0, base: G.tick, scan: -999, idle: 0, amphib: 0, taken: 0, pk: c.start, ck: id };
+        G.attacks.push(p); seen[a.from + ':' + a.to + ':' + id] = p;
+      }
+    }
+    // encirclement starts and ends
+    for (const a of G.attacks) {
+      const c = comps[a.ck]; if (!(a.pk >= 0) || !c) continue;
+      a.sea = c.portI >= 0 ? c.portI : c.beachI;
+      if (c.st !== 1) { a.enc = 0; a.out = 0; continue; }
+      if (a.enc) continue;
+      a.enc = G.tick; a.bd = 1e9; a.bo = -1; a.scan = -999;
+      // break out toward the nearest ground of the main territory
+      const m = main[a.from], x0 = a.pk % W, y0 = (a.pk / W) | 0;
+      if (m >= 0) { let bd = 1e9; for (let i = 0; i < G.N; i++) if (comp[i] === m) { const d = Math.abs(i % W - x0) + Math.abs(((i / W) | 0) - y0); if (d < bd) { bd = d; a.bo = i; } } a.bd = bd + 1; }
+      const A = G.nations[a.from], D = G.nations[a.to], near = ID.placeName ? ID.placeName(G, a.pk) : '';
+      if (a.from === G.player && a.troops >= 1 && ID.Events) ID.Events.queue(G, A, 'enc_pocket', { id: a.id, to: a.to, near });
+      if (a.to === G.player && a.troops >= 1) ID.news(G, ID.fmtPop(a.troops) + ' ' + A.adj + ' troops are encircled' + (near ? ' near ' + near : '') + '. Hold the ring and they must surrender.', 'good', A.id, D.id);
+    }
+  }
+  function surrender(G, c, id, n, Wn, give) {
+    const tiles = c.tiles;
+    const share = tiles.length / Math.max(1, n.tiles);
+    const lost = n.troops * Math.min(0.9, share * 0.9);
+    let pocket = 0;
+    for (let k = G.attacks.length - 1; k >= 0; k--) { const a = G.attacks[k]; if (a.from === n.id && a.ck === id) { pocket += a.troops; G.attacks.splice(k, 1); } }
+    const back = give ? pocket * 0.4 : 0; pocket -= back; // a surrender on terms sends the wounded home
+    n.troops += back - lost; n.pop -= lost * 0.3 + pocket * 0.3; n.losses += lost + pocket; n.casM += (lost + pocket) * 0.6;
+    Wn.kills += lost + pocket; Wn.cnt.prisoners = (Wn.cnt.prisoners || 0) + lost + pocket;
+    const near = ID.placeName ? ID.placeName(G, c.start) : '';
+    const war = ID.Diplomacy.warOf(G, Wn.id, c.o);
+    for (const t of tiles) ID.setOwner(G, t, Wn.id);
+    if (war) { if (war.a === Wn.id) war.ta += tiles.length; else war.tb += tiles.length; }
+    if (tiles.length > 60 || pocket >= 2) {
+      const tot = lost + pocket, k = Math.min(8, 2 + tot / 15);
+      ID.news(G, 'Encircled: a ' + n.adj + ' pocket' + (near ? ' near ' + near : '') + ' of ' + tiles.length + ' tiles surrenders to ' + Wn.name + '. ' + ID.fmtPop(tot) + ' troops go into captivity.', n.id === G.player ? 'war' : 'good', Wn.id, n.id);
+      if (n.id === G.player) { ID.sfx(G, 'bad'); ID.logGrief(n, G.tick, 'A pocket was encircled and ' + ID.fmtPop(tot) + ' troops surrendered.'); }
+      if (Wn.id === G.player) ID.sfx(G, 'good');
+      Wn.glory = Math.min(100, Wn.glory + k); n.glory -= k; n.we = Math.min(100, n.we + k * 0.6); Wn.stab = Math.min(100, Wn.stab + k * 0.25);
+      if (ID.Press && pocket >= 10) ID.Press.pocket(G, Wn, n, tot, near);
+    }
+    if (n.tiles <= 0) ID.Diplomacy.eliminate(G, n, Wn);
+  }
 
   /* ---------------------------------------------------------------- per-tick driver */
   C.tick = function (G) {
@@ -746,6 +938,25 @@
     if (G.fortsDirty) ID.recomputeForts(G);
     if (G.tick % 10 === 0) { C.updateSupply(G); if (G.shock && G.shock.length) G.shock = G.shock.filter((s) => s.until > G.tick); }
   };
+
+  /* The player's army is encircled: break out, hold for relief, or surrender on terms. */
+  ID.EVENT_DEFS.push({ id: 'enc_pocket', sys: 1, tone: 'bad', sfx: 'alarm', press: 0,
+    title: (n, G, c) => 'Our army is encircled' + (c.near ? ' near ' + c.near : ''),
+    text: (n, G, c) => {
+      const a = G.attacks.find((x) => x.id === c.id), p = a && C.pocketInfo(G, a), D = G.nations[c.to];
+      if (!p || !p.enc) return 'The ring has already been broken.';
+      const why = { navy: 'The ' + (D ? D.adj + ' ' : '') + 'navy rules the sea around it, so no ship gets through.', beach: 'The beach can no longer carry them: it has been under fire for months, and they never took a port.', shore: 'They have lost their last stretch of coast.', harbour: 'The beach is lost and they hold no port: ships have nowhere to land.', land: 'The enemy has closed the ring behind them.' }[p.why] || '';
+      return ID.fmtPop(p.troops) + ' of our troops are cut off' + (D ? ' inside ' + D.name : '') + '. ' + why + ' Without supply they lose men and nerve every day and cannot advance; at best they can fight toward our own lines. Unless the ring is broken they must surrender in about ' + p.days + ' days.';
+    },
+    opts: (G, n, c) => {
+      const get = (GG) => GG.attacks.find((x) => x.id === c.id && x.enc);
+      if (!get(G)) return [{ label: 'Good news, then', fx: [] }];
+      return [
+        { label: 'Fight our way out', tip: 'Everything toward our own lines: the breakout moves half again as fast, but the pocket bleeds faster.', ai: 2, fx: [['fn', (GG) => { const a = get(GG); if (a) { a.out = 1; a.surge = GG.tick + 20; a.scan = -999; } }], ['note', 'A breakout toward our lines; heavier losses', null]] },
+        { label: 'Hold for relief', tip: 'Dig in and wait for the relief attack. They hold a month longer, and every day costs the besieger war weariness.', ai: 1, fx: [['fn', (GG) => { const a = get(GG); if (a) a.holdX = (a.holdX || 0) + 3; }], ['note', 'The pocket holds about 30 days longer', true]] },
+        { label: 'Surrender on terms', tip: 'Spare the men: four in ten come home wounded or exchanged. The ground is lost.', ai: 0.3, fx: [['fn', (GG) => { const a = get(GG); if (a) a.give = 1; }], ['stab', -3], ['note', 'Four in ten of the troops come home', true]] },
+      ];
+    } });
 
   /* Daily population and troop pool. */
   C.tickPop = function (G, n) {

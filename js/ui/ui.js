@@ -141,7 +141,9 @@
     const t = UI.target(); if (!t) { UI.toast('Select an enemy you are at war with on the map.'); return; }
     const cap = n.emergency ? 1 : ID.ideo(n).control.cap;
     const r = ID.Combat.launch(G, n.id, t.id, n.troops * Math.min(UI.commit, cap), UI.style);
-    if (typeof r === 'string') { UI.toast(r); ID.Audio.play('bad'); } else ID.Audio.play('drums');
+    if (typeof r === 'string') { UI.toast(r); ID.Audio.play('bad'); }
+    else if (r.relief != null) UI.toast('No land front: ' + ID.fmtPop(r.troops) + ' troops sail for the pocket and land in about ' + Math.max(1, Math.ceil((r.path.length - 1) / ID.Combat.BOAT_SPEED)) + ' days. The sea lift carries about ' + ID.fmtPop(ID.Combat.liftCap(G, n, t.id, G._comp[r.target])) + ' a day.', true);
+    else ID.Audio.play('drums');
   };
   acts.expandHint = () => { const G = UI.G, n = P(); let best = -1; for (let p = 1; p < G.provinces.length && best < 0; p++) { const Pr = G.provinces[p]; if (!Pr.owner && Pr.wild && Pr.nb.some((q) => G.provinces[q].owner === n.id)) best = Pr.center; } if (best >= 0) { R.focus(best); UI.sel = best; R.selected = best; } };
   acts.recall = (a) => { const G = UI.G; const at = G.attacks.find((x) => x.id === a); if (at) { ID.Combat.cancel(G, at); UI.toast('Recalled. A tenth of the force is lost in the withdrawal.', true); } };
@@ -474,12 +476,18 @@
     if (n.nwars) h += '<div class="styles orders">' + okeys.map((k) => { const ab = ID.Combat.ABIL[k], why = ID.Combat.abilBlock(G, n, k, ab.self ? null : -1), soft = why && (why.indexOf('Select') === 0); const cd = (n.cd['ab_' + k] || 0) - G.tick; const g = ID.Combat.abilGold(n, ab), ac = ID.Combat.abilCd(n, ab); return UI.btn(ab.name + (cd > 0 ? ' <span class="num">' + cd + 'd</span>' : ' <span class="num">' + (g ? g + 'g' : 'free') + '</span>'), 'abil', k, { cls: 'sm ' + (UI.aim === k ? 'on' : ab.doctrine ? 'dord' : 'ghost'), off: soft ? '' : why, tip: '<h5>' + ab.name + (ab.doctrine ? ' <span class="dim">· ' + esc(ID.ideo(n).name) + ' order</span>' : '') + '</h5>' + esc(ab.desc) + (ab.self ? '' : ab.range >= 999 ? '<hr>Click, then click the land of an enemy at war with you.' : '<hr>Click, then click enemy land within ' + ab.range + ' tiles of yours.') + '<br>Cost ' + (g ? g + ' gold' : 'nothing') + ' · every ' + ac + ' days' }); }).join('') + '</div>';
     if (n.nwars) h += '<div class="styles">' + Object.keys(ID.STYLES).map((k) => { const S = ID.STYLES[k], e = I.doctrine.styles[k] || 0, ok = ID.Combat.styleOk(n, k); return UI.btn(S.name + ' <span class="num">×' + e.toFixed(2) + '</span>', 'style', k, { cls: 'sm ' + (UI.style === k ? 'on' : 'ghost'), off: ok ? '' : S.needs === 'mil2' && n.tech.mil < 2 ? 'Needs military technology 2.' : 'Your doctrine cannot fight this way.', tip: '<h5>' + S.name + '</h5>' + esc(S.desc) + '<hr>Your doctrine: <b>×' + e.toFixed(2) + '</b> effectiveness' }); }).join('') + '</div>';
     if (mine.length || boats.length) {
-      h += '<div class="chips">' + mine.map((a) => '<span class="chip"' + tip('Committed ' + ID.fmtPop(a.committed) + ', ' + a.taken + ' tiles taken' + (a.to ? ', ' + ID.STYLES[a.style].name.toLowerCase() : '') + '.') + '>→ ' + (a.to ? esc(G.nations[a.to].base) : 'Hinterland') + ' <b class="num">' + ID.fmtPop(a.troops) + '</b><button data-act="recall" data-a="' + a.id + '"' + tip('Recall the survivors. A tenth are lost withdrawing.') + '>recall</button></span>').join('') +
+      h += '<div class="chips">' + mine.map((a) => '<span class="chip"' + tip('Committed ' + ID.fmtPop(a.committed) + ', ' + a.taken + ' tiles taken' + (a.to ? ', ' + ID.STYLES[a.style].name.toLowerCase() : '') + '.' + UI.pocketTip(G, a)) + '>→ ' + (a.to ? esc(G.nations[a.to].base) : 'Hinterland') + (a.pk >= 0 ? (a.enc ? ' <span class="bad">encircled</span>' : ' <span class="dim">pocket</span>') : '') + ' <b class="num">' + ID.fmtPop(a.troops) + '</b><button data-act="recall" data-a="' + a.id + '"' + tip('Recall the survivors. A tenth are lost withdrawing.') + '>recall</button></span>').join('') +
         boats.map((b) => '<span class="chip"' + tip('A convoy on its way. It lands in about ' + Math.max(1, Math.ceil((b.path.length - 1 - b.pos) / ID.Combat.BOAT_SPEED)) + ' days.') + '>⛴ at sea <b class="num">' + ID.fmtPop(b.troops) + '</b> <span class="dim num">' + Math.max(1, Math.ceil((b.path.length - 1 - b.pos) / ID.Combat.BOAT_SPEED)) + 'd</span></span>').join('') + '</div>';
     }
     el.innerHTML = h; el.hidden = false;
   };
 
+  /* What a pocket's chip says: supplied by sea (and for how long by the beach alone), or encircled. */
+  UI.pocketTip = function (G, a) {
+    const p = ID.Combat.pocketInfo(G, a); if (!p) return '';
+    if (p.enc) return '<hr><span class="bad">Encircled.</span> No supply: it loses men every day, can only break out toward our lines, and surrenders in about ' + p.days + ' days unless the ring is broken.';
+    return '<hr>A pocket supplied by sea through its ' + (p.sea || 'coast') + '. Reinforcements sail there at about ' + ID.fmtPop(p.lift) + ' troops a day.' + (p.beachLeft >= 0 ? ' <span class="warn">The beach alone carries it for ' + p.beachLeft + ' more days: take a port.</span>' : '');
+  };
   /* ---------------------------------------------------------------- alerts */
   UI.alerts = function () {
     const G = UI.G, n = P(), I = ID.ideo(n), out = []; const add = (text, tab, red, act, arg) => out.push({ text, tab, red, act, arg });
@@ -489,6 +497,11 @@
     if (n.nwars) {
       let inc = 0; for (const a of G.attacks) if (a.to === n.id) inc += a.troops;
       if (inc > 1) add('<b>Under attack</b> by ' + ID.fmtPop(inc) + ' troops', 'mil', true);
+      for (const a of G.attacks) {
+        if (!a.enc || a.troops < 0.5) continue;
+        if (a.to === n.id) add('<b>' + ID.fmtPop(a.troops) + ' enemy troops encircled</b> near ' + ID.placeName(G, a.pk) + ': hold the ring', 'mil', false, 'goto', a.pk);
+        else if (a.from === n.id) { const p = ID.Combat.pocketInfo(G, a); add('<b>' + ID.fmtPop(a.troops) + ' of our troops encircled</b> near ' + ID.placeName(G, a.pk) + (p ? ': surrender in ' + p.days + ' days' : ''), 'mil', true, 'goto', a.pk); }
+      }
       if (!G.attacks.some((a) => a.from === n.id) && n.troops > n.pop * n.mob * 0.6) add('<b>Troops idle</b> while at war', 'mil');
       { const m = ID.Economy.monthsLeft(n); if (m < 9) add('<b>Arsenal running dry</b>: about ' + Math.max(0, Math.round(m)) + ' months of fighting left (kit ' + Math.round(n.equip * 100) + '%)', 'mil', m < 4); }
       if (n.equip < 0.8) add('<b>Short of kit</b>: equipment ' + Math.round(n.equip * 100) + '%, attack ×' + n.equip.toFixed(2) + ((n.a.armsPaid || 0) > (n.a.armsCap || 0) * 1.02 ? ' (factories are the limit)' : ''), 'mil', n.equip < 0.75);

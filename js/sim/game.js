@@ -253,7 +253,7 @@
       owner: rle(G.owner), bld: rle(G.bld), hp: rle(G.hp), rad: G.radList.map((i) => [i, G.rad[i]]),
       nations: G.nations, player: G.player, rel,
       prov: G.provinces.slice(1).map((P) => [P.core, Math.round(P.unrest * 10) / 10, P.opp, Math.round(P.oppStr * 10) / 10, Math.round(P.integ), P.lastOwner, P.sponsor, P.oil || 0, P.oilFound || 0, P.oilCo || 0, P.oilShare || 0, P.oilAt || 0, P.canal || 0]), fronts: G.fronts || null,
-      attacks: G.attacks.map((a) => ({ id: a.id, from: a.from, to: a.to, troops: a.troops, committed: a.committed, style: a.style, amphib: a.amphib, taken: a.taken })),
+      attacks: G.attacks.map((a) => ({ id: a.id, from: a.from, to: a.to, troops: a.troops, committed: a.committed, style: a.style, amphib: a.amphib, taken: a.taken, pk: a.pk, enc: a.enc, bo: a.bo, bd: a.bd, out: a.out, holdX: a.holdX, give: a.give, last: a.last, pobj: a.pobj })),
       boats: G.boats, missiles: G.missiles, builds: G.builds, dip: G.dip, blocs: G.blocs, news: G.news.slice(-60), chronicle: G.chronicle, world: G.world, flags: G.flags,
       evq: G.evq, tray: G.tray || [], votes: G.votes, nextId: G.nextId, over: G.over, won: G.won || null, ack: G.ack || null, endless: !!G.endless, tut: G.tut, offers: G.offers || [], shock: G.shock || [], historical: !!G.historical, story: G.story || null, beach: G.beach || [], press: G.press || null,
     };

@@ -355,6 +355,17 @@
     for (const e of enemies) if (Dp.warScore(G, n, e) < -0.25) losing = true;
     n.a.losing = losing;
     { const want = losing ? (n.flags.ld_depth ? 'depth' : 'defend') : n.nwars && n.troops > n.pop * ID.maxMob(n) * 0.6 && G.rng.chance(0.5) ? 'attack' : 'balanced'; if ((n.posture || 'balanced') !== want && (!n.postureAt || G.tick - n.postureAt > 120)) C.setPosture(G, n, want); }
+    // pockets: aim at an enemy landing's beach or port (taking it cuts the pocket off), relieve our own
+    // encircled pockets, and send a pocket whose beach is wearing out toward the nearest enemy port
+    for (const a of G.attacks) {
+      if (!(a.pk >= 0)) continue;
+      if (a.to === n.id && a.sea >= 0 && G.owner[a.sea] === a.from && G.rng.chance(0.5)) (n.objs = n.objs || {})[a.from] = a.sea;
+      else if (a.from === n.id && a.to) {
+        const p = C.pocketInfo(G, a); if (!p) continue;
+        if (p.enc && a.bo >= 0) { let best = -1, bd = 1e9; const W = G.W, bx = a.bo % W, by = (a.bo / W) | 0; for (const v of a.heap.v) { if (G.owner[v] !== a.to) continue; const d = Math.abs(v % W - bx) + Math.abs(((v / W) | 0) - by); if (d < bd) { bd = d; best = v; } } if (best >= 0) (n.objs = n.objs || {})[a.to] = best; }
+        else if (!p.enc && p.sea !== 'port' && (a.pobj == null || a.pobj < 0 || G.owner[a.pobj] !== a.to)) { const W = G.W, x0 = a.pk % W, y0 = (a.pk / W) | 0; let bd = 40; a.pobj = -1; for (const i of G.blist) if (G.bld[i] === B.PORT && G.owner[i] === a.to) { const d = Math.abs(i % W - x0) + Math.abs(((i / W) | 0) - y0); if (d < bd) { bd = d; a.pobj = i; } } }
+      }
+    }
     // landward enemies sorted by threat
     const land = enemies.filter((e) => ID.borders(G, n.id, e.id) > 0);
     land.sort((a, c) => Dp.power(c) - Dp.power(a));

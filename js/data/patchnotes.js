@@ -3,6 +3,14 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'Encirclement', items: [
+      'Troops in a pocket now belong to that pocket. A landing or a cut-off salient fights with what it has; the enemy’s home army can no longer feed it across your country.',
+      'A landing is supplied over its beach for about four months. After that it needs a captured port. Take its beach, its port or its whole coast, or bring a navy three times stronger than theirs, and it is cut off.',
+      'Reinforcements reach a pocket only by sea, a limited number a day (more through its ports and with a strong navy). You can see them sailing as boats.',
+      'An encircled pocket cannot advance. It loses men and nerve every day, can only try to break out toward its own lines, and surrenders when the countdown runs out. The side that holds the ring takes prisoners and glory, and pays a little war weariness while the pocket holds.',
+      'In the Supply map mode, encircled pockets have a red outline with their troops and the days left. Alerts warn you when enemy troops are encircled, and when your own army is, you decide: fight out, hold for relief, or surrender on terms.',
+      'The AI goes for the beach or port of a landing on its soil, tries to relieve its own pockets, and keeps its fronts broader instead of driving thin salients.',
+    ] },
     { date: '24 November 2026', title: 'Small things and fixes', items: [
       'The dev console can now be opened on phones and tablets too, for those who know where to look.',
       'Fixed: while an expansion into the hinterland was under way, the War tab showed whichever tab you had open before.',

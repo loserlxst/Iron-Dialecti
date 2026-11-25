@@ -371,6 +371,30 @@
       ctx.beginPath(); ctx.moveTo(X - r * 0.5, Y); ctx.lineTo(X + r * 0.5, Y); ctx.moveTo(X, Y - r * 0.7); ctx.lineTo(X, Y + r * 0.7); ctx.stroke();
       if (z >= 5) { ctx.fillStyle = css(mine ? RED : INK); ctx.font = '700 10px "Barlow Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('BEACHHEAD', X, Y - r * 1.9); }
     }
+    // encircled pockets (supply map): a red ring, the troops inside and the days until they surrender
+    if (R.mode === 'supply' && G._comps) for (let id = 0; id < G._comps.length; id++) {
+      const c = G._comps[id]; if (c.st !== 1 || !c.win || !c.tiles || !G.nations[c.o].nwars) continue;
+      const cm = G._comp; let mx = 0, my = 0, k = 0;
+      ctx.strokeStyle = css(RED, 0.95); ctx.lineWidth = Math.max(2, z * 0.3); ctx.beginPath();
+      for (const t of c.tiles) {
+        if (G.owner[t] !== c.o) continue;
+        const x = t % W, y = (t / W) | 0; mx += x; my += y; k++;
+        const X0 = sx(x), Y0 = sy(y), X1 = sx(x + 1), Y1 = sy(y + 1);
+        if (X1 < -5 || Y1 < -5 || X0 > cw + 5 || Y0 > ch + 5) continue;
+        if (x === 0 || G.owner[t - 1] !== c.o || cm[t - 1] !== id) { ctx.moveTo(X0, Y0); ctx.lineTo(X0, Y1); }
+        if (x === W - 1 || G.owner[t + 1] !== c.o || cm[t + 1] !== id) { ctx.moveTo(X1, Y0); ctx.lineTo(X1, Y1); }
+        if (y === 0 || G.owner[t - W] !== c.o || cm[t - W] !== id) { ctx.moveTo(X0, Y0); ctx.lineTo(X1, Y0); }
+        if (t + W >= G.N || G.owner[t + W] !== c.o || cm[t + W] !== id) { ctx.moveTo(X0, Y1); ctx.lineTo(X1, Y1); }
+      }
+      ctx.stroke();
+      if (!k) continue;
+      let tr = 0; for (const a of G.attacks) if (a.from === c.o && a.ck === id) tr += a.troops;
+      const days = Math.max(0, (ID.Combat.holdOf(G, G.nations[c.o], id) - G.cutAge[c.start]) * 10);
+      const X = sx(mx / k + 0.5), Y = sy(my / k + 0.5); if (X < -40 || Y < -40 || X > cw + 40 || Y > ch + 40) continue;
+      const txt = (tr >= 0.5 ? ID.fmtPop(tr) + ' · ' : '') + days + 'd';
+      ctx.font = '800 13px "Barlow Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 4; ctx.strokeStyle = css(PAPER, 0.95); ctx.strokeText(txt, X, Y); ctx.fillStyle = css(RED); ctx.fillText(txt, X, Y);
+    }
     // oil fields (and the Canal): a derrick on each province that produces, in the colour of whoever takes the money
     if (z >= 2) for (let p = 1; p < G.provinces.length; p++) {
       const Pr = G.provinces[p]; if (!Pr.oil || !Pr.oilFound) continue;
