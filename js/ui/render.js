@@ -390,10 +390,14 @@
       if (!k) continue;
       let tr = 0; for (const a of G.attacks) if (a.from === c.o && a.ck === id) tr += a.troops;
       const days = Math.max(0, (ID.Combat.holdOf(G, G.nations[c.o], id) - G.cutAge[c.start]) * 10);
-      const X = sx(mx / k + 0.5), Y = sy(my / k + 0.5); if (X < -40 || Y < -40 || X > cw + 40 || Y > ch + 40) continue;
-      const txt = (tr >= 0.5 ? ID.fmtPop(tr) + ' · ' : '') + days + 'd';
+      // the label sits above the pocket, clear of the attack arrow
+      let top = 1e9; for (const t of c.tiles) if (G.owner[t] === c.o) top = Math.min(top, (t / W) | 0);
+      const X = sx(mx / k + 0.5), Y = sy(top) - 14; if (X < -60 || Y < -40 || X > cw + 60 || Y > ch + 40) continue;
+      const txt = 'ENCIRCLED · ' + (tr >= 0.5 ? ID.fmtPop(tr) + ' · ' : '') + 'surrenders in ' + days + 'd';
       ctx.font = '800 13px "Barlow Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.lineWidth = 4; ctx.strokeStyle = css(PAPER, 0.95); ctx.strokeText(txt, X, Y); ctx.fillStyle = css(RED); ctx.fillText(txt, X, Y);
+      const tw = ctx.measureText(txt).width + 12;
+      ctx.fillStyle = css(PAPER, 0.95); ctx.strokeStyle = css(RED); ctx.lineWidth = 2; ctx.fillRect(X - tw / 2, Y - 10, tw, 20); ctx.strokeRect(X - tw / 2, Y - 10, tw, 20);
+      ctx.fillStyle = css(RED); ctx.fillText(txt, X, Y + 1);
     }
     // oil fields (and the Canal): a derrick on each province that produces, in the colour of whoever takes the money
     if (z >= 2) for (let p = 1; p < G.provinces.length; p++) {

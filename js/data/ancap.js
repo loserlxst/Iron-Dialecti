@@ -55,7 +55,7 @@
       const tiles = Pr.cnt[o.id] || 0; if (tiles < 4 || tiles > o.tiles * 0.25) continue;
       if (!Pr.nb || !Pr.nb.some((q) => G.provinces[q].owner === n.id)) continue;
       if (ID.areRivals(n.ideo, o.ideo) || ID.ideo(o).flags.noPeace) continue;
-      const price = Math.round(50 + tiles * 1.1 + Pr.urban * 220 + (Pr.core === o.id ? tiles * 0.8 : 0));
+      const price = Math.round(50 + tiles * 1.8 + Pr.urban * 220 + (Pr.core === o.id ? tiles * 0.8 : 0));
       const score = tiles / price;
       if (!best || score > best.score) best = { Pr, o, price, tiles, score };
     }
@@ -134,7 +134,7 @@
   function extra(n, G) {
     const ag = n.sigx && n.sigx.ag; if (!ag) return [];
     const rows = ag.slice().sort((a, b) => b.s - a.s).map((a, k) => [a.name, pct(a.s) + ' of the contracts' + (k === 0 && n.sigx.dom ? ' · dominant for ' + n.sigx.dom + ' months' : ''), k === 0 && a.s > 0.6 ? false : null]);
-    rows.push(['Members’ fees', n.tax + '% of output (set by the agencies, not by you)', n.tax < 6.5]);
+    rows.push(['Members’ fees', n.tax + '% of output (set by the agencies, not by you)', n.tax < 9.5 ? true : n.tax > 12 ? false : null]);
     const b = G ? ACap.offer(G, n) : null;
     rows.push(['Land for sale', b ? (b.Pr.name || 'A province') + ' from ' + b.o.name + ', ' + b.tiles + ' tiles, ' + b.price + ' gold' : 'no neighbour needs the money just now', b ? true : null]);
     if ((n.sigx.exitAt || 0) > (G ? G.tick : 0)) rows.push(['Exit', 'a province left recently; the next may go after ' + ID.dateOf(n.sigx.exitAt).short, null]);
@@ -156,9 +156,11 @@
         fx: [['fn', (G, n) => { n.sigx.excl = G.tick + 2 * YEAR; }], ['mod', 'def', 0.12, 24, 'Exclusive contract'], ['mod', 'atk', 0.05, 24, 'Exclusive contract']], ai: (n, v) => !!n.a.threatened && n.gold > 200 && v > 45 },
       { id: 'ac_buy', name: 'Buy a province', desc: 'Buy the best-priced border province from a neighbour that needs the money (broke, in debt or unstable). The doctrine card names the offer. No war, no claim left behind.', cost: {}, cd: 18,
         can: (n, G) => { const b = ACap.offer(G, n); return !b ? 'No neighbour needs the money just now.' : n.gold < b.price ? 'The best offer is ' + (b.Pr.name || 'a province') + ' from ' + b.o.name + ' for ' + b.price + ' gold.' : ''; },
+        price: (n, G) => { const b = ACap.offer(G, n); return b ? b.price + ' gold' : 'no offer'; },
         fx: [['fn', (G, n) => ACap.buy(G, n)]], ai: (n, v, G) => { const b = ACap.offer(G, n); return !!b && !n.nwars && n.gold > b.price * 1.6 + 100; } },
       { id: 'ac_ransom', name: 'Buy peace', desc: 'War is bad for business. Pay the strongest enemy to go home: gold equal to 150 plus four tenths of its army (in thousands). The peace follows the war score as usual.', cost: {}, cd: 24,
         can: (n, G) => { const e = ACap.foe(G, n); return !e ? 'You are not at war.' : ID.ideo(e).flags.noPeace ? e.name + ' does not take money for peace.' : n.gold < ACap.ransom(e) ? 'Needs ' + ACap.ransom(e) + ' gold for ' + e.name + '.' : ''; },
+        price: (n, G) => { const e = ACap.foe(G, n); return e ? ACap.ransom(e) + ' gold' : 'not at war'; },
         fx: [['fn', (G, n) => { const e = ACap.foe(G, n); if (!e) return; const c = ACap.ransom(e); n.gold -= c; e.gold += c; ID.news(G, n.name + ' pays ' + c + ' gold and ' + e.name + ' goes home.', 'dip', n.id, e.id); ID.Diplomacy.peace(G, n, e); }]],
         ai: (n, v, G) => !!n.a.losing && n.gold > 300 },
     ],

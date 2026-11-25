@@ -1107,14 +1107,15 @@ dispatches (`d_ap_poor`, `d_ap_feud`).
   4 months: `ac_monopoly` (spread the contracts, a long contract, let it be); over 60% for 24 months or 85% at once:
   `ac_state` (let it govern = junta or NRX, logged as a coup with source `agency`; buy it out; or civil war).
 - **Land as property**: `ac_buy` buys the best-priced border province (`ACap.offer`) from an AI neighbour that is
-  broke, in debt or unstable (price 50 + 1.1/tile + urban + core); the claim goes with it. **Exit**: a province with
+  broke, in debt or unstable (price 50 + 1.8 a tile, more for towns and core land); the claim goes with it. **Exit**: a province with
   unrest 55+ or a 55+ movement may leave, at most every two years, for the friendliest neighbour at peace (or
   independence through `P.secede`).
 - **Acts**: Spread the contracts, An exclusive contract, Buy a province, Buy peace (`ACap.ransom`: 150 + 0.4 × the
   enemy's army, then `Diplomacy.peace`). War trait *Contract armies* (cities +40%, home +15%, losses in attack
   +10%); order *Bounties*. Forbidden (`ID.FORBID.ancap`): emergency rule, factories, towns, recruitment laws.
-- **Measured** (`node tools/forced.js ancap 40`: one state forced into it in 8 worlds): 23 years on average, 3 of 8
-  to the end; ends by agency (junta/NRX) or coup; largest land share 11%; up to 8 provinces bought in a run. With
+- **Measured** (`node tools/forced.js ancap 40`: one state forced into it in 8 worlds, after the browser pass raised land prices): 31 years on average, 4 of 8
+  to the end; ends by agency (junta/NRX) or coup; largest land share 16%; up to 8 provinces bought in a run. Before
+  the price rise: 23 years, 3 of 8, 11%. With
   the bans switched off (`ID_FORBID_OFF=ancap`) 26 years and 2 of 8: the bans cost the AI nothing measurable.
   `ideocheck ancap,nrx,minarchy 30` passes. Unforced worlds: ancap is rare (one start in 8 random worlds).
 
@@ -1147,6 +1148,35 @@ state can reach by land at the start, 0–2% of the world's land) ever settled.
 - **Measured** (`node tools/settle.js --runs 8 --years 50`, self-check first): islands settled 39% by 1915, 65% by
   1920, 75% by 1925, 99% by 1940, 100% by 1960; 2.8 expeditions a world (merchant republics 10 of 22, constitutional
   monarchies 6, socialist states 1); largest state 20% on average, 31% at most (21% and 32% before).
+
+## Session 15: browser pass and what is left
+
+Checked in the desktop app's browser pane at 800×600 and at phone width (375×812), with no console errors: *Settle*
+on an unclaimed coast (cost and days on the button, the boat chip, the landing; a coast claimed first by a neighbour
+now says so), an encircled enemy pocket in the Supply map (red outline, "ENCIRCLED · troops · surrenders in Nd"
+label above the pocket, alert, ticker), the coup from the first dispatch through the second night to
+`coup_lost` and *Fight on from the provinces* (the player crosses to the loyalist rump at war with the junta),
+`plot_stage`, the Anarcho-Capitalist doctrine card (agencies, fees, land for sale, prices on *Buy a province* and
+*Buy peace* through a new optional `act.price(n, G)` in `ui/doctrine.js`) and a purchase. `enc_pocket` was checked
+in Node (text, options, the breakout flag). Fixes from the pass: an encirclement on tick 0 read as none (`a.enc =
+G.tick || 1`); "near :" in alerts for unnamed provinces; the pocket label moved clear of the attack arrow; the coup's
+reasons are phrased from the plotters' side; land prices for the covenant raised from 1.1 to 1.8 gold a tile.
+
+Left undone or simplified:
+- Encirclement: the AI avoids thin salients with a heap penalty, not with a supply-aware plan; a cut-off salient takes
+  a share of the attack by its share of the border, an approximation; the national troop pool still defends
+  everywhere (only committed attack troops belong to a pocket); prisoners are counted (`cnt.prisoners`) but never
+  returned at peace; there is no separate fleet or blockade order, only sea power ratios.
+- Coups: scripted coups in story chapters and programmes (`['ideology', x, 'coup']`) stay scripted choices outside the
+  model; the old `plot_uncovered` dispatch is no longer queued (the stage dispatches replace it) but its text remains;
+  the "before" coup count has no weak-state figure (the old code did not log stability).
+- Anarcho-Capitalism: its destiny is in the liberal family tree, so only states without a national tree can reach
+  it; the player's own land is never offered for sale to AI covenants; other AI states do not single out covenants as
+  easy prey beyond their thin defence.
+- Settling: strategic value is "a rival next door"; straits are not rated; islands are only 0–2% of the land on the
+  standard maps, so the balance effect is small by construction.
+- Not done: a full campaign played by hand in the browser; the published artifact and the GitHub Pages zip were not
+  rebuilt.
 
 ## Peace by ideology (`sim/diplomacy.js`)
 

@@ -516,8 +516,9 @@
     let pick = -1, ps = 0;
     for (const k in best) {
       const Pr = G.provinces[+k], b = best[k];
-      let rival = 0; for (const q of Pr.nb) { const o = G.provinces[q].owner; if (o && o !== n.id && ID.op(G, n.id, o) < 0) rival = 1; }
-      const sc = Pr.tiles * (0.6 + Pr.fertile) * (1 - Pr.rough * 0.4) * (Pr.oil ? 1.6 : 1) * (1 + rival * 0.3) / (25 + b.d);
+      let rival = 0, land = 0; for (const q of Pr.nb) { const o = G.provinces[q].owner; if (o && o !== n.id) { land = 1; if (ID.op(G, n.id, o) < 0) rival = 1; } }
+      // a coast a neighbour can walk to will be theirs before the ships arrive: true islands first
+      const sc = Pr.tiles * (0.6 + Pr.fertile) * (1 - Pr.rough * 0.4) * (Pr.oil ? 1.6 : 1) * (1 + rival * 0.3) * (land ? 0.3 : 1) / (25 + b.d);
       if (sc > ps) { ps = sc; pick = b.i; }
     }
     return pick;
@@ -579,7 +580,11 @@
       if (G.cut[bt.target] === 1) { C.addBeach(G, bt.target, bt.owner); if (A.id === G.player) ID.news(G, 'Relief convoys reach the pocket: it is supplied by sea again.', 'good', A.id); ID.fx(G, 'land', bt.target); }
       return;
     }
-    if (!to || !ID.atWar(G, bt.owner, to)) { A.troops += bt.troops; return; }
+    if (!to || !ID.atWar(G, bt.owner, to)) {
+      A.troops += bt.troops;
+      if (bt.settle && to && A.id === G.player) ID.news(G, 'Our settlers find ' + (ID.placeName(G, bt.target) || 'the coast') + ' already claimed by ' + G.nations[to].name + '. They sail home.', 'bad', A.id, to);
+      return;
+    }
     const D = G.nations[to];
     const cr = C.crossing(A, D);
     if (cr.sunk > 0.02) { // the defender's navy meets the convoy
@@ -962,7 +967,7 @@
       a.sea = c.portI >= 0 ? c.portI : c.beachI;
       if (c.st !== 1) { a.enc = 0; a.out = 0; continue; }
       if (a.enc) continue;
-      a.enc = G.tick; a.bd = 1e9; a.bo = -1; a.scan = -999;
+      a.enc = G.tick || 1; a.bd = 1e9; a.bo = -1; a.scan = -999;
       // break out toward the nearest ground of the main territory
       const m = main[a.from], x0 = a.pk % W, y0 = (a.pk / W) | 0;
       if (m >= 0) { let bd = 1e9; for (let i = 0; i < G.N; i++) if (comp[i] === m) { const d = Math.abs(i % W - x0) + Math.abs(((i / W) | 0) - y0); if (d < bd) { bd = d; a.bo = i; } } a.bd = bd + 1; }

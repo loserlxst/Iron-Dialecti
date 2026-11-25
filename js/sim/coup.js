@@ -293,7 +293,7 @@
   /* ---------------------------------------------------------------- the player's dispatches */
   const E = ID.EVENT_DEFS;
   const plOf = (n, c) => c && c.src ? c : n.coupNow || {};
-  const oddsLine = (G, n, c) => { const o = Cp.odds(G, n, plOf(n, c)); return 'The loyalists’ chance: ' + pct(1 - o.p) + '. Why: ' + o.rows.map((r) => r[0] + ' ' + sgn(-r[1])).join('; ') + '.'; };
+  const oddsLine = (G, n, c) => { const o = Cp.odds(G, n, plOf(n, c)); return 'The loyalists’ chance: ' + pct(1 - o.p) + '. The plotters’ ' + pct(o.p) + ' is made of: ' + o.rows.map((r, k) => (k ? r[0] + ' ' + sgn(r[1]) : r[0].toLowerCase() + ' starts at ' + pct(r[1]))).join('; ') + (o.p <= 0.05 || o.p >= 0.92 ? ' (never below 5% or above 92%)' : '') + '.'; };
   const wantTxt = (G, n, pl) => (pl.to && pl.to !== n.ideo ? ' They mean to proclaim ' + ID.IDEOLOGIES[pl.to].name + '.' : ' They mean to keep the system and change the man at the top.');
   // a plot found at one of its stages: act now, or watch
   E.push({ id: 'plot_stage', sys: 1, tone: 'bad', sfx: 'alarm',

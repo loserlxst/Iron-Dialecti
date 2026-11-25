@@ -30,7 +30,8 @@
     if (n.ideo === 'absmon') { const f = n.sigx && ID.DOC_FAV[n.sigx.fav]; h += '<div class="dcfav">In favour at court: <b>' + (f ? esc(f.name) : 'no one in particular') + '</b>' + (f ? ' <span class="dim">' + fxSpans(Dc.describe(f.fx)) + '</span>' : '') + '</div>'; }
     h += '<div class="dcacts">' + D.acts.map((a) => {
       const why = Dc.actBlock(G, n, a), afx = UI.fxHtml(a.fx, n).replace(/<\/span>/g, '</span> ');
-      return UI.btn(esc(a.name) + ' <span>' + costTxt(a.cost || {}) + '</span>', 'doctrine', a.id, { cls: 'sm', off: why, tip: '<h5>' + esc(a.name) + '</h5>' + esc(a.desc) + '<hr>' + (a.sig ? '<b class="' + (a.sig > 0 ? 'good' : 'bad') + '">' + esc(D.gauge) + ' ' + (a.sig > 0 ? '+' : '−') + Math.abs(a.sig) + '</b> ' : '') + afx + '<hr><span class="dim">Cost: ' + costTxt(a.cost || {}) + ' · again after ' + (a.cd >= 24 ? Math.round(a.cd / 12) + ' years' : a.cd + ' months') + '</span>' });
+      let ct = costTxt(a.cost || {}); if (a.price) { try { ct = a.price(n, G) || ct; } catch (e) { /* keep the static cost */ } } // a price that depends on the moment
+      return UI.btn(esc(a.name) + ' <span>' + ct + '</span>', 'doctrine', a.id, { cls: 'sm', off: why, tip: '<h5>' + esc(a.name) + '</h5>' + esc(a.desc) + '<hr>' + (a.sig ? '<b class="' + (a.sig > 0 ? 'good' : 'bad') + '">' + esc(D.gauge) + ' ' + (a.sig > 0 ? '+' : '−') + Math.abs(a.sig) + '</b> ' : '') + afx + '<hr><span class="dim">Cost: ' + costTxt(a.cost || {}) + ' · again after ' + (a.cd >= 24 ? Math.round(a.cd / 12) + ' years' : a.cd + ' months') + '</span>' });
     }).join('') + '</div></div>';
     return h;
   };

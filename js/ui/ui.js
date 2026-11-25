@@ -508,8 +508,9 @@
       if (inc > 1) add('<b>Under attack</b> by ' + ID.fmtPop(inc) + ' troops', 'mil', true);
       for (const a of G.attacks) {
         if (!a.enc || a.troops < 0.5) continue;
-        if (a.to === n.id) add('<b>' + ID.fmtPop(a.troops) + ' enemy troops encircled</b> near ' + ID.placeName(G, a.pk) + ': hold the ring', 'mil', false, 'goto', a.pk);
-        else if (a.from === n.id) { const p = ID.Combat.pocketInfo(G, a); add('<b>' + ID.fmtPop(a.troops) + ' of our troops encircled</b> near ' + ID.placeName(G, a.pk) + (p ? ': surrender in ' + p.days + ' days' : ''), 'mil', true, 'goto', a.pk); }
+        const nm = ID.placeName(G, a.pk), near = nm ? ' near ' + esc(nm) : '';
+        if (a.to === n.id) add('<b>' + ID.fmtPop(a.troops) + ' enemy troops encircled</b>' + near + ': hold the ring', 'mil', false, 'goto', a.pk);
+        else if (a.from === n.id) { const p = ID.Combat.pocketInfo(G, a); add('<b>' + ID.fmtPop(a.troops) + ' of our troops encircled</b>' + near + (p ? ': surrender in ' + p.days + ' days' : ''), 'mil', true, 'goto', a.pk); }
       }
       if (!G.attacks.some((a) => a.from === n.id) && n.troops > n.pop * n.mob * 0.6) add('<b>Troops idle</b> while at war', 'mil');
       { const m = ID.Economy.monthsLeft(n); if (m < 9) add('<b>Arsenal running dry</b>: about ' + Math.max(0, Math.round(m)) + ' months of fighting left (kit ' + Math.round(n.equip * 100) + '%)', 'mil', m < 4); }
