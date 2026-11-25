@@ -1118,6 +1118,36 @@ dispatches (`d_ap_poor`, `d_ap_feud`).
   the bans switched off (`ID_FORBID_OFF=ancap`) 26 years and 2 of 8: the bans cost the AI nothing measurable.
   `ideocheck ancap,nrx,minarchy 30` passes. Unforced worlds: ancap is rare (one start in 8 random worlds).
 
+## Session 15, part 4: settling empty islands (`sim/combat.js`, `sim/ai.js`)
+
+Islands nobody owned stayed empty all game: expansion into unclaimed land (`C.launch` with to = 0, `processExpand`,
+`seedWild`) only works by land. Measured before (`node tools/settle.js`): 0% of the islands (unclaimed land no
+state can reach by land at the start, 0–2% of the world's land) ever settled.
+
+- **The expedition**: `C.settleCost(G, n, tile)` → `{gold: 60 + 0.8 × route length, troops: 10% of the pool (8–60),
+  days, path}`; `C.settle` launches a boat (`bt.settle`), one at a time per state. It lands through the existing
+  unclaimed-landing path of `landBoat`: seizes the beach, founds a piece (`newPiece`) with its own expansion
+  (`C.launch(…, 0, …, anchor)`), and `C.settled` prints the news, a World Dispatch story ("X plants its flag on Y")
+  and, for the player, a line when a rival settles within 45 tiles. Colonies are pieces like any other (Part 1): in
+  peace supplied over their beach; in war through a port, and they can be cut off. Their expansions are never
+  marked encircled.
+- **Reinforcing colonies**: `C.launch(G, from, 0, troops)` with no frontier left on the main territory sends settlers
+  by sea (`C.relief` with `to` 0) to a colony that still has unclaimed land beside it (`c.wild`, counted in the
+  supply pass). The Expand button therefore works for colonies too.
+- **Rivals**: `G.settleLog` (owner, province, tick); a second expedition to the same or a neighbouring province
+  within three years costs both sides 12 opinion and the newcomer threat, with a news line if the player is involved.
+- **AI** (`AI.settleWeight`, `settle` in `AI.month`): in peace, not threatened, with a port, 160 gold and 40 troops,
+  one colony at a time; chance 0.6% × weight × era (1.0, 0.8, 0.5, 0.3) × (1 + sea power / 8, at most ×2) a month.
+  Weights: merchant 2.2, the monarchies 1.6, liberal 1.4, minarchy/ancap/NRX 1.3, natsoc 1.2, corporatist 1.1, …,
+  the socialist and anarchist families 0.15, Third Position, Revival, pan-nationalism, Juche and the fire 0; seafaring
+  systems ×1.5. `C.bestSettle` rates every reachable unclaimed province not bordering the state: tiles × fertility ×
+  (1 − roughness) × oil × (a rival next door: 1.3) / (25 + sea distance).
+- **Player**: *Settle* on unclaimed coast in the selection card, with cost and travel time (it replaces *Land
+  settlers here*); `acts.settle`. Boat chips on the attack bar now say settlers, convoy or at sea.
+- **Measured** (`node tools/settle.js --runs 8 --years 50`, self-check first): islands settled 39% by 1915, 65% by
+  1920, 75% by 1925, 99% by 1940, 100% by 1960; 2.8 expeditions a world (merchant republics 10 of 22, constitutional
+  monarchies 6, socialist states 1); largest state 20% on average, 31% at most (21% and 32% before).
+
 ## Peace by ideology (`sim/diplomacy.js`)
 
 - `D.terms(G, win, lose, score)`, called by every negotiated peace with a winner (not civil wars), returns the

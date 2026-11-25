@@ -440,15 +440,30 @@
 
   function expand(G, n) {
     if (!G.wildB || !G.wildB[n.id]) return;
-    if (G.attacks.some((a) => a.from === n.id && a.to === 0)) return;
+    if (G.attacks.some((a) => a.from === n.id && a.to === 0) || G.boats.some((b) => b.owner === n.id && b.relief === 0)) return;
     const target = Math.max(1, n.pop * n.mob), ready = n.troops / target;
     if (ready < 0.5 || n.a.losing) return;
     const share = n.nwars ? 0.12 : n.a.threatened ? 0.2 : 0.3;
     ID.Combat.launch(G, n.id, 0, n.troops * share, 'advance');
   }
+  /* Settling empty islands by sea, in peacetime and mostly in the early eras. Colonising systems and seafaring
+     states go often; the anti-colonial systems (the socialist and anarchist families, the Third Position, the
+     Revival, pan-nationalists, Juche) rarely or never. */
+  const SETTLE_W = { merchant: 2.2, liberal: 1.4, conmon: 1.6, absmon: 1.6, minarchy: 1.3, ancap: 1.3, nrx: 1.3, corporatist: 1.1, natpop: 0.9, natsoc: 1.2, junta: 0.8, personalist: 0.8, theocracy: 0.8, technocracy: 0.8, socdem: 0.7, agrarian: 0.4, thirdpos: 0, revival: 0, pannat: 0, juche: 0, nazacc: 0 };
+  AI.settleWeight = (n) => { const I = ID.ideo(n); const w = SETTLE_W[n.ideo] != null ? SETTLE_W[n.ideo] : I.family === 'socialist' || I.family === 'anarchist' ? 0.15 : 0.6; return w * (I.flags.navalPower ? 1.5 : 1); };
+  function settle(G, n) {
+    const C = ID.Combat;
+    if (n.nwars || n.a.threatened || !n.nb[B.PORT] || n.gold < 160 || n.troops < 40 || n.trans > 0) return;
+    if (G.boats.some((b) => b.owner === n.id) || G.attacks.some((a) => a.from === n.id && a.to === 0 && a.pk >= 0)) return; // one colony at a time
+    const w = AI.settleWeight(n) * [1.0, 0.8, 0.5, 0.3][ID.eraOf(G.tick)] * (1 + Math.min(1, C.seaPower(n) / 8));
+    if (!w || !G.rng.chance(clamp(0.006 * w, 0, 0.06))) return;
+    const t = C.bestSettle(G, n); if (t < 0) return;
+    C.settle(G, n, t);
+  }
   AI.month = function (G, n) {
     threats(G, n);
     expand(G, n);
+    settle(G, n);
     budget(G, n);
     mobilise(G, n);
     research(G, n);

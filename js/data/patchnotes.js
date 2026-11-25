@@ -3,6 +3,13 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'Settling empty islands', items: [
+      'Empty islands no longer stay empty. Any state with a port can send a settling expedition by sea: settlers and some troops, for gold and a few weeks at sea. They found a beachhead and claim the land around it.',
+      'Select an unclaimed coast and press Settle: the cost and the travel time are on the button.',
+      'Colonies are supplied through their beach and later through a port. In a war they can be cut off like any other pocket.',
+      'Merchant republics, monarchies and liberal states settle most, mostly in the early decades. Revolutionary and anti-colonial systems rarely or never do.',
+      'Two states racing for the same island do not like each other much afterwards. The World Dispatch reports new colonies, and you hear when a rival plants its flag near you.',
+    ] },
     { date: '25 November 2026', title: 'A new system: Anarcho-Capitalism', items: [
       'No state at all. Defence, courts and roads are bought from competing private agencies, and the members’ fees are whatever the agencies charge: you never set a tax.',
       'Competition between the agencies keeps protection cheap and the economy efficient, and thin when war comes. Let one agency take over the market and it becomes strong, expensive, and in the end the state itself.',

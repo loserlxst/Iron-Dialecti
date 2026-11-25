@@ -160,6 +160,7 @@
       const why = quiet || pk >= 0 ? '' : C.canExpand(G, A); if (why) return why;
       troops = Math.min(troops, A.troops); if (troops < 1 && pk < 0) return 'No troops to commit.';
       let a = find();
+      if (!a && pk < 0) { a = mk('advance'); seedWild(G, a); if (!a.heap.size) { const p = C.seaPiece(G, A, 0); if (p >= 0) return C.relief(G, A, 0, p, troops, 'advance'); } a.troops = 0; a.committed = 0; G.attacks.push(a); }
       if (a) { a.troops += troops; a.committed += troops; a.idle = 0; }
       else { a = mk('advance'); seedWild(G, a); G.attacks.push(a); }
       A.troops -= troops;
@@ -193,7 +194,7 @@
   /* The piece of A's land (not the main territory) that touches enemy `to` and can be reached by sea: the one with the longest front. */
   C.seaPiece = function (G, A, to) {
     const L = G._comps || []; let best = -1, bw = 0;
-    for (let id = 0; id < L.length; id++) { const c = L[id]; if (c.o !== A.id || c.st !== 2 || !c.adj || !c.adj[to]) continue; if (c.adj[to] > bw) { bw = c.adj[to]; best = id; } }
+    for (let id = 0; id < L.length; id++) { const c = L[id]; if (c.o !== A.id || c.st !== 2 || !c.adj) continue; const w = to ? c.adj[to] || 0 : c.wild || 0; if (w > bw) { bw = w; best = id; } }
     return best;
   };
   /* Troops a day the sea lift carries to one pocket: more through its ports, a seafaring system and logistics; less against a strong navy. */
@@ -452,6 +453,76 @@
     if (n.id === G.player) ID.sfx(G, 'boat');
     return bt;
   };
+  /* ---------------------------------------------------------------- settling by sea */
+  /* A settling expedition: a boat of settlers and some troops to an unclaimed coast, which founds a beachhead and
+     expands from it like any expansion. Cost and time: {gold, troops, days, path} or a reason. */
+  C.settleCost = function (G, n, target) {
+    if (G.owner[target] || G.terrain[target] === T.SEA || !G.coast[target]) return 'Pick an unclaimed coast.';
+    const pl = C.planBoat(G, n, target); if (typeof pl === 'string') return pl;
+    return { gold: Math.round(60 + pl.path.length * 0.8), troops: clamp(n.troops * 0.1, 8, 60), days: Math.max(1, Math.ceil((pl.path.length - 1) / C.BOAT_SPEED)), path: pl.path };
+  };
+  C.settle = function (G, n, target) {
+    const c = C.settleCost(G, n, target); if (typeof c === 'string') return c;
+    if (n.gold < c.gold) return 'The expedition needs ' + c.gold + ' gold.';
+    if (n.troops < c.troops + 4) return 'The expedition needs ' + ID.fmtPop(c.troops) + ' troops.';
+    if (G.boats.some((b) => b.owner === n.id && b.settle)) return 'An expedition is already at sea.';
+    n.gold -= c.gold; n.troops -= c.troops;
+    const bt = { id: G.nextId++, owner: n.id, troops: c.troops, style: 'advance', path: c.path, pos: 0, target, settle: 1 };
+    G.boats.push(bt);
+    if (n.id === G.player) ID.sfx(G, 'boat');
+    // a race for the same island: the other claimant takes it badly
+    const P0 = G.prov[target], L = G.settleLog || (G.settleLog = []);
+    for (const e of L) {
+      if (e.o === n.id || G.tick - e.t > 1080 || !G.nations[e.o] || !G.nations[e.o].alive) continue;
+      const Pe = G.provinces[e.p]; if (e.p !== P0 && !(Pe && Pe.nb && Pe.nb.indexOf(P0) >= 0)) continue;
+      ID.addOpBoth(G, n.id, e.o, -12); n.threat += 2;
+      if (n.id === G.player || e.o === G.player) ID.news(G, 'A race for ' + (ID.placeName(G, target) || 'the island') + ': ' + G.nations[e.o].name + ' and ' + n.name + ' have both sent settlers. Neither government is pleased.', 'dip', n.id, e.o);
+    }
+    L.push({ o: n.id, p: P0, t: G.tick }); if (L.length > 60) L.shift();
+    return bt;
+  };
+  /* The flag is planted: the news, the World Dispatch, and a word to the player when a rival settles near them. */
+  C.settled = function (G, A, i) {
+    const nm = ID.placeName(G, i) || 'an empty island';
+    A.cnt.colonies = (A.cnt.colonies || 0) + 1;
+    if (A.id === G.player) { ID.news(G, 'Our settlers plant the flag on ' + nm + '. The beach will supply them until they hold a port.', 'good', A.id); return; }
+    const me = G.nations[G.player];
+    if (me && me.alive) {
+      const W = G.W, x = i % W, y = (i / W) | 0; let near = 1e9;
+      for (let p = 1; p < G.provinces.length; p++) { const Pr = G.provinces[p]; if (Pr.owner !== me.id) continue; const d = Math.abs(Pr.center % W - x) + Math.abs(((Pr.center / W) | 0) - y); if (d < near) near = d; }
+      if (near < 45) ID.news(G, A.name + ' plants its flag on ' + nm + ', ' + near + ' tiles from our coast.', 'dip', A.id, me.id);
+    }
+    if (ID.Press) ID.Press.add(G, { w: ID.isMajor(G, A) ? 2 : 1, kind: 'dip', a: A.id, art: 'sea', title: A.base + ' plants its flag on ' + nm, key: 'settle' + A.id, gap: 360,
+      text: 'A ' + A.adj + ' expedition has come ashore on ' + nm + ', which no government had claimed. The settlers have a flag, a charter and a few hundred rifles; the nearest neighbours have a list of objections.' });
+  };
+  /* The AI's pick: an unclaimed coast it can reach and cannot reach by land, rated by size, fertility, oil, distance and
+     how close it lies to rivals (a foothold near them is worth more). Returns a tile or -1. */
+  C.bestSettle = function (G, n) {
+    if (!n.nb[B.PORT]) return -1;
+    const starts = [];
+    for (const i of G.blist) if (G.bld[i] === B.PORT && G.hp[i] && G.owner[i] === n.id && G.cut[i] !== 1) for (const s of ID.seaNeighbors(G, i)) starts.push(s);
+    if (!starts.length) return -1;
+    const dist = ID.seaDistance(G, starts, C.navalRange(G, n)), W = G.W, own = G.owner, terr = G.terrain;
+    const mine = new Set(); for (let p = 1; p < G.provinces.length; p++) if (G.provinces[p].owner === n.id) mine.add(p);
+    const best = {};
+    for (let i = 0; i < G.N; i++) {
+      if (own[i] || !G.coast[i] || terr[i] === T.SEA) continue;
+      const P0 = G.prov[i], Pr = G.provinces[P0]; if (!Pr || Pr.owner || Pr.nb.some((q) => mine.has(q))) continue; // what borders us we take by land
+      const x = i % W; let d = 1e9;
+      for (const q of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) if (q >= 0 && q < G.N && terr[q] === T.SEA && dist[q] >= 0 && dist[q] < d) d = dist[q];
+      if (d > 1e8) continue;
+      if (!best[P0] || d < best[P0].d) best[P0] = { i, d };
+    }
+    let pick = -1, ps = 0;
+    for (const k in best) {
+      const Pr = G.provinces[+k], b = best[k];
+      let rival = 0; for (const q of Pr.nb) { const o = G.provinces[q].owner; if (o && o !== n.id && ID.op(G, n.id, o) < 0) rival = 1; }
+      const sc = Pr.tiles * (0.6 + Pr.fertile) * (1 - Pr.rough * 0.4) * (Pr.oil ? 1.6 : 1) * (1 + rival * 0.3) / (25 + b.d);
+      if (sc > ps) { ps = sc; pick = b.i; }
+    }
+    return pick;
+  };
+
   /* The first wave takes the beach itself: open enemy ground within two tiles of the landing point. */
   function seize(G, target, to, max) {
     const W = G.W, H = G.H, own = G.owner, x0 = target % W, y0 = (target / W) | 0;
@@ -484,7 +555,8 @@
     if (bt.relief != null) { // reinforcements for a pocket: the enemy navy may meet them, and the beach may be gone
       const E = G.nations[bt.relief];
       if (E && E.alive && ID.atWar(G, A.id, E.id)) { const cr = C.crossing(A, E); if (cr.sunk > 0.02) { const s = bt.troops * cr.sunk * 0.8 * (0.6 + 0.4 * G.rng.next()); bt.troops -= s; A.pop -= s; A.losses += s; A.casM += s; E.kills += s; } }
-      if (to === bt.owner && E && E.alive && ID.atWar(G, A.id, E.id)) { A.troops += bt.troops; C.launch(G, A.id, E.id, bt.troops, bt.style, true, bt.target); }
+      if (to === bt.owner && bt.relief === 0) { A.troops += bt.troops; C.launch(G, A.id, 0, bt.troops, 'advance', true, bt.target); }
+      else if (to === bt.owner && E && E.alive && ID.atWar(G, A.id, E.id)) { A.troops += bt.troops; C.launch(G, A.id, E.id, bt.troops, bt.style, true, bt.target); }
       else if (to === bt.owner) A.troops += bt.troops;
       else { const lost = bt.troops * 0.4; A.troops += bt.troops - lost; A.pop -= lost; A.losses += lost; if (A.id === G.player) ID.news(G, 'The pocket’s harbour has fallen: the convoy turns back with ' + ID.fmtPop(lost) + ' lost.', 'war', A.id); }
       return;
@@ -498,7 +570,8 @@
       A.troops += bt.troops;
       if (a && typeof a !== 'string') { a.troops += bt.troops * 0.9; a.committed += bt.troops; A.troops -= bt.troops * 0.9; seedWild(G, a); }
       ID.fx(G, 'land', bt.target);
-      if (A.id === G.player) ID.news(G, 'Settlers come ashore on unclaimed land. The beach will supply them.', 'good', A.id);
+      if (bt.settle) C.settled(G, A, bt.target);
+      else if (A.id === G.player) ID.news(G, 'Settlers come ashore on unclaimed land. The beach will supply them.', 'good', A.id);
       return;
     }
     if (to === bt.owner) { // relief by sea: a cut-off coast gets a beachhead
@@ -793,7 +866,7 @@
     for (let id = 0; id < comps.length; id++) {
       const c = comps[id]; if (main[c.o] === id) continue;
       const n = G.nations[c.o], stp = (G._visS = (G._visS || 0) + 1), tiles = [], adj = {};
-      let sp = 0, shore = -1, wasMain = 0; stack[sp++] = c.start; vis[c.start] = stp;
+      let sp = 0, shore = -1, wasMain = 0, wild = 0; stack[sp++] = c.start; vis[c.start] = stp;
       while (sp) {
         const t = stack[--sp]; tiles.push(t); if (cut[t] === 0) wasMain++;
         if (shore < 0 && G.coast[t]) shore = t;
@@ -802,9 +875,10 @@
           if (q < 0) continue; const oo = own[q];
           if (oo === c.o) { if (comp[q] === id && vis[q] !== stp) { vis[q] = stp; stack[sp++] = q; } }
           else if (oo && G.warM[c.o * MAXN + oo]) adj[oo] = (adj[oo] || 0) + 1;
+          else if (!oo && G.terrain[q] !== T.SEA) wild++;
         }
       }
-      c.tiles = tiles; c.adj = adj; c.shore = shore; c.fromMain = wasMain * 2 > tiles.length;
+      c.tiles = tiles; c.adj = adj; c.shore = shore; c.fromMain = wasMain * 2 > tiles.length; c.wild = wild;
       let win = 0, wb = 0; for (const k in adj) if (adj[k] > wb) { wb = adj[k]; win = +k; }
       c.win = win;
       if (!win) { // nobody contests it: supplied over its own shore, as in peacetime (an inland enclave stays cut, but nobody besieges it)
@@ -884,7 +958,7 @@
     }
     // encirclement starts and ends
     for (const a of G.attacks) {
-      const c = comps[a.ck]; if (!(a.pk >= 0) || !c) continue;
+      const c = comps[a.ck]; if (!(a.pk >= 0) || !c || !a.to) continue; // colonies expanding into empty land are never besieged
       a.sea = c.portI >= 0 ? c.portI : c.beachI;
       if (c.st !== 1) { a.enc = 0; a.out = 0; continue; }
       if (a.enc) continue;

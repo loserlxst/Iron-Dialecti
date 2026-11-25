@@ -145,6 +145,11 @@
     else if (r.relief != null) UI.toast('No land front: ' + ID.fmtPop(r.troops) + ' troops sail for the pocket and land in about ' + Math.max(1, Math.ceil((r.path.length - 1) / ID.Combat.BOAT_SPEED)) + ' days. The sea lift carries about ' + ID.fmtPop(ID.Combat.liftCap(G, n, t.id, G._comp[r.target])) + ' a day.', true);
     else ID.Audio.play('drums');
   };
+  acts.settle = (i) => {
+    const G = UI.G, r = ID.Combat.settle(G, P(), i);
+    if (typeof r === 'string') { UI.toast(r); ID.Audio.play('bad'); }
+    else UI.toast('The expedition sails: ' + ID.fmtPop(r.troops) + ' settlers and soldiers, ashore in about ' + Math.max(1, Math.ceil((r.path.length - 1) / ID.Combat.BOAT_SPEED)) + ' days.', true);
+  };
   acts.expandHint = () => { const G = UI.G, n = P(); let best = -1; for (let p = 1; p < G.provinces.length && best < 0; p++) { const Pr = G.provinces[p]; if (!Pr.owner && Pr.wild && Pr.nb.some((q) => G.provinces[q].owner === n.id)) best = Pr.center; } if (best >= 0) { R.focus(best); UI.sel = best; R.selected = best; } };
   acts.recall = (a) => { const G = UI.G; const at = G.attacks.find((x) => x.id === a); if (at) { ID.Combat.cancel(G, at); UI.toast('Recalled. A tenth of the force is lost in the withdrawal.', true); } };
   /* What the crossing will cost: their navy against ours. */
@@ -449,7 +454,11 @@
       h += '<p class="lead" style="font-size:14px">No state governs this land. Take it without a war: it costs troops, not diplomacy. New land raises your population ceiling and settles into your country within a few years.</p>' + UI.kv(rows) + '<div class="acts">';
       const tr = me.troops * UI.commit, can = ID.Combat.canExpand(G, me), going = G.attacks.find((a) => a.from === me.id && a.to === 0);
       h += UI.btn('Expand into the hinterland <span>' + ID.fmtPop(tr) + '</span>', 'expand', null, { cls: 'red', off: can, tip: '<h5>Expand</h5>Send ' + ID.fmtPop(tr) + ' troops (your Commit share) to claim unclaimed land along your whole frontier. About ' + Math.round(ID.Combat.WILD_LOSS * 1000) + ' men are lost per tile of open ground, more in forest and hills. <span class="dim">(Enter)</span>' + (going ? '<hr>Already expanding with ' + ID.fmtPop(going.troops) + '; this adds to it.' : '') });
-      if (G.coast[i]) { const pl = ID.Combat.planBoat(G, me, i); h += UI.btn('Land settlers here <span>' + ID.fmtPop(tr) + '</span>', 'landing', null, { off: typeof pl === 'string' ? pl : '', tip: 'Ship troops from your nearest port to claim this coast and push inland from it.' }); }
+      if (G.coast[i]) {
+        const c = ID.Combat.settleCost(G, me, i), bad = typeof c === 'string';
+        const why = bad ? c : me.gold < c.gold ? 'Needs ' + c.gold + ' gold.' : me.troops < c.troops + 4 ? 'Needs ' + ID.fmtPop(c.troops) + ' troops.' : G.boats.some((b) => b.owner === me.id && b.settle) ? 'An expedition is already at sea.' : '';
+        h += UI.btn('Settle <span>' + (bad ? '' : c.gold + ' gold · ' + c.days + ' days') + '</span>', 'settle', i, { off: why, tip: '<h5>A settling expedition</h5>' + (bad ? esc(c) : 'Settlers and ' + ID.fmtPop(c.troops) + ' troops sail from your nearest port: <b>' + c.gold + ' gold</b>, about <b>' + c.days + ' days</b> at sea. They found a beachhead here and claim the land around it. The colony is supplied over its beach and later through a port; in a war it can be cut off.') });
+      }
       h += '</div>';
     }
     h += '</div>';
@@ -477,7 +486,7 @@
     if (n.nwars) h += '<div class="styles">' + Object.keys(ID.STYLES).map((k) => { const S = ID.STYLES[k], e = I.doctrine.styles[k] || 0, ok = ID.Combat.styleOk(n, k); return UI.btn(S.name + ' <span class="num">×' + e.toFixed(2) + '</span>', 'style', k, { cls: 'sm ' + (UI.style === k ? 'on' : 'ghost'), off: ok ? '' : S.needs === 'mil2' && n.tech.mil < 2 ? 'Needs military technology 2.' : 'Your doctrine cannot fight this way.', tip: '<h5>' + S.name + '</h5>' + esc(S.desc) + '<hr>Your doctrine: <b>×' + e.toFixed(2) + '</b> effectiveness' }); }).join('') + '</div>';
     if (mine.length || boats.length) {
       h += '<div class="chips">' + mine.map((a) => '<span class="chip"' + tip('Committed ' + ID.fmtPop(a.committed) + ', ' + a.taken + ' tiles taken' + (a.to ? ', ' + ID.STYLES[a.style].name.toLowerCase() : '') + '.' + UI.pocketTip(G, a)) + '>→ ' + (a.to ? esc(G.nations[a.to].base) : 'Hinterland') + (a.pk >= 0 ? (a.enc ? ' <span class="bad">encircled</span>' : ' <span class="dim">pocket</span>') : '') + ' <b class="num">' + ID.fmtPop(a.troops) + '</b><button data-act="recall" data-a="' + a.id + '"' + tip('Recall the survivors. A tenth are lost withdrawing.') + '>recall</button></span>').join('') +
-        boats.map((b) => '<span class="chip"' + tip('A convoy on its way. It lands in about ' + Math.max(1, Math.ceil((b.path.length - 1 - b.pos) / ID.Combat.BOAT_SPEED)) + ' days.') + '>⛴ at sea <b class="num">' + ID.fmtPop(b.troops) + '</b> <span class="dim num">' + Math.max(1, Math.ceil((b.path.length - 1 - b.pos) / ID.Combat.BOAT_SPEED)) + 'd</span></span>').join('') + '</div>';
+        boats.map((b) => '<span class="chip"' + tip('A convoy on its way. It lands in about ' + Math.max(1, Math.ceil((b.path.length - 1 - b.pos) / ID.Combat.BOAT_SPEED)) + ' days.') + '>⛴ ' + (b.settle ? 'settlers' : b.relief != null ? 'convoy' : 'at sea') + ' <b class="num">' + ID.fmtPop(b.troops) + '</b> <span class="dim num">' + Math.max(1, Math.ceil((b.path.length - 1 - b.pos) / ID.Combat.BOAT_SPEED)) + 'd</span></span>').join('') + '</div>';
     }
     el.innerHTML = h; el.hidden = false;
   };
