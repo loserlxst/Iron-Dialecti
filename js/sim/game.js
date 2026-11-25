@@ -268,7 +268,7 @@
     const nN = G.nations.length;
     const rel = []; for (let a = 1; a < nN; a++) for (let b = 1; b < nN; b++) rel.push(Math.round(G.rel[a * MAXN + b]));
     const o = {
-      v: 1, seed: G.seed, size: G.size, scenario: G.scenario, map: G.map, difficulty: G.difficulty, challenge: G.challenge, ironman: G.ironman, tick: G.tick, startTick: G.startTick || 0, speed: G.speed, rng: G.rng.s, era: G.era,
+      v: 1, seed: G.seed, size: G.size, scenario: G.scenario, map: G.map ? JSON.stringify(G.map) : undefined /* a string: the save rounds numbers, a map must rebuild exactly */, difficulty: G.difficulty, challenge: G.challenge, ironman: G.ironman, tick: G.tick, startTick: G.startTick || 0, speed: G.speed, rng: G.rng.s, era: G.era,
       owner: rle(G.owner), bld: rle(G.bld), hp: rle(G.hp), rad: G.radList.map((i) => [i, G.rad[i]]),
       nations: G.nations, player: G.player, rel,
       prov: G.provinces.slice(1).map((P) => [P.core, Math.round(P.unrest * 10) / 10, P.opp, Math.round(P.oppStr * 10) / 10, Math.round(P.integ), P.lastOwner, P.sponsor, P.oil || 0, P.oilFound || 0, P.oilCo || 0, P.oilShare || 0, P.oilAt || 0, P.canal || 0]), fronts: G.fronts || null,
@@ -280,7 +280,7 @@
   };
   Gm.load = function (str) {
     const o = typeof str === 'string' ? JSON.parse(str) : str;
-    const sc = o.scenario === 'custom' ? o.map : o.scenario && o.scenario !== 'random' ? ID.SCENARIOS[o.scenario] : null;
+    const sc = o.scenario === 'custom' && o.map ? ID.Maps.validate(typeof o.map === 'string' ? JSON.parse(o.map) : o.map) : o.scenario && o.scenario !== 'random' ? ID.SCENARIOS[o.scenario] : null;
     if (o.scenario === 'custom' && !sc) throw new Error('This save is on a custom map but carries no map.');
     const map = ID.genMap(ID.mapOpts(sc, o.seed, o.size));
     const N = map.N;

@@ -219,7 +219,7 @@
       P.fertile = (P.tc[T.FARM] + P.tc[T.PLAINS] * 0.5) / t;
     }
 
-    return { W, H, N, terrain, river, coast, prov, provinces, landCount: land.length, seed: opts.seed, size: opts.size || 'std' };
+    return { blobs, W, H, N, terrain, river, coast, prov, provinces, landCount: land.length, seed: opts.seed, size: opts.size || 'std' };
   };
 
   /* Map options for a world: a scenario's own layout, or (for saves made before the scenario grew) its legacy one. */

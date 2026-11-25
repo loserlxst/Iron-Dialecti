@@ -82,7 +82,7 @@
       (last ? btn('Continue <small>' + esc(idx[last].name) + ', ' + esc(idx[last].date) + '</small>', 'loadSlot', last, { cls: 'big red' }) : '') +
       btn('New campaign <small>1910–1976</small>', 'newGame', null, { cls: 'big' + (last ? '' : ' red') }) +
       btn('Learn to play <small>guided, 15 minutes</small>', 'tutorial', null, { cls: 'big' }) +
-      '<div class="row">' + btn('Load', 'loadMenu', null, { cls: 'ghost' }) + btn('Challenges <small>' + unlocked + ' / ' + ID.CHALLENGES.length + '</small>', 'challenges', null, { cls: 'ghost' }) + btn('Records <small>' + meta.runs.length + '</small>', 'records', null, { cls: 'ghost' }) + btn('Handbook', 'handbookT', null, { cls: 'ghost' }) + btn('Patch notes', 'patchNotes', null, { cls: 'ghost' }) + btn('Settings', 'settings', null, { cls: 'ghost' }) + '<a class="b ghost" href="https://discord.gg/bURjWZdgy7" target="_blank" rel="noopener" style="text-decoration:none">Discord</a></div>' +
+      '<div class="row">' + btn('Load', 'loadMenu', null, { cls: 'ghost' }) + btn('Challenges <small>' + unlocked + ' / ' + ID.CHALLENGES.length + '</small>', 'challenges', null, { cls: 'ghost' }) + btn('Records <small>' + meta.runs.length + '</small>', 'records', null, { cls: 'ghost' }) + btn('Map maker', 'mapMaker', null, { cls: 'ghost' }) + btn('Load code', 'loadCode', null, { cls: 'ghost' }) + btn('Handbook', 'handbookT', null, { cls: 'ghost' }) + btn('Patch notes', 'patchNotes', null, { cls: 'ghost' }) + btn('Settings', 'settings', null, { cls: 'ghost' }) + '<a class="b ghost" href="https://discord.gg/bURjWZdgy7" target="_blank" rel="noopener" style="text-decoration:none">Discord</a></div>' +
       '</div><div class="foot">' + (UI.touch ? 'Plays with tap, drag and pinch; press and hold anything to have it explained.' : 'Plays entirely with left-click, drag, scroll and keys.') + ' Saves stay in this browser.</div>';
   };
 
@@ -127,7 +127,7 @@
     if (UI.compact) h += '<div class="pickcard inl" id="pickcard">' + pickCard() + '</div>';
     if (ch) h += '<div class="note red">' + esc(ch.desc) + '</div>';
     else {
-      h += '<div class="field"><label>World</label><div class="seg">' + [['meridia', 'The Three Continents'], ['random', 'Random world']].map((x) => '<button class="' + (S.scenario === x[0] ? 'on' : '') + '" data-act="setScen" data-a=\'"' + x[0] + '"\'>' + x[1] + '</button>').join('') + '</div><small>' + (S.scenario === 'meridia' ? esc(ID.SCENARIOS.meridia.desc) : 'A new map from a seed. Share the seed and someone else gets the same world.') + '</small></div>';
+      h += '<div class="field"><label>World</label><div class="seg wrap">' + [['meridia', 'The Three Continents'], ['random', 'Random world']].concat(S.map ? [['custom', esc(S.map.name)]] : []).map((x) => '<button class="' + (S.scenario === x[0] ? 'on' : '') + '" data-act="setScen" data-a=\'"' + x[0] + '"\'>' + x[1] + '</button>').join('') + '</div><small>' + (S.scenario === 'meridia' ? esc(ID.SCENARIOS.meridia.desc) : S.scenario === 'custom' ? 'A custom map with ' + S.map.nations.length + ' states. Copy code shares it.' + (S.map ? ' ' + btn('Edit in the map maker', 'setupEdit', null, { cls: 'sm ghost' }) : '') : 'A new map from a seed. Share the seed and someone else gets the same world.') + '</small></div>';
       if (S.scenario === 'random') {
         h += '<div class="field"><label>Seed and size</label><div class="row nw"><input type="text" value="' + S.seed + '" data-change="seed" style="width:120px"' + tip('Type a number and press Enter') + '>' + btn('New seed', 'reroll', null, { cls: 'ghost' }) + '</div><div class="seg" style="margin-top:6px">' + Object.keys(ID.MAP_SIZES).filter((k) => !ID.MAP_SIZES[k].hidden).map((k) => '<button class="' + (S.size === k ? 'on' : '') + '" data-act="setSize" data-a=\'"' + k + '"\'' + tip(ID.MAP_SIZES[k].desc) + '>' + ID.MAP_SIZES[k].name + '</button>').join('') + '</div></div>';
       }
@@ -177,12 +177,21 @@
     return h;
   }
   /* The screen changed size or turned: lay the setup screen out again. */
-  Sc.relayout = function () { if (ID.Main.mode === 'setup' && SG) renderSetup(); else if (ID.Main.mode === 'title' && !$('#title').hidden && !$('#title').classList.contains('setup')) { const f = $('#title .foot'); if (f) f.textContent = (UI.touch ? 'Plays with tap, drag and pinch; press and hold anything to have it explained.' : 'Plays entirely with left-click, drag, scroll and keys.') + ' Saves stay in this browser.'; } };
+  Sc.relayout = function () { if (ID.Main.mode === 'setup' && SG) renderSetup(); else if (ID.Main.mode === 'maker' && ID.Maker) ID.Maker.relayout(); else if (ID.Main.mode === 'title' && !$('#title').hidden && !$('#title').classList.contains('setup')) { const f = $('#title .foot'); if (f) f.textContent = (UI.touch ? 'Plays with tap, drag and pinch; press and hold anything to have it explained.' : 'Plays entirely with left-click, drag, scroll and keys.') + ' Saves stay in this browser.'; } };
   Sc.pickAt = function (i) {
     if (!SG || i < 0) return; const o = SG.owner[i]; if (!o) return;
     S.nation = o; R.selected = SG.nations[o].capital; renderSetup(); ID.Audio.play('click');
   };
   acts.newGame = () => Sc.setup({});
+  /* Share the world being set up as a map code, with every country's customization (js/ui/maker.js shows it). */
+  acts.setupCode = () => {
+    const G = SG, M = ID.Maps; if (!G) return;
+    let d = S.scenario === 'custom' ? JSON.parse(JSON.stringify(S.map)) : S.scenario === 'meridia' ? M.fromMeridia() : M.fromWorld(G, { name: 'World ' + G.seed, seed: G.seed, size: G.size, land: 0.37, blobs: G.blobs.map((b) => b.map((v) => Math.round(v * 1e4) / 1e4)) });
+    for (const x of d.nations) { const n = ID.byBase(G, x.key); if (S.custom[x.key]) Object.assign(x, S.custom[x.key]); if (n) { x.ideo = n.ideo; x.sit = n.sit; x.base = n.base; x.adj = n.adj; } }
+    try { d = M.validate(d); } catch (e) { UI.toast(e.message); return; }
+    ID.Maker.showCode(d);
+  };
+  acts.setupEdit = () => { if (S.map) ID.Maker.open(S.map); };
   acts.setScen = (a) => { S.scenario = a; S.nation = 0; S.ideos = {}; S.custom = {}; genSetup(); renderSetup(); };
   acts.setSize = (a) => { S.size = a; S.nation = 0; S.ideos = {}; genSetup(); renderSetup(); };
   acts.setDiff = (a) => { S.difficulty = a; renderSetup(); };

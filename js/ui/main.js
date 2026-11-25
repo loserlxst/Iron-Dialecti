@@ -36,7 +36,7 @@
         if (running(G)) advance(G, ID.SPEEDS[G.speed] || 6, dt); else acc = 0;
         if (G.sfx.length) { for (const s of G.sfx) ID.Audio.play(s); G.sfx.length = 0; }
         keyPan(dt);
-      } else if (Main.mode === 'setup') keyPan(dt);
+      } else if (Main.mode === 'setup' || Main.mode === 'maker') keyPan(dt);
       R.frame(dt);
       if (Main.mode === 'game') UI.frame(dt);
       if (ID.Music) {
@@ -60,9 +60,10 @@
 
   /* ---------------------------------------------------------------- map pointer input */
   const pts = new Map(); let down = null, moved = false, pinch = 0, pinchC = null, lastClick = { t: 0, o: -1 };
-  let hover = null, hoverShown = false, holdT = 0, held = false;
-  function clickTile(i) {
+  let hover = null, hoverShown = false, holdT = 0, held = false, drag = false; // drag: the map maker took this drag (paint, move a handle)
+  function clickTile(i, e) {
     if (Main.mode === 'setup') { ID.Screens.pickAt(i); return; }
+    if (Main.mode === 'maker') { ID.Maker.tap(e.clientX, e.clientY); return; }
     if (Main.mode !== 'game' || !UI.G) return;
     const G = UI.G, o = i >= 0 ? G.owner[i] : 0, now = performance.now();
     UI.clickTile(i);
@@ -74,7 +75,8 @@
     ID.Audio.unlock();
     cv.setPointerCapture(e.pointerId);
     pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pts.size === 1) { down = { x: e.clientX, y: e.clientY }; moved = false; held = false; }
+    if (pts.size === 1) { down = { x: e.clientX, y: e.clientY }; moved = false; held = false; drag = Main.mode === 'maker' && ID.Maker.down(e.clientX, e.clientY); }
+    else if (drag) { ID.Maker.up(); drag = false; } // a second finger: pinch and pan instead
     clearTimeout(holdT); holdT = 0;
     /* A finger held still on the map shows what the mouse would show on hover. */
     if (pts.size === 1 && e.pointerType !== 'mouse') holdT = setTimeout(() => { holdT = 0; if (pts.size !== 1 || moved || !down) return; const h = tileTip(R.tileAt(down.x, down.y)); if (h) { UI.tipAt(down.x, down.y, h, true); hoverShown = true; held = true; } }, 480);
@@ -87,7 +89,7 @@
     p.x = e.clientX; p.y = e.clientY;
     if (pts.size === 1) {
       if (!moved && Math.hypot(e.clientX - down.x, e.clientY - down.y) > (e.pointerType === 'mouse' ? 5 : 10)) { moved = true; cv.classList.add('drag'); clearTimeout(holdT); holdT = 0; if (held) hideMapTip(); }
-      if (moved) R.pan(dx, dy);
+      if (moved) { if (drag) ID.Maker.move(e.clientX, e.clientY); else R.pan(dx, dy); }
     } else if (pts.size === 2) {
       const [a, b] = [...pts.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y), c = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
       if (pinch > 0) R.zoomAt(c.x, c.y, d / pinch);
@@ -99,7 +101,8 @@
     const single = pts.size === 1; pts.delete(e.pointerId);
     clearTimeout(holdT); holdT = 0;
     if (pts.size < 2) pinch = 0;
-    if (single && !moved && !held && e.type !== 'pointercancel' && Main.mode !== 'title') clickTile(R.tileAt(e.clientX, e.clientY));
+    if (drag && single) { drag = false; if (moved) { ID.Maker.up(); if (!pts.size) { cv.classList.remove('drag'); moved = false; } return; } ID.Maker.up(true); }
+    if (single && !moved && !held && e.type !== 'pointercancel' && Main.mode !== 'title') clickTile(R.tileAt(e.clientX, e.clientY), e);
     if (!pts.size) { cv.classList.remove('drag'); moved = false; }
   }
   function onWheel(e) {

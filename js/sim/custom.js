@@ -50,12 +50,14 @@
     return o;
   };
 
+  /* An adjective for a name nobody gave one: Bobland → Boblandian, Varna → Varnan. */
+  Cu.adjOf = (b) => b + (/a$/.test(b) ? 'n' : /[eiouy]$/.test(b) ? 'an' : 'ian');
   /* Definition-level fields, applied before the world grows (they change who owns what). */
   const SIT_W = { great: 1.5, sick: 1.7, rich: 0.9, small: 0.55, backwater: 1.25, revolution: 0.9, trader: 0.6, middling: 1.0 };
   Cu.applyDef = function (d, c, random) {
     d.key = d.key || d.base;
     if (!c) return d;
-    if (c.base) { d.base = c.base; d.adj = c.adj || c.base + (/a$/.test(c.base) ? 'n' : /[eiouy]$/.test(c.base) ? 'an' : 'ian'); } else if (c.adj) d.adj = c.adj;
+    if (c.base) { d.base = c.base; d.adj = c.adj || Cu.adjOf(c.base); } else if (c.adj) d.adj = c.adj;
     if (c.sit && c.sit !== d.sit) { if (random) d.w = d.w * SIT_W[c.sit] / (SIT_W[d.sit] || 1); d.sit = c.sit; }
     if (c.color) d.color = c.color.slice();
     if (c.blurb) d.blurb = c.blurb;

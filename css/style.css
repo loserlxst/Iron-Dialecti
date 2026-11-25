@@ -862,3 +862,27 @@ label.b { display: inline-flex; align-items: center; cursor: pointer; }
   .govrow { grid-template-columns: 24px 1fr; } .govrow select { grid-column: 1 / -1; } .govrow .b { grid-column: 1 / -1; }
   .swatch { min-height: 32px; }
 }
+
+/* ---------------------------------------------------------------- map maker (js/ui/maker.js) */
+.pick.maker .db { padding-top: 10px; }
+.mktools { padding: 8px 14px 0; flex: none; } .mktools .seg button { flex: 1 1 0; }
+.tswatch { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.tswatch button { display: flex; align-items: center; gap: 6px; padding: 5px 6px; background: var(--paper); border: 2px solid var(--ink); font: 600 13.5px var(--body); cursor: pointer; color: var(--ink); }
+.tswatch button i { width: 18px; height: 14px; border: 1.5px solid var(--ink); flex: none; } .tswatch button.on { background: var(--ink); color: var(--paper); }
+ul.checks { margin: 0; padding-left: 18px; } ul.checks li { font-size: 14px; } ul.checks li.bad { color: var(--red); font-weight: 600; }
+.mklist { display: flex; flex-direction: column; margin-top: 8px; }
+.mksel .sl { margin-top: 6px; }
+.mkrow { display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 6px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--paper3); } .mkrow input { width: 100%; min-width: 0; }
+.mkpre { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .mkpre .dec { margin: 0; }
+textarea.code { font: 500 13px/1.35 ui-monospace, Consolas, monospace; word-break: break-all; }
+@media (max-width: 760px) and (min-height: 501px) {
+  .pick.maker { top: auto; height: 50vh; width: 100vw; border-top: 3px solid var(--ink); }
+  .pick.maker.min { height: auto; } .pick.maker.min .db { display: none; }
+  .pick.maker .dh h2 { font-size: 20px; }
+}
+@media (max-width: 760px), (max-height: 500px) {
+  .mkpre { grid-template-columns: 1fr; }
+  .mkrow { grid-template-columns: 1fr auto auto; } .mkrow input { grid-column: 1 / -1; }
+  .tswatch { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-height: 500px) { .pick.maker.min .db { display: none; } }

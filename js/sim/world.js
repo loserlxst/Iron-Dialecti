@@ -342,7 +342,7 @@
   ID.borders = (G, a, b) => (G.border[a] && G.border[a][b]) || 0;
 
   /* ---------------------------------------------------------------- world creation */
-  const SIT_W = { great: 1.5, sick: 1.7, rich: 0.9, small: 0.55, backwater: 1.25, revolution: 0.9, trader: 0.6, middling: 1.0 };
+  const SIT_W = (ID.SIT_W = { great: 1.5, sick: 1.7, rich: 0.9, small: 0.55, backwater: 1.25, revolution: 0.9, trader: 0.6, middling: 1.0 });
   const SIT_IND = { great: 1.3, sick: 0.6, rich: 2.2, small: 1.0, backwater: 0.35, revolution: 0.9, trader: 1.3, middling: 1.0 };
   const SIT_STAB = { great: 66, sick: 38, rich: 50, small: 60, backwater: 56, revolution: 44, trader: 64, middling: 58 };
 
@@ -365,6 +365,7 @@
       news: [], chronicle: [], stats: { pop: 1, gdp: 1, trade: 1, byIdeo: {}, byFam: {} }, world: { tension: 0, depressionAt: 0, depression: 0, waves: [], greatWar: 0 },
       flags: {}, dirty: [], dirtyAll: true, radList: [], mapMode: 'political', fx: [], sfx: [], capLost: [], evq: [], votes: [], offers: [], over: null, nextId: 1, fortsDirty: true, tut: null,
     };
+    G.blobs = map.blobs; // the layout used (not saved: the map maker reads it from a fresh world)
     const rng = G.rng;
     for (let p = 1; p < G.provinces.length; p++) {
       const P = G.provinces[p];
@@ -383,12 +384,24 @@
           const i = y * W + x; if (G.terrain[i] === T.SEA || G.terrain[i] === T.MOUNTAIN) continue;
           const dd = dx * dx + dy * dy; if (dd < bd) { bd = dd; best = i; }
         }
+        // a capital far out at sea, or in a province another capital already holds (maps from the map maker or a
+        // code): the nearest land tile anywhere, in a province of its own
+        if (best < 0 || defs.some((o) => o.capProv === G.prov[best])) {
+          best = -1; bd = 1e18;
+          for (let i = 0; i < N; i++) {
+            if (G.terrain[i] === T.SEA || G.terrain[i] === T.MOUNTAIN || defs.some((o) => o.capProv === G.prov[i])) continue;
+            const dd = (i % W - tx) ** 2 + (((i / W) | 0) - ty) ** 2; if (dd < bd) { bd = dd; best = i; }
+          }
+          if (best < 0) throw new Error('There is not enough land for ' + (d.base || 'every state') + '.');
+        }
         defs.push(ID.Custom.applyDef(Object.assign({}, d, { capTile: best, capProv: G.prov[best] }), custom[d.key || d.base]));
       }
     } else {
       const want = ID.MAP_SIZES[size].nations;
       const cand = [];
       for (let p = 1; p < G.provinces.length; p++) { const P = G.provinces[p]; if (P.tiles >= 50 && P.fertile > 0.25) cand.push(P); }
+      if (!cand.length) for (let p = 1; p < G.provinces.length; p++) if (G.provinces[p].tiles >= 12) cand.push(G.provinces[p]); // a world of small islands
+      if (!cand.length) throw new Error('This map has too little land for any state.');
       const chosen = [rng.pick(cand)];
       while (chosen.length < want && chosen.length < cand.length) {
         let best = null, bs = -1;

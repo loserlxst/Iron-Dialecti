@@ -556,7 +556,11 @@
       ctx.strokeStyle = css(INK); ctx.lineWidth = 3; ctx.strokeRect(X - s, Y - s, s * 2, s * 2);
       ctx.strokeStyle = css(PAPER); ctx.lineWidth = 1.2; ctx.strokeRect(X - s, Y - s, s * 2, s * 2);
     }
+    if (R.overlay) R.overlay(ctx, sx, sy, z); // the map maker's handles (js/ui/maker.js)
   };
+  /* Map coordinates (in tiles, fractional) under a screen point. */
+  R.mapAt = (px, py) => [(px - cw / 2) / cam.z + cam.x, (py - ch / 2) / cam.z + cam.y];
+  R.center = () => [cam.x, cam.y];
 
   /* A small flag-like swatch for a nation, used across the UI. */
   R.swatch = (n) => (ID.Flags ? ID.Flags.html(n, 'mini') : '<span class="sw" style="background:' + n.css + '"></span>');
