@@ -130,6 +130,16 @@
     ['haven', 'The offshore haven', 'The world’s money comes here to rest, quietly.', [['gold', 300], ['mod', 'rev', 0.06, PERM, 'Offshore haven'], ['opAll', -3]]],
   ]);
 
+  tree('ancap', 'ac', [
+    ['covenant', 'The covenant', 'One contract every resident signs, and anyone may leave. It fits on two pages.', [['sig', 6], ['sup', 'capital', 6], ['legitmod', 3, 120, 'The covenant']]],
+    ['market', 'An open market in protection', 'Any firm with guns, insurance and a clean record may sell defence. Three new agencies open in a month.', [['sig', 12], ['mod', 'eff', 0.03, PERM, 'Open market in protection']]],
+    ['company', 'The company guard', 'One great agency on a long contract: uniforms, artillery and a pension scheme.', [['sig', -12], ['mod', 'def', 0.08, PERM, 'The company guard'], ['troops', 0.05]]],
+    ['courts', 'Polycentric law', 'Competing courts, one arbitration code, and verdicts published by the insurers.', [['mod', 'eff', 0.04, PERM, 'Polycentric law'], ['mod', 'trade', 0.06, PERM, 'Polycentric law'], ['grievance', -6]]],
+    ['fortress', 'The proprietors’ fortress', 'Every warehouse a strongpoint, every estate a garrison, every guard on commission.', [['mod', 'def', 0.06, PERM, 'Proprietors’ fortress'], ['mod', 'atk', 0.03, PERM, 'Proprietors’ fortress']]],
+    ['order', 'Order without a state', 'It works. Mostly. The newspapers abroad keep waiting for it to collapse.', [['sig', 10], ['legitmod', 4, 120, 'Order without a state'], ['conf', 8]]],
+    ['seastead', 'The sea-steads', 'Floating towns beyond every jurisdiction, bolted to ours by contract.', [['gold', 200], ['mod', 'trade', 0.08, PERM, 'The sea-steads']]],
+  ]);
+
   /* ---------------------------------------------------------------- conservative */
   tree('conmon', 'cm', [
     ['coronation', 'A coronation for the age', 'Gold coaches, old oaths and a newsreel in every cinema.', [['tradition', 8], ['sig', 10]]],

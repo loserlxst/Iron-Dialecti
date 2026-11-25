@@ -300,6 +300,7 @@
     if (n.ideo === 'junta') return G.rng.chance(0.5) ? 'personalist' : 'liberal';
     if (n.ideo === 'personalist') return 'junta';
     if (ID.ideo(n).family === 'socialist' && n.fs.bureaucracy < 40 && G.rng.chance(0.3)) return 'personalist';
+    if ((n.ideo === 'minarchy' || n.ideo === 'nrx' || n.ideo === 'liberal') && n.fs.capital > 60 && G.rng.chance(0.15)) return 'ancap'; // the proprietors' coup: abolish the state they could not capture
     return G.rng.chance(0.75) ? 'junta' : G.rng.pick(['personalist', 'corporatist', 'natpop', 'natsyn']);
   };
   /* A coup now (scripted events): fought out by sim/coup.js like any other. */
@@ -430,6 +431,7 @@
     if (ideo === 'natsyn') return fs.workers * 0.5 + fs.military * 0.5;
     if (ideo === 'technosoc') return fs.intelligentsia * 0.5 + fs.workers * 0.5;
     if (ideo === 'nrx') return fs.capital * 0.6 + fs.intelligentsia * 0.4;
+    if (ideo === 'ancap') return fs.capital * 0.7 + fs.intelligentsia * 0.3;
     if (ideo === 'natsoc' || ideo === 'nazacc') return fs.military * 0.4 + fs.peasants * 0.3 + fs.bureaucracy * 0.3;
     switch (I.family) {
       case 'socialist': case 'anarchist': return ideo === 'mao' || ideo === 'ancom' ? fs.peasants * 0.7 + fs.workers * 0.3 : urban * fs.workers + (1 - urban) * (fs.workers * 0.4 + fs.peasants * 0.6);
@@ -465,6 +467,8 @@
       else if (I.id === 'nrx') w = era >= 2 && n.tech.ind >= 4 ? u * (50 - fs.capital) * 0.03 : 0;
       else if (I.id === 'natsoc') w = era >= 1 ? (50 - n.stab) * 0.5 + (n.depression ? 26 : 0) + (n.lostWarAt != null && n.age - n.lostWarAt < 60 ? 18 : 0) + (ID.ideo(n).elections && n.depression ? 10 : 0) : 0;
       else if (I.id === 'nazacc') w = 0; // never a movement: only a National Socialist regime can become the fire
+      // the hard-right revolt of a market crisis: proprietors and shopkeepers who blame the state for the crash
+      else if (I.id === 'ancap') w = cur.econ.model === 'market' || cur.econ.model === 'mixed' ? (n.depression ? 9 : 0) + (n.inflation > 40 ? 6 : 0) + Math.max(0, (n.tax || 0) - 30) * 0.4 + (fs.capital < 35 ? 4 : 0) : 0;
       if (G.scenario === 'meridia' && (I.id === 'thirdpos' || I.id === 'pannat' || I.id === 'revival')) w *= Pr.region === 'old' ? 2 : 0.35;
       if (w <= 0) return 0;
       const dist = ID.ideoDist(n.ideo, I.id);

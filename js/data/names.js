@@ -26,7 +26,7 @@
     ansyn: 'Federation Secretary', ancom: 'Rotating Delegate', liberal: 'President', socdem: 'Chancellor', minarchy: 'First Citizen', conmon: 'Monarch', absmon: 'Emperor',
     theocracy: 'Supreme Guardian', agrarian: 'Elder of the Assembly', junta: 'General', corporatist: 'Head of Government', technocracy: 'Director-General', personalist: 'The Leader',
     merchant: 'Doge', cybernetic: 'Chief Co-ordinator', natpop: 'The Tribune', thirdpos: 'Chairman of the Command Council', pannat: 'Secretary of the Regional Command', revival: 'Guide of the Revolution',
-    juche: 'Great Leader', natsyn: 'National Chief', technosoc: 'Chairman of the Network', nrx: 'Chief Executive', natsoc: 'Führer', nazacc: 'Führer',
+    juche: 'Great Leader', natsyn: 'National Chief', technosoc: 'Chairman of the Network', nrx: 'Chief Executive', ancap: 'Chair of Arbitration', natsoc: 'Führer', nazacc: 'Führer',
   };
   ID.genLeader = (rng, ideo) => ({ name: rng.pick(FIRST) + ' ' + rng.pick(LAST), age: rng.int(38, 62), title: TITLES[ideo] || 'Head of State', traits: ID.rollTraits ? ID.rollTraits(rng, ideo) : [] });
   /* the sum of a leader's AI leanings: agg (war appetite), peace (willingness to settle), reform, purge */
@@ -113,13 +113,13 @@
   ];
 
   /* Weights for starting ideologies in random worlds. */
-  ID.START_WEIGHTS = { absmon: 3, conmon: 3, liberal: 3, junta: 2, theocracy: 1.5, agrarian: 1.5, socdem: 1.5, personalist: 1.5, merchant: 1, corporatist: 1, natpop: 1, ml: 1.1, demsoc: 0.8, minarchy: 0.7, technocracy: 0.6, ansyn: 0.6, mao: 0.6, council: 0.5, trot: 0.5, marketsoc: 0.5, ancom: 0.4, cybernetic: 0.3, thirdpos: 0.7, pannat: 0.5, revival: 0.4, juche: 0.3, natsyn: 0.6, technosoc: 0.15, nrx: 0.15, natsoc: 0.4, nazacc: 0 };
+  ID.START_WEIGHTS = { ancap: 0.25, absmon: 3, conmon: 3, liberal: 3, junta: 2, theocracy: 1.5, agrarian: 1.5, socdem: 1.5, personalist: 1.5, merchant: 1, corporatist: 1, natpop: 1, ml: 1.1, demsoc: 0.8, minarchy: 0.7, technocracy: 0.6, ansyn: 0.6, mao: 0.6, council: 0.5, trot: 0.5, marketsoc: 0.5, ancom: 0.4, cybernetic: 0.3, thirdpos: 0.7, pannat: 0.5, revival: 0.4, juche: 0.3, natsyn: 0.6, technosoc: 0.15, nrx: 0.15, natsoc: 0.4, nazacc: 0 };
   ID.SIT_FOR = {
     absmon: ['sick', 'backwater', 'great'], conmon: ['great', 'middling', 'trader'], liberal: ['rich', 'great', 'trader'], junta: ['small', 'middling', 'great'],
     theocracy: ['backwater', 'middling'], agrarian: ['backwater', 'small'], socdem: ['rich', 'middling'], personalist: ['middling', 'sick', 'great'], merchant: ['trader'],
     corporatist: ['great', 'middling'], natpop: ['small', 'middling'], ml: ['revolution', 'great'], demsoc: ['small', 'rich'], minarchy: ['trader', 'small'], technocracy: ['middling', 'rich'],
     ansyn: ['revolution', 'small'], mao: ['revolution', 'backwater'], council: ['revolution', 'small'], trot: ['revolution'], marketsoc: ['middling', 'rich'], ancom: ['revolution', 'small'], cybernetic: ['middling', 'rich'],
     thirdpos: ['middling', 'backwater', 'revolution'], pannat: ['revolution', 'middling'], revival: ['revolution', 'backwater'],
-    juche: ['revolution', 'backwater', 'small'], natsyn: ['middling', 'small'], technosoc: ['revolution', 'middling'], nrx: ['rich', 'trader'], natsoc: ['great', 'middling'], nazacc: ['great'],
+    juche: ['revolution', 'backwater', 'small'], natsyn: ['middling', 'small'], technosoc: ['revolution', 'middling'], nrx: ['rich', 'trader'], ancap: ['trader', 'rich', 'small'], natsoc: ['great', 'middling'], nazacc: ['great'],
   };
 })();

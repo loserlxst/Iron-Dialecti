@@ -275,6 +275,9 @@
   ib('socdem', 1964, ['The golden age of welfare', 'The welfare state at its height.', [M('ls', 1, 'The golden age')]],
     [['Comprehensive schools', 'One school for every child.', [M('sci', 0.03, 'Comprehensive schools')]], ['Universities for all', 'A university place for every school leaver who wants one.', [['sup', 'intelligentsia', 6]]]],
     [['Wage solidarity', 'Equal pay for equal work, across every industry.', [['sup', 'workers', 6]]], ['Industrial democracy', 'Workers on the board of every firm.', [M('eff', 0.03, 'Industrial democracy')]]]);
+  ib('ancap', 1964, ['The open-source covenant', 'The covenant’s two pages are copied by a dozen towns abroad.', [['sig', 6], ['opAll', 2]]],
+    [['Private currencies', 'Three moneys, two of them backed by gold.', [M('trade', 0.04, 'Private currencies'), ['inflation', -10]]], ['Toll roads everywhere', 'Every road a company, every company a toll.', [M('eff', 0.03, 'Toll roads'), ['sup', 'workers', -4]]]],
+    [['The arbitration exchange', 'Courts compete on a public exchange of verdicts.', [M('eff', 0.03, 'Arbitration exchange'), ['grievance', -6]]], ['Charter towns', 'Whole towns founded by contract, with their own agencies.', [['gold', 120], M('growth', 0.05, 'Charter towns')]]]);
   ib('minarchy', 1964, ['The tax revolt', 'The citizens vote to cut every tax in half.', [['sig', 6]]],
     [['The flat tax', 'One rate for everyone, and capital arrives to pay it.', [M('rev', -0.02, 'The flat tax'), ['sup', 'capital', 6], M('prod', 0.03, 'New investment')]], ['Private roads', 'Roads built and run by companies.', [M('eff', 0.03, 'Private roads')]]],
     [['Free banking zones', 'Zones where any bank may issue its own money.', [M('trade', 0.04, 'Free banking')]], ['The sea-steads', 'Platforms at sea, outside every jurisdiction.', [['gold', 100]]]]);

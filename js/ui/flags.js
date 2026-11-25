@@ -33,11 +33,12 @@
     eaglering: () => '<circle cx="10" cy="10" r="8.6" fill="none" stroke-width="1.4"/><path d="M10 4.5l1.5 2.2 4.4-1.4-2.2 3.6 2.2.8-3.7 1.5-.7 4.3h-3l-.7-4.3-3.7-1.5 2.2-.8-2.2-3.6 4.4 1.4z"/>',
     flame: () => '<path d="M10 1c1.2 3.2 5.6 5.4 5.6 10.4A5.6 5.6 0 0 1 10 19a5.6 5.6 0 0 1-5.6-5.6c0-2.7 1.5-4.1 2.6-5.6.2 1.8.9 2.8 1.9 3.3C8.4 8 9.6 4.6 10 1Z"/><path d="M10 11.5c.9 1.2 2.4 2 2.4 3.6a2.4 2.4 0 0 1-4.8 0c0-1.3.9-2 2.4-3.6Z" style="fill:var(--bg)"/>',
     cogwheat: () => cog(10, 10, 8.5) + '<rect x="9.2" y="5" width="1.6" height="10" fill="var(--bg)"/>',
+    coin: () => '<circle cx="10" cy="10" r="8"/><path d="M10 4.5v11M13 7c-.6-1-1.7-1.5-3-1.5-1.8 0-3 .9-3 2.2 0 3 6 1.6 6 4.6 0 1.3-1.3 2.2-3 2.2-1.4 0-2.6-.6-3.1-1.6" fill="none" stroke="var(--bg)" stroke-width="1.6"/>',
     eagle: () => '<path d="M10 3l2 3 6-2-3 5 3 1-5 2-1 6h-4l-1-6-5-2 3-1-3-5 6 2z"/>',
     crescent: () => '<path d="M12.5 2.5a7.5 7.5 0 1 0 0 15 6 6 0 1 1 0-15Z"/><path d="M15 7l.7 1.8 1.9.1-1.5 1.2.5 1.9-1.6-1.1-1.6 1.1.5-1.9-1.5-1.2 1.9-.1z"/>',
     torch: () => '<path d="M10 1c2.6 3 3.6 5.2 3.6 7.2A3.6 3.6 0 0 1 10 11.8 3.6 3.6 0 0 1 6.4 8.2C6.4 6.2 7.4 4 10 1Z"/><path d="M7 12.5h6l-1.6 6.5H8.6Z"/>',
   };
-  F.EMBLEM_OF = { ml: 'star', trot: 'ringstar', council: 'cog', mao: 'stars', marketsoc: 'cogstar', demsoc: 'rose', ansyn: '', ancom: '', liberal: 'ring', socdem: 'diamond', minarchy: 'shield', conmon: 'crown', absmon: 'crown', theocracy: 'sun', agrarian: 'wheat', junta: 'sword', corporatist: 'chevron', technocracy: 'compass', personalist: 'laurel', merchant: 'anchor', cybernetic: 'node', natpop: 'torch', thirdpos: 'cogwheat', pannat: 'eagle', revival: 'crescent', juche: 'ringstar', natsyn: 'arrows', technosoc: 'bolt', nrx: 'ffwd', natsoc: 'eaglering', nazacc: 'flame' };
+  F.EMBLEM_OF = { ml: 'star', trot: 'ringstar', council: 'cog', mao: 'stars', marketsoc: 'cogstar', demsoc: 'rose', ansyn: '', ancom: '', liberal: 'ring', socdem: 'diamond', minarchy: 'shield', conmon: 'crown', absmon: 'crown', theocracy: 'sun', agrarian: 'wheat', junta: 'sword', corporatist: 'chevron', technocracy: 'compass', personalist: 'laurel', merchant: 'anchor', cybernetic: 'node', natpop: 'torch', thirdpos: 'cogwheat', pannat: 'eagle', revival: 'crescent', juche: 'ringstar', natsyn: 'arrows', technosoc: 'bolt', nrx: 'ffwd', ancap: 'coin', natsoc: 'eaglering', nazacc: 'flame' };
   F.emblem = function (ideo, fill, bg, size) {
     const k = F.EMBLEM_OF[ideo]; if (!k || !EMB[k]) return '';
     return '<svg viewBox="0 0 20 20" width="' + (size || 20) + '" height="' + (size || 20) + '" style="--bg:' + bg + '" fill="' + fill + '" stroke="' + fill + '" stroke-width="0">' + EMB[k]() + '</svg>';

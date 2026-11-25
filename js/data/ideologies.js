@@ -1006,6 +1006,39 @@
     flaws: ['The fire falls fast every month it is not fed. When it goes out, the regime falls.', 'Devastating choices arrive month after month, and none of them is good.', 'No trade, no research, no peace and no friends: everyone is entitled to fight you.', 'The economy and the people are consumed with everything else.'],
   });
 
+  /* session 15: no state at all */
+  def({
+    id: 'ancap', name: 'Anarcho-Capitalism', family: 'liberal', color: [214, 166, 24], title: 'Free Covenant of {N}',
+    short: 'No state at all: courts, police and armies are firms, and every resident is a customer.',
+    theory: 'If protection, justice and roads are services like any other, they can be bought from competing firms instead of taken by a monopoly that taxes. Each resident contracts with the defence agency and the court they trust; disputes between agencies go to arbitration, because war is bad for business. Its theorists call this the only order without aggression. Its critics answer that the strongest agency will simply become a state again, that those who cannot pay will get no justice, and that a territory with no sovereign is an invitation to every neighbour that has one. In the game the covenant pays its agencies out of members’ fees it does not set, hires every soldier it has, and can buy and lose land like any other property.',
+    axes: { econ: 1.0, auth: -1.0, trad: -0.2, intl: 0.3 }, rivals: ['ml', 'ancom'],
+    econ: { model: 'market', tax: 9, invest: 0.42, cycle: 1.6, eff: 1.1, privSci: 1 },
+    budget: { welfare: 0, security: 0.06, science: 0, arms: 0.3, heavy: 0 }, bmax: { welfare: 0, science: 0, security: 0.14, arms: 0.5 },
+    control: { type: 'parliament', body: 'Covenant Assembly', auth: 1.2, warVote: 1, cap: 1, lawCost: 16, griev: 0 },
+    elections: 0,
+    recruit: { allowed: ['mercenary'], def: 'mercenary' },
+    doctrine: { atk: 0.95, def: 1.05, home: 1.2, morale: 'gold', styles: { advance: 1, assault: 0.7, blitz: 1.0, infiltrate: 1.15, siege: 0.9 } },
+    fbase: { workers: -16, peasants: -2, capital: 30, military: -12, clergy: -4, intelligentsia: 4, bureaucracy: -30 },
+    fpow: { capital: 2.8, bureaucracy: 0.1, workers: 0.8, military: 0.6 }, ruling: ['capital'], fnames: { capital: 'Proprietors', military: 'Agency men' },
+    legit: { prosperity: 0.65, order: 0.2, competence: 0.15 },
+    laws: { press: ['free'], security: ['liberties', 'police'], land: ['landlord', 'smallholder'], labor: ['free', 'company'], religion: ['tolerance'], trade: ['free'] },
+    lawDef: { press: 'free', security: 'police', land: 'smallholder', labor: 'free', religion: 'tolerance', trade: 'free' },
+    dip: { export: 0.15, agg: 0.05, trade: 1.25, cb: [] },
+    flags: { privateEverything: 1, noFees: 1 },
+    drift: [
+      { to: 'junta', label: 'The agency becomes the state', why: 'One defence agency has outgrown its rivals. Its directors stop asking for contracts and start issuing orders.',
+        pressure: (n) => b((n.sig || 50) < 20) * 0.5 + b(war(n)) * 0.2 + b(n.stab < 35) * 0.2 - 0.45 },
+      { to: 'nrx', label: 'The proprietors incorporate', why: 'The great proprietors buy out the agencies and run the territory as one company with one board.',
+        pressure: (n) => b(P(n, 'capital') > 55) * 0.3 + b((n.sig || 50) < 35) * 0.3 + b(n.tech.ind >= 5) * 0.1 - 0.5 },
+      { to: 'minarchy', label: 'One public court after all', why: 'After a lost war or a crash the members vote to buy one public court and one public army, and call it a night-watchman.',
+        pressure: (n) => b(war(n) && n.a.losing) * 0.4 + b(dep(n)) * 0.3 + b(n.stab < 40) * 0.2 - 0.5 },
+    ],
+    objective: { name: 'The Free Covenant', desc: 'The world’s highest output per head, competition among the agencies at 70, and three provinces bought rather than conquered.',
+      parts: (n, G) => [['First in output per head', b(ID.rankOf(G, n, 'gdppc') === 1), 1], ['Competition at 70 or above', b((n.sig || 0) >= 70), 1], ['Provinces bought', n.cnt.bought || 0, 3]] },
+    perks: ['The fastest private investment and highest efficiency of any economy; private research grows with prosperity.', 'Territory is a market: buy a neighbour’s province for gold, with no war.', 'Contract armies hold cities and home ground fiercely, and an agency monopoly can be bought for a stronger defence.', 'Wars are bad for business: you can buy your way out of one.'],
+    flaws: ['No taxes, no conscription, no public works, no rule by decree: the members’ fees are what the agencies charge, and every soldier is hired.', 'Unpaid companies desert; a covenant without gold has no army.', 'Competition keeps protection thin; a monopoly becomes a state (junta or NRX).', 'Unhappy provinces can leave peacefully for a neighbour, and nobody may stop them.'],
+  });
+
   /* the older systems' roads into the session 12 ones */
   for (const [from, d] of [
     ['ml', { to: 'juche', label: 'Our own road', why: 'A party state with a living founder, walls around its economy and suspicious allies decides it needs nobody, not even them.',
@@ -1020,6 +1053,10 @@
       pressure: (n) => b(P(n, 'capital') > 20) * 0.4 + b(n.tech.ind >= 5) * 0.2 - 0.5 }],
     ['minarchy', { to: 'nrx', label: 'The night-watchman sells the night', why: 'With capital in command and new machines in every firm, even the minimal state is put up for sale.',
       pressure: (n) => b(P(n, 'capital') > 55) * 0.3 + b(n.tech.ind >= 5) * 0.3 - 0.5 }],
+    ['minarchy', { to: 'ancap', label: 'The last tax abolished', why: 'Liberty at its height and the proprietors in command: the members vote to sell the courts and the army too.',
+      pressure: (n) => b((n.sig || 0) > 85) * 0.4 + b(P(n, 'capital') > 45) * 0.2 + b(n.stab > 55) * 0.1 - 0.55 }],
+    ['nrx', { to: 'ancap', label: 'Exit, all the way down', why: 'The board breaks the company into a market of agencies and lets every city choose its own.',
+      pressure: (n) => b((n.sig || 0) > 85) * 0.3 + b(n.stab > 65) * 0.2 + b(P(n, 'capital') > 50) * 0.1 - 0.55 }],
     ['natpop', { to: 'natsoc', label: 'The movement finds a racial doctrine', why: 'A movement with total power, a cult around its leader and a humiliation to avenge declares the nation a race.',
       pressure: (n) => b(L(n, 'security', 'secret')) * 0.2 + b(n.charisma > 60) * 0.3 + b(dep(n) || lost(n)) * 0.3 - 0.5 }],
     ['corporatist', { to: 'natsoc', label: 'The party swallows the state', why: 'Charisma, total propaganda and war dissolve the chambers into one party and one will.',

@@ -651,7 +651,7 @@
   dec({ id: 'antitrust', name: 'Break up the trusts', desc: 'Dissolve the largest combines.', cost: { auth: 20 }, cd: 60,
     ideos: ['liberal', 'socdem', 'conmon'], vote: { workers: 10, capital: -25, intelligentsia: 8 }, fx: [['sup', 'capital', -10], ['sup', 'workers', 6], ['conf', -5], ['mod', 'pow_capital', -0.12, 120, 'Trust-busting']] });
   dec({ id: 'charter_companies', name: 'Sell charters', desc: 'Auction monopolies and public functions to the highest bidders.', cost: { auth: 10 }, cd: 60,
-    ideos: ['minarchy', 'merchant', 'liberal', 'nrx'], fx: [['gold', 220], ['corr', 8], ['mod', 'pow_capital', 0.2, 120, 'Chartered monopolies'], ['sup', 'workers', -6]] });
+    ideos: ['minarchy', 'merchant', 'liberal', 'nrx', 'ancap'], fx: [['gold', 220], ['corr', 8], ['mod', 'pow_capital', 0.2, 120, 'Chartered monopolies'], ['sup', 'workers', -6]] });
 
   /* ---- conservative */
   dec({ id: 'royal_progress', name: 'Royal progress', desc: 'The sovereign tours the provinces with full ceremony.', cost: { gold: 60 }, cd: 36,

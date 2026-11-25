@@ -3,6 +3,14 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'A new system: Anarcho-Capitalism', items: [
+      'No state at all. Defence, courts and roads are bought from competing private agencies, and the members’ fees are whatever the agencies charge: you never set a tax.',
+      'Competition between the agencies keeps protection cheap and the economy efficient, and thin when war comes. Let one agency take over the market and it becomes strong, expensive, and in the end the state itself.',
+      'Every soldier is a hired company. They fight hard for cities and home ground while they are paid, and walk away when the money runs out.',
+      'Land is property. Buy a border province from a neighbour that needs the money, with no war at all. But your own unhappy provinces can leave for a neighbour, and nobody may stop them.',
+      'You can also buy your way out of a war. No taxes, no conscription, no public works and no rule by decree.',
+      'It has its own programmes, inner circle, dispatches, a destiny (The Free Covenant) with a tree after it, and roads in from Minarchism and NRX and out to a junta or a corporation. It can rise as a hard-right revolt in a market crash.',
+    ] },
     { date: '25 November 2026', title: 'Coups, rebuilt', items: [
       'A coup now needs plotters, and the game tells you who they are: the army, a member of your inner circle, a foreign power paying one of them, or bankers hiring officers.',
       'A content army (military support 60 or more) no longer stages coups of its own. If you are overthrown with a happy army, it was someone else, and the dispatch names them.',

@@ -1082,6 +1082,42 @@ and the `coup` event's one roll against odds rounded to 10%).
   (25/2 before); weak states (stability < 35) 0.64 successes per state-decade; juntas 0.04, personalist 0.06,
   democratic socialists 0.13, technosoc 0.28 (their exported revolutions are bought coups).
 
+## Session 15, part 3: Anarcho-Capitalism (`ancap`; new file `js/data/ancap.js`, loads after `data/engines.js`)
+
+The checklist of sessions 13/13b, all done: the `def` in `data/ideologies.js` (liberal family, gold, *Free Covenant of
+{N}*, market economy with **no `taxMin`, so no tax slider**: the engine sets `n.tax` as members' fees; recruitment
+`mercenary` only; morale `gold`; control `parliament` with no elections; objective *The Free Covenant*: first in
+output per head, Competition 70, three provinces bought), drift roads in (minarchy at Liberty 85+, NRX at
+Acceleration 85+) and out (junta: *the agency becomes the state*; nrx: *the proprietors incorporate*; minarchy after a
+lost war or crash); `R.body`/`R.lines` (Board of Arbitration; Leaner contracts, Guard the frontier, Incorporate);
+`tree('ancap', 'ac', …)`, `late('ancap')`, `ib('ancap', 1964)` (14 programmes); leader title *Chair of Arbitration*,
+`START_WEIGHTS` 0.25, `SIT_FOR` trader/rich/small; emblem `coin` in `ui/flags.js`; `classSupport` (capital,
+intelligentsia) and `pickOpp` (a hard-right revolt in market economies in a depression, inflation or high taxes);
+`P.coupIdeo` (15% of coups in minarchies, NRX or liberal states with capital above 60) and `Coup.ideoFor` for
+business plots; the *Sell charters* decision; the destiny *The Free Covenant* (`fl_d_covenant`, liberal family tree)
+with its after-destiny tree (`afterdest.js`); World Dispatch stories for purchases and exits; two ordinary
+dispatches (`d_ap_poor`, `d_ap_feud`).
+
+- **Engine J, the market for protection** (`ID.Ancap`). Three agencies (`n.sigx.ag`: name, share, quality) split the
+  contracts. Quality wanders, customers follow it, the leader grows with the size of the contracts (arms + security
+  budget) and loses customers past 45%. The gauge *Competition* = 1 − Σshare² scaled (100 = three equal agencies);
+  the doctrine's `drift` is 0 and `month` overwrites it. Fees `ACap.fee` = 8% + 0.06 × (100 − Competition), so a
+  monopoly is richer. Gauge effects: efficiency, confidence, growth and trade up, defence down, coups rarer with
+  competition. *Thin protection*: defence −18% × the shortfall of the arms budget below 25%. An agency over 60% for
+  4 months: `ac_monopoly` (spread the contracts, a long contract, let it be); over 60% for 24 months or 85% at once:
+  `ac_state` (let it govern = junta or NRX, logged as a coup with source `agency`; buy it out; or civil war).
+- **Land as property**: `ac_buy` buys the best-priced border province (`ACap.offer`) from an AI neighbour that is
+  broke, in debt or unstable (price 50 + 1.1/tile + urban + core); the claim goes with it. **Exit**: a province with
+  unrest 55+ or a 55+ movement may leave, at most every two years, for the friendliest neighbour at peace (or
+  independence through `P.secede`).
+- **Acts**: Spread the contracts, An exclusive contract, Buy a province, Buy peace (`ACap.ransom`: 150 + 0.4 × the
+  enemy's army, then `Diplomacy.peace`). War trait *Contract armies* (cities +40%, home +15%, losses in attack
+  +10%); order *Bounties*. Forbidden (`ID.FORBID.ancap`): emergency rule, factories, towns, recruitment laws.
+- **Measured** (`node tools/forced.js ancap 40`: one state forced into it in 8 worlds): 23 years on average, 3 of 8
+  to the end; ends by agency (junta/NRX) or coup; largest land share 11%; up to 8 provinces bought in a run. With
+  the bans switched off (`ID_FORBID_OFF=ancap`) 26 years and 2 of 8: the bans cost the AI nothing measurable.
+  `ideocheck ancap,nrx,minarchy 30` passes. Unforced worlds: ancap is rare (one start in 8 random worlds).
+
 ## Peace by ideology (`sim/diplomacy.js`)
 
 - `D.terms(G, win, lose, score)`, called by every negotiated peace with a winner (not civil wars), returns the

@@ -541,6 +541,12 @@
     ['The market miracle', 'Growth that economists will spend decades explaining.', [M('prod', 0.06, 'The miracle'), ['build', B.FACTORY, 2], E('The Market Miracle')]],
     ['Treaties of commerce', 'Free trade with every neighbour that will sign.', [['opAll', 6], M('trade', 0.05, 'Treaties')]],
     ['The trading republic', 'Every neighbour is richer for trading with {N}, and every neighbour knows it.', [M('def', 0.05, 'Too useful to attack'), ['opAll', 5], E('The Trading Republic')]]);
+  T('fl_d_covenant',
+    ['The covenant reprinted', 'A second edition of the two pages, with a clause for disputes between agencies and one for disputes about the clause.', [['sig', 8], L(4, 'The covenant reprinted'), ['sup', 'capital', 4]]],
+    ['The agencies abroad', 'Our defence agencies sell protection to anyone who pays, including governments that still believe in governments.', [['gold', 150], M('atk', 0.04, 'Agencies abroad'), ['threat', 4]]],
+    ['The market in sovereignty', 'Provinces of other states petition to join the covenant. Some of their governments sell them.', [['subvertNb', 8], M('trade', 0.06, 'The market in sovereignty'), E('The Market in Sovereignty')]],
+    ['The quiet covenant', 'No adventures abroad: the agencies compete on price at home and the members get richer.', [M('eff', 0.04, 'The quiet covenant'), ['sig', 6]]],
+    ['The richest place on earth', 'Measured per head, and the members measure everything per head.', [M('ls', 2, 'The richest place'), M('prod', 0.04, 'The richest place'), E('The Richest Place on Earth')]]);
   T('fl_d_union',
     ['The federal constitution', 'States’ rights, a supreme court and a bill of rights.', [L(5, 'The constitution'), M('unrest', -3, 'Federalism')]],
     ['The union of democracies', 'A defence pact with a great power that shares our values.', [['protector'], M('def', 0.05, 'The union of democracies')]],
@@ -1196,6 +1202,13 @@
     ['The merchant fleet', 'Ships under the {A} flag on every ocean.', [['build', B.PORT, 1], M('navy', 0.1, 'The merchant fleet')]],
     ['A century of the open economy', 'A hundred years without a tariff.', [L(3, 'A century'), ['opAll', 2]]],
     ['The prosperous republic', 'The richest people on the continent, and they mostly know it.', [M('ls', 2, 'Prosperity'), M('unrest', -2, 'Prosperity'), E('The Prosperous Republic')]]);
+  X('fl_d_covenant',
+    ['Mercenary exports', 'Companies under our contracts guard mines, ports and presidents on three continents.', [['gold', 120], M('atk', 0.03, 'Contract veterans')]],
+    ['Bought frontiers', 'Border villages abroad sell us their land, one survey at a time.', [['claimsAll'], ['opAll', -3]]],
+    ['The insurers’ audit', 'The insurers grade every agency every year, and publish the grades.', [M('eff', 0.03, 'The insurers’ audit'), ['corr', -6]]],
+    ['The open city', 'Anyone may move here, sign the covenant and work the next morning.', [M('growth', 0.06, 'The open city'), ['sup', 'workers', 4]]],
+    ['Arbitration between nations', 'Our courts settle other countries’ disputes, for a fee.', [['opAll', 4], M('rev', 0.04, 'Arbitration fees')]],
+    ['A century without a state', 'The first hundred years of the covenant, and nobody has yet been elected to anything.', [L(4, 'A century without a state'), M('unrest', -2, 'A century without a state'), E('A Century Without a State')]]);
   X('fl_d_union',
     ['The joint command', 'One command for every allied democracy.', [M('def', 0.03, 'The joint command'), ['discipline', 4]]],
     ['The shipyards of democracy', 'Ships for every free navy.', [['build', B.PORT, 1], M('navy', 0.2, 'The shipyards')]],

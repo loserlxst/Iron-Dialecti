@@ -326,6 +326,7 @@ js/data/dispatches.js the third shelf of ordinary dispatches, and the sovereignt
 js/data/trees2.js     longer trees: a nine-programme branch per national tree, late ideology pairs
 js/data/afterdest.js  the tree each destiny opens (ID.FOCUS.after), shown as its own tab while the destiny holds
 js/data/trees3.js     the late century: a 1960s–70s branch per national and family tree, five more per ideology tree
+js/data/ancap.js      Anarcho-Capitalism: its doctrine, inner circle, the market for protection (engine J) and dispatches
 js/ui/sovereignty.js  the Sovereignty panel (key U), its Report items and handbook page
 js/ui/nation.js       Nation screen and superevents; scenes.js paints their scenes
 js/ui/tray.js         dispatch tray (ordinary dispatches wait while the clock runs)
@@ -335,7 +336,7 @@ js/ui/tutorial.js     guided first campaign as Cassine
 js/ui/main.js         boot, main loop, pointer and wheel input
 tools/                load.js (loads the sim in index.html's order), metrics.js (events, pacing, trees, tables),
                       simulate.js, soak.js, budget.js, probe.js, fates.js, history.js, encircle.js (pockets and
-                      landings), coups.js (coup balance and the player's coup) (headless, Node)
+                      landings), coups.js (coup balance and the player's coup), forced.js (one state forced into an ideology) (headless, Node)
 ```
 
 The `sim` layer never touches the DOM, so whole campaigns run in Node for balance testing.
