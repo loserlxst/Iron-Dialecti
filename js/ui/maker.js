@@ -66,7 +66,7 @@
 
   /* ---------------------------------------------------------------- the panel */
   const field = (label, inner, note) => '<div class="field"><label>' + label + '</label>' + inner + (note ? '<small>' + note + '</small>' : '') + '</div>';
-  const seg = (cur, list, act) => '<div class="seg wrap">' + list.map((x) => '<button class="' + (cur === x[0] ? 'on' : '') + '" data-act="' + act + '" data-a=\'' + esc(JSON.stringify(x[0])) + '\'' + (x[2] ? tip(x[2]) : '') + '>' + x[1] + '</button>').join('') + '</div>';
+  const seg = (cur, list, act) => '<div class="seg wrap grow">' + list.map((x) => '<button class="' + (cur === x[0] ? 'on' : '') + '" data-act="' + act + '" data-a=\'' + esc(JSON.stringify(x[0])) + '\'' + (x[2] ? tip(x[2]) : '') + '>' + x[1] + '</button>').join('') + '</div>';
   const slider = (act, v, lo, hi, step, label) => '<div class="sl" style="grid-template-columns:96px 1fr 52px"><span>' + label + '</span><input type="range" min="' + lo + '" max="' + hi + '" step="' + step + '" value="' + v + '" data-change="' + act + '"><b>' + v + '</b></div>';
   function panel() {
     if (!def) return;
