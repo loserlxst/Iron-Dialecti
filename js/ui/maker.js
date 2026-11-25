@@ -96,6 +96,14 @@
   const toggle = (act, on, label, note) => '<label class="chk"><input type="checkbox" data-change="' + act + '"' + (on ? ' checked' : '') + '> <span>' + label + (note ? ' <span class="dim">' + note + '</span>' : '') + '</span></label>';
   const TABS = [['scenario', 'Scenario'], ['terrain', 'Terrain'], ['territory', 'Borders'], ['states', 'States'], ['buildings', 'Buildings'], ['land', 'Generator']];
   const SIZES = [[0, '1'], [1, '3'], [2, '5'], [3, '7'], [5, '11'], [8, '17'], [12, '25']];
+  const HELP = {
+    scenario: 'The whole map: its name, start year and size, what the game fills in for you, problems to fix before play, saving and sharing.',
+    terrain: 'Paint the ground itself: sea, plains, forest, mountains, rivers. Terrain decides food, people, and how hard land is to attack.',
+    territory: 'Paint which state owns each tile. Painted land is theirs at the start, exactly as drawn.',
+    states: 'Add, move and edit the states: capital, name and flag, treasury, stability, alliances and overlords.',
+    buildings: 'Place cities, factories, ports and forts on exact tiles.',
+    land: 'The generator made the starting land from round shapes and noise. Unlock it to reshape continents.',
+  };
   function panel() {
     if (!def) return;
     const t = $('#title'), old = t.querySelector('.pick .db'), top = old ? old.scrollTop : 0;
@@ -105,74 +113,78 @@
       '<button class="x" data-act="mkOpen"' + tip(open ? 'Fold the panel away' : 'Show the panel') + '>' + (open ? '–' : '+') + '</button><button class="x" data-act="mkQuit"' + tip('Back to the title screen') + '>✕</button></div>';
     if (open) {
       h += '<div class="mktabs">' + TABS.map((x) => '<button class="' + (tab === x[0] ? 'on' : '') + '" data-act="mkTab" data-a=\'"' + x[0] + '"\'>' + x[1] + (x[0] === 'scenario' && checks.length ? ' <i class="' + (errs ? 'bad' : 'warn') + '">' + checks.length + '</i>' : '') + '</button>').join('') + '</div><div class="db">';
+      h += '<p class="mkhelp">' + HELP[tab] + '</p>';
       h += ({ scenario: scenarioPanel, terrain: terrainPanel, territory: borderPanel, states: statesPanel, buildings: bldPanel, land: genPanel })[tab]();
-      h += '</div><div class="ft">' + btn('Play this map', 'mkPlay', null, { cls: 'big red', off: errs ? 'Fix the problems listed under Scenario first.' : '' }) + '<span class="sp"></span>' + btn('Save', 'mkSave', null, { cls: 'ghost', tip: 'Keep this map in this browser' }) + btn('Code', 'mkCode', null, { cls: 'ghost', tip: 'A code anyone can paste into Load code' }) + '</div>';
+      h += '</div><div class="ft">' + btn('Play this map', 'mkPlay', null, { cls: 'big red', tip: 'Go to the new campaign screen with this map, pick a state and begin.', off: errs ? 'Fix the problems listed under Scenario first.' : '' }) + '<span class="sp"></span>' + btn('Save', 'mkSave', null, { cls: 'ghost', tip: 'Keep this map in this browser. Open it again from Map maker on the title screen.' }) + btn('Share', 'mkCode', null, { cls: 'ghost', tip: 'Make a code anyone can paste into Load code to play or edit this map.' }) + '</div>';
     }
     h += '</div><div id="mkstat"></div>';
     t.innerHTML = h;
     const db = t.querySelector('.pick .db'); if (db) db.scrollTop = top;
     fitCanvas(); status();
   }
-  function modes() { return seg(tool.mode, [['brush', 'Brush', 'Paint under the cursor (B)'], ['fill', 'Fill', 'Fill the connected area under the cursor (F)'], ['pick', 'Pick', 'Take what is under the cursor (I)']], 'mkMode'); }
+  function modes() {
+    const what = { brush: 'Drag over the map to paint the tiles under the brush.', fill: 'Click once to paint a whole connected area: every touching tile of the same kind.', pick: 'Click a tile to copy what it is into the brush, then paint with it.' };
+    return field('Tool', seg(tool.mode, [['brush', 'Brush', '<h5>Brush (B)</h5>' + what.brush], ['fill', 'Fill', '<h5>Fill (F)</h5>' + what.fill], ['pick', 'Pick', '<h5>Pick (I)</h5>' + what.pick]], 'mkMode'), what[tool.mode]);
+  }
   function scenarioPanel() {
     let h = field('Name', '<input type="text" maxlength="' + M.LIM.name + '" value="' + esc(def.name) + '" data-change="mkName" style="width:100%">');
     h += field('Start year', seg(def.year || 1910, M.YEARS.map((y) => [y, y + '', y === 1910 ? 'The Age of Empires' : y === 1925 ? 'The Age of Masses' : 'The Age of Total War: the industry, arms and science of 1940']), 'mkYear'));
     h += field('Map size', seg(def.size, Object.keys(ID.MAP_SIZES).map((k) => [k, ID.MAP_SIZES[k].name + ' <small>' + ID.MAP_SIZES[k].W + '×' + ID.MAP_SIZES[k].H + '</small>']), 'mkSize'), 'Everything you painted is stretched to the new size.');
-    h += field('Automatic', toggle('mkGrow', def.grow !== false, 'States grow into land you have not painted', '(off: only painted land and each capital’s province are owned)') + toggle('mkAutoB', def.autoBld !== false, 'Add the usual cities, factories, ports and forts', '(off: only the ones you place, and a city at each capital)'));
+    h += field('What the game fills in for you', toggle('mkGrow', def.grow !== false, 'States grow into land you have not painted', '(off: only painted land and each capital’s province are owned)') + toggle('mkAutoB', def.autoBld !== false, 'Add the usual cities, factories, ports and forts', '(off: only the ones you place, and a city at each capital)'));
     const errs = checks.filter((c) => c.lvl === 'err');
-    h += field('Checks', checks.length ? '<ul class="checks">' + checks.map((c) => '<li class="' + (c.lvl === 'err' ? 'bad' : 'warn') + '">' + esc(c.text) + '</li>').join('') + '</ul>' + (errs.length ? '' : '<small>Warnings do not stop play.</small>') : '<small class="good">Ready to play.</small>');
-    h += field('Maps', '<div class="row">' + btn('Open a preset or a saved map', 'mkPresets', null, { cls: 'sm' }) + btn(slot >= 0 ? 'Save' : 'Save as a new map', 'mkSave', null, { cls: 'sm' }) + '</div><div class="row" style="margin-top:6px">' + btn('Copy code', 'mkCode', null, { cls: 'sm' }) + btn('Load code', 'loadCode', null, { cls: 'sm ghost' }) + btn('Export file', 'mkExport', null, { cls: 'sm ghost' }) + '<label class="b sm ghost">Import file<input type="file" accept=".idmap,application/json" data-change="mkImport" hidden></label></div>');
+    h += field('Problems before play', checks.length ? '<ul class="checks">' + checks.map((c) => '<li class="' + (c.lvl === 'err' ? 'bad' : 'warn') + '">' + esc(c.text) + '</li>').join('') + '</ul>' + (errs.length ? '<small>Red problems stop play; fix them first.</small>' : '<small>These are warnings: you can still play.</small>') : '<small class="good">No problems: ready to play.</small>');
+    h += field('Save and share', '<div class="row">' + btn('Open a preset or a saved map', 'mkPresets', null, { cls: 'sm' }) + btn(slot >= 0 ? 'Save' : 'Save as a new map', 'mkSave', null, { cls: 'sm', tip: 'Keep this map in this browser.' }) + '</div><div class="row" style="margin-top:6px">' + btn('Copy code', 'mkCode', null, { cls: 'sm', tip: 'A text code for this map that anyone can paste into Load code.' }) + btn('Load code', 'loadCode', null, { cls: 'sm ghost', tip: 'Open a map from a code someone gave you.' }) + btn('Export file', 'mkExport', null, { cls: 'sm ghost', tip: 'Download the map as a .idmap file: easier to share for big maps.' }) + '<label class="b sm ghost"' + tip('Open a .idmap file.') + '>Import file<input type="file" accept=".idmap,application/json" data-change="mkImport" hidden></label></div>');
     h += '<p class="dim" style="font-size:13.5px">Countries of the Three Continents keep their own programmes and destinies wherever you put them. Every other state gets the family and ideology programmes, as on random worlds. The scripted history belongs to the Three Continents campaign.</p>';
     return h;
   }
   function terrainPanel() {
     const TT = ID.TERRAIN;
-    let h = field('Tool', modes());
-    h += field('Paint', '<div class="tswatch">' + [0, 1, 2, 3, 4, 5, 6].map((k) => '<button class="' + (!tool.river && tool.t === k ? 'on' : '') + '" data-act="mkBrush" data-a="' + k + '"><i style="background:' + (k === 0 ? '#abbcb8' : hex(TT[k].col)) + '"></i>' + TT[k].name + '</button>').join('') +
-      '<button class="' + (tool.river === 1 ? 'on' : '') + '" data-act="mkRiver" data-a="1"><i style="background:#4a7a9a"></i>River</button><button class="' + (tool.river === -1 ? 'on' : '') + '" data-act="mkRiver" data-a="-1"><i class="no"></i>No river</button></div>');
+    let h = modes();
+    h += field('Terrain to paint', '<div class="tswatch">' + [0, 1, 2, 3, 4, 5, 6].map((k) => '<button class="' + (!tool.river && tool.t === k ? 'on' : '') + '" data-act="mkBrush" data-a="' + k + '"><i style="background:' + (k === 0 ? '#abbcb8' : hex(TT[k].col)) + '"></i>' + TT[k].name + '</button>').join('') +
+      '<button class="' + (tool.river === 1 ? 'on' : '') + '" data-act="mkRiver" data-a="1"' + tip('Add a river along the tiles you paint. Rivers make farmland richer.') + '><i style="background:#4a7a9a"></i>Add river</button><button class="' + (tool.river === -1 ? 'on' : '') + '" data-act="mkRiver" data-a="-1"' + tip('Remove rivers from the tiles you paint.') + '><i class="no"></i>Erase river</button></div>', ID.TERRAIN[tool.t] && !tool.river ? (tool.t === T.SEA ? 'Sea drowns land.' : ID.TERRAIN[tool.t].desc || '') : '');
     if (tool.mode === 'brush') h += field('Brush size <span class="dim" style="font-weight:500">([ and ])</span>', seg(tool.r, SIZES, 'mkSizeB'));
     let n = 0; for (let i = 0; i < N; i++) if (pT[i] >= 0 || pR[i] >= 0) n++;
-    h += field('Painted by hand', '<div class="row"><span>' + n + ' tiles</span>' + btn('Back to the generated land', 'mkClearPaint', null, { cls: 'sm ghost', off: n ? '' : 'Nothing is painted.' }) + '</div>', UI.touch ? 'One finger paints; two fingers move and zoom the map.' : 'Drag to paint. Scroll or two fingers move the map; Ctrl+scroll or pinch zooms.');
+    h += field('Your terrain painting', '<div class="row"><span>' + n + ' tiles painted</span>' + btn('Erase it all', 'mkClearPaint', null, { cls: 'sm ghost', tip: 'Remove all terrain and rivers you painted: the land goes back to what the generator made.', off: n ? '' : 'Nothing is painted.' }) + '</div>', UI.touch ? 'One finger paints; two fingers move and zoom the map.' : 'Drag to paint. Scroll or two fingers move the map; Ctrl+scroll or pinch zooms.');
     return h;
   }
   function borderPanel() {
-    let h = '<p class="lead" style="font-size:14.5px">Paint who owns each tile. Painted land is fixed: the game starts with exactly these borders. ' + (def.grow !== false ? 'Land you leave unpainted is taken by the nearest states as they grow.' : 'Land you leave unpainted is nobody’s.') + '</p>';
-    h += field('Tool', modes());
-    h += field('Owner', '<div class="olist">' + def.nations.map((d, k) => { const n = PG && PG.nations[k + 1]; return '<button class="' + (tool.owner === k + 1 ? 'on' : '') + '" data-act="mkOwner" data-a="' + (k + 1) + '"><i style="background:' + (n ? n.css : '#888') + '"></i>' + esc(d.base) + '</button>'; }).join('') +
-      '<button class="' + (tool.owner === NOBODY ? 'on' : '') + '" data-act="mkOwner" data-a="' + NOBODY + '"' + tip('Nobody’s land: the hinterland, which any state may take without a war.') + '><i style="background:#f0e9d6"></i>Nobody</button><button class="' + (tool.owner === 0 ? 'on' : '') + '" data-act="mkOwner" data-a="0"' + tip('Unpaint: the tile goes back to whoever grows into it.') + '><i class="no"></i>Unpaint</button></div>');
+    let h = modes();
+    h += field('Paint land for', '<div class="olist">' + def.nations.map((d, k) => { const n = PG && PG.nations[k + 1]; return '<button class="' + (tool.owner === k + 1 ? 'on' : '') + '" data-act="mkOwner" data-a="' + (k + 1) + '"><i style="background:' + (n ? n.css : '#888') + '"></i>' + esc(d.base) + '</button>'; }).join('') +
+      '<button class="' + (tool.owner === NOBODY ? 'on' : '') + '" data-act="mkOwner" data-a="' + NOBODY + '"' + tip('Nobody’s land: unclaimed hinterland that any state may take without a war.') + '><i style="background:#f0e9d6"></i>Nobody</button><button class="' + (tool.owner === 0 ? 'on' : '') + '" data-act="mkOwner" data-a="0"' + tip('Erase painted borders: the tile goes to whichever state grows into it.') + '><i class="no"></i>Erase</button></div>', def.grow !== false ? 'Land you leave unpainted goes to the nearest states as they grow (switch below).' : 'Land you leave unpainted belongs to nobody (growth is switched off below).');
     if (tool.mode === 'brush') h += field('Brush size', seg(tool.r, SIZES, 'mkSizeB'));
     let n = 0; for (let i = 0; i < N; i++) if (O[i]) n++;
-    h += field('Painted borders', '<div class="row">' + btn('Fix the borders you see', 'mkBakeOwn', null, { cls: 'sm', tip: 'Paint every tile with the owner it has now, so the borders stay exactly as they are while you edit elsewhere.' }) + btn('Clear', 'mkClearOwn', null, { cls: 'sm ghost', off: n ? '' : 'Nothing is painted.' }) + '</div><small>' + n + ' tiles painted.</small>' + toggle('mkGrow', def.grow !== false, 'States grow into unpainted land'));
+    h += field('Your borders', '<div class="row">' + btn('Lock in the borders you see', 'mkBakeOwn', null, { cls: 'sm', tip: '<h5>Lock in the borders</h5>Paint every tile with the owner it has now. Then nothing you change elsewhere (moving a capital, a new state) moves these borders, and you can adjust them tile by tile.' }) + btn('Erase all', 'mkClearOwn', null, { cls: 'sm ghost', tip: 'Remove all painted borders: every state grows from its capital again.', off: n ? '' : 'Nothing is painted.' }) + '</div><small>' + n + ' tiles painted.</small>' + toggle('mkGrow', def.grow !== false, 'States grow into land you have not painted', '(off: that land belongs to nobody)'));
     return h;
   }
   function statesPanel() {
-    let h = '<div class="row" style="margin-bottom:8px">' + btn(armed ? 'Click the map for its capital…' : 'Add a state', 'mkArm', null, { cls: 'sm' + (armed ? ' red' : ''), off: def.nations.length >= M.LIM.nations ? 'A map can have at most ' + M.LIM.nations + ' states.' : '' }) + '<span class="dim">' + def.nations.length + ' states · drag a capital to move it</span></div>';
+    let h = '<div class="row" style="margin-bottom:8px">' + btn(armed ? 'Click the map for its capital…' : 'Add a state', 'mkArm', null, { cls: 'sm' + (armed ? ' red' : ''), off: def.nations.length >= M.LIM.nations ? 'A map can have at most ' + M.LIM.nations + ' states.' : '' }) + '<span class="dim">' + def.nations.length + ' states</span></div><small class="dim" style="display:block;margin:-4px 0 8px">' + UI.tap('Click a state on the map or in the list to select it. Drag its square capital marker to move it.') + '</small>';
     const d = def.nations[selN];
     if (d) {
       const n = PG && PG.nations[selN + 1], others = def.nations.filter((x) => x !== d);
       h += '<div class="note mksel"><div class="row nw">' + (n ? ID.Flags.html(n, 'sflag') : '') + '<b style="font-size:17px">' + esc(d.base) + '</b><span class="dim">' + (n ? n.tiles + ' tiles · ' : '') + (ID.FOCUS.nations[d.key] ? esc(d.key) + '’s programmes' : 'family programmes') + '</span></div>';
-      h += '<div class="row" style="margin:6px 0">' + btn('Edit country…', 'mkEdit', null, { cls: 'sm red', tip: 'Name, flag, colour, system, situation, leader, motto and more' }) + btn('Paint its land', 'mkPaintAs', null, { cls: 'sm' }) + btn('Delete', 'mkDelN', null, { cls: 'sm ghost' }) + '</div>';
-      if (def.grow !== false) h += slider('mkWeight', d.w, 0.3, 2.5, 0.05, 'Spread') + '<small class="dim">How far it grows into unpainted land against its neighbours.</small>';
-      h += slider('mkGold', d.gold != null ? d.gold : -10, -10, 1500, 10, 'Treasury', d.gold != null ? d.gold : 'auto');
-      h += slider('mkStab', d.stab != null ? d.stab : 4, 4, 95, 1, 'Stability', d.stab != null ? d.stab : 'auto');
+      h += '<div class="row" style="margin:6px 0">' + btn('Edit country…', 'mkEdit', null, { cls: 'sm red', tip: 'Name, flag, colour, system, situation, leader, motto and more' }) + btn('Paint its land', 'mkPaintAs', null, { cls: 'sm', tip: 'Open the Borders tab with this state on the brush.' }) + btn('Delete', 'mkDelN', null, { cls: 'sm ghost' }) + '</div>';
+      if (def.grow !== false) h += slider('mkWeight', d.w, 0.3, 2.5, 0.05, 'Growth') + '<small class="dim">How far it spreads into unpainted land against its neighbours: higher takes more.</small>';
+      h += slider('mkGold', d.gold != null ? d.gold : -10, -10, 1500, 10, 'Treasury', d.gold != null ? d.gold : 'default');
+      h += slider('mkStab', d.stab != null ? d.stab : 4, 4, 95, 1, 'Stability', d.stab != null ? d.stab : 'default');
       h += '<div class="mkgrid"><label>Alliance</label><select data-change="mkBloc"><option value="0">None</option>' + [1, 2, 3, 4, 5, 6, 7, 8].map((b) => '<option value="' + b + '"' + (d.bloc === b ? ' selected' : '') + '>Alliance ' + 'ABCDEFGH'[b - 1] + ' (' + def.nations.filter((x) => x.bloc === b).length + ')</option>').join('') + '</select>' +
         '<label>Overlord</label><select data-change="mkOver"><option value="">None: independent</option>' + others.map((x) => '<option value="' + esc(x.key) + '"' + (d.over === x.key ? ' selected' : '') + '>' + esc(x.base) + '</option>').join('') + '</select>' +
         (d.over ? '<label>As its</label><select data-change="mkDep">' + Object.keys(ID.Sov.KIND).map((k) => '<option value="' + k + '"' + (d.dep === k ? ' selected' : '') + '>' + esc(ID.Sov.KIND[k].name) + '</option>').join('') + '</select>' : '') + '</div>';
-      h += '<small class="dim">Slide Treasury or Stability to the far left for the game’s own value. Members of an alliance start in one bloc; a dependency starts bound to its overlord.</small></div>';
+      h += '<small class="dim">Default (far left) lets the game set the treasury and stability from the state’s situation. States in the same alliance start in one bloc. A state with an overlord starts as its dependency: the overlord takes a share of its revenue and decides its wars.</small></div>';
     }
     h += '<div class="mklist">' + def.nations.map((x, k) => { const n = PG && PG.nations[k + 1]; return '<button class="nrow' + (k === selN ? ' on' : '') + '" data-act="mkSelN" data-a="' + k + '">' + (n ? ID.Flags.html(n, 'mini') : '') + '<b>' + esc(x.base) + '</b><small>' + esc(ID.IDEOLOGIES[x.ideo].name) + ' · ' + esc(ID.SITUATIONS[x.sit].name.toLowerCase()) + (x.bloc ? ' · alliance ' + 'ABCDEFGH'[x.bloc - 1] : '') + (x.over ? ' · under ' + esc((def.nations.find((o) => o.key === x.over) || {}).base || '') : '') + '</small></button>'; }).join('') + '</div>';
     return h;
   }
   function bldPanel() {
     const L = [[B.CITY, 'City'], [B.FACTORY, 'Factory'], [B.PORT, 'Port'], [B.FORT, 'Fort'], [0, 'Remove']];
-    let h = field('Place', seg(tool.bld, L, 'mkBld'), UI.tap('Click a tile to place it. Ports go on coasts. Red squares mark the ones you placed.'));
+    const WHAT = { [B.CITY]: 'Cities hold people and count toward growth and output.', [B.FACTORY]: 'Factories make industry: arms, building and output.', [B.PORT]: 'Ports carry trade and ships. Only on a coast.', [B.FORT]: 'Forts slow and bleed attackers around them.', 0: 'Remove a building you placed.' };
+    let h = field('Click a tile to place', seg(tool.bld, L, 'mkBld'), WHAT[tool.bld] + ' ' + UI.tap('Red squares mark the buildings you placed.'));
     let n = 0; for (let i = 0; i < N; i++) if (Bd[i]) n++;
-    h += field('Placed by hand', '<div class="row"><span>' + n + '</span>' + btn('Keep the buildings you see', 'mkBakeB', null, { cls: 'sm', tip: 'Turn every building now on the map into one placed by hand, and stop adding the automatic ones. Then remove or add exactly what you want.' }) + btn('Clear', 'mkClearB', null, { cls: 'sm ghost', off: n ? '' : 'None placed.' }) + '</div>');
+    h += field('Your buildings', '<div class="row"><span>' + n + ' placed</span>' + btn('Lock in the buildings you see', 'mkBakeB', null, { cls: 'sm', tip: '<h5>Lock in the buildings</h5>Every building now on the map becomes one you placed, and the game stops adding its own. Then remove or add exactly what you want.' }) + btn('Erase all', 'mkClearB', null, { cls: 'sm ghost', off: n ? '' : 'None placed.' }) + '</div>');
     h += toggle('mkAutoB', def.autoBld !== false, 'Also add the usual cities, factories, ports and forts', '(by each state’s size and situation)');
     return h;
   }
   function genPanel() {
-    let h = '<p class="lead" style="font-size:14.5px">The generator draws land from round shapes and noise. It is the start, not the map: what you paint lies on top of it and stays.</p>';
+    let h = '<p class="dim" style="font-size:14px;margin:-2px 0 10px">What you paint in Terrain lies on top of the generator and always stays.</p>';
     if (def.gen === false) return h + '<div class="note">The generator is off: the map is only what you painted.</div><div class="row" style="margin-top:8px">' + btn('Turn the generator back on', 'mkGenOn', null, { cls: 'sm' }) + '</div>';
     h += toggle('mkGenOpen', genOpen, 'Unlock the generator', '(reshape continents; your painting stays on top)');
     if (genOpen) {
@@ -181,7 +193,7 @@
       h += field('Shapes (' + def.blobs.length + ')', '<div class="row">' + btn('Add a continent', 'mkAddBlob', 0.14, { cls: 'sm' }) + btn('Add an island', 'mkAddBlob', 0.04, { cls: 'sm' }) + '</div>' +
         (selB >= 0 && def.blobs[selB] ? '<div class="note" style="margin-top:8px"><b>Selected shape</b>' + slider('mkBlobR', Math.round(def.blobs[selB][2] * 1000), 10, 350, 1, 'Size') + btn('Delete it', 'mkDelBlob', null, { cls: 'sm ghost' }) + '</div>' : ''), UI.tap('Drag a round handle to move a shape; click one to select it.'));
     }
-    h += field('Freeze', '<div class="row">' + btn('Turn the generator off, keep the land', 'mkBake', null, { cls: 'sm', tip: 'All the land becomes painted land. Nothing generated can change it again. The code gets longer.' }) + btn('Empty sea', 'mkEmpty', null, { cls: 'sm ghost', tip: 'Turn the generator off and remove all land you did not paint.' }) + '</div>');
+    h += field('Stop generating', '<div class="row">' + btn('Turn the generator off, keep the land', 'mkBake', null, { cls: 'sm', tip: 'All the land becomes painted land. Nothing generated can change it again. The code gets longer.' }) + btn('Empty sea', 'mkEmpty', null, { cls: 'sm ghost', tip: 'Turn the generator off and remove all land you did not paint.' }) + '</div>');
     return h;
   }
 
@@ -197,11 +209,21 @@
     }
     const st = $('#mkstat'); if (st) { st.style.left = (L + 10) + 'px'; st.style.bottom = (sheet ? innerHeight - Hh + 8 : 10) + 'px'; }
   }
+  /* What a click or drag on the map does right now, in words. */
+  function action() {
+    const sizeW = tool.r * 2 + 1, br = tool.mode === 'fill' ? 'Fill' : tool.mode === 'pick' ? 'Pick' : 'Brush ' + sizeW + '×' + sizeW;
+    if (tab === 'terrain') return tool.mode === 'pick' ? 'Pick: click to copy a tile’s terrain' : br + ': ' + (tool.river > 0 ? 'add river' : tool.river < 0 ? 'erase river' : ID.TERRAIN[tool.t].name);
+    if (tab === 'territory') return tool.mode === 'pick' ? 'Pick: click to copy a tile’s owner' : br + ': ' + (tool.owner === 0 ? 'erase borders' : tool.owner === NOBODY ? 'nobody’s land' : (def.nations[tool.owner - 1] || {}).base);
+    if (tab === 'buildings') return 'Click: ' + (tool.bld ? 'place a ' + ID.BUILDINGS[tool.bld].name.toLowerCase() : 'remove a placed building');
+    if (tab === 'states') return armed ? 'Click land: new capital' : 'Click: select a state · drag a capital: move it';
+    if (tab === 'land' && genOpen) return 'Drag a round handle: move a shape';
+    return UI.touch ? 'Two fingers move and zoom' : 'Drag or scroll moves, Ctrl+scroll zooms';
+  }
   function status() {
     const st = $('#mkstat'); if (!st || !PG) return;
-    if (hov < 0) { st.textContent = UI.touch ? 'Two fingers move and zoom the map.' : 'Scroll moves the map, Ctrl+scroll zooms. Ctrl+Z undoes.'; return; }
+    if (hov < 0) { st.textContent = action() + (UI.touch ? '' : ' · Ctrl+Z undoes'); return; }
     const i = hov, o = PG.owner[i], P = PG.provinces[PG.prov[i]];
-    st.textContent = (i % W) + ', ' + ((i / W) | 0) + ' · ' + ID.TERRAIN[PG.terrain[i]].name + (PG.river[i] ? ', river' : '') + (PG.terrain[i] === T.SEA ? '' : ' · ' + (o ? PG.nations[o].base : 'nobody') + (O[i] ? ' (painted)' : def.grow !== false ? ' (grown)' : '') + (P ? ' · province ' + P.id + ', ' + P.tiles + ' tiles' : '') + (PG.bld[i] ? ' · ' + ID.BUILDINGS[PG.bld[i]].name + (Bd[i] ? ' (placed)' : '') : ''));
+    st.textContent = action() + '  ▸  ' + (i % W) + ', ' + ((i / W) | 0) + ' · ' + ID.TERRAIN[PG.terrain[i]].name + (PG.river[i] ? ', river' : '') + (PG.terrain[i] === T.SEA ? '' : ' · ' + (o ? PG.nations[o].base : 'nobody') + (O[i] ? ' (painted)' : def.grow !== false ? ' (grown)' : '') + (P ? ' · province ' + P.id + ', ' + P.tiles + ' tiles' : '') + (PG.bld[i] ? ' · ' + ID.BUILDINGS[PG.bld[i]].name + (Bd[i] ? ' (placed)' : '') : ''));
   }
 
   /* ---------------------------------------------------------------- drawing on the map */

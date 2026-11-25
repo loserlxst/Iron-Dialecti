@@ -915,3 +915,4 @@ textarea.code { font: 500 13px/1.35 ui-monospace, Consolas, monospace; word-brea
   #title .menu > .b { min-width: 0; }
   #title .menu > .row { grid-column: 1 / -1; }
 }
+.mkhelp { font-size: 14px; line-height: 1.35; margin: 0 0 10px; padding: 6px 9px; background: var(--paper2); border-left: 4px solid var(--red); }

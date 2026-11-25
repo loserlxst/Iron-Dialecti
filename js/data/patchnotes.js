@@ -22,6 +22,7 @@
       'Scenario options: start in 1910, 1925 or 1940, and give any state its treasury, its stability, an alliance, or an overlord it starts bound to.',
       'The generator is locked unless you open it, so nothing reshapes your map by accident. Turn it off entirely, keeping the land as painting, or start from An empty sea.',
       'The panel no longer covers the map: the map is drawn beside it, or above it on a phone, and the panel folds away.',
+      'Every tab now says what it is for, every tool explains what a click or a drag will do, and the line along the bottom of the map always shows the tool in hand and what is under the cursor.',
     ] },
     { date: '25 November 2026', title: 'Watch the world', items: [
       'A new observer mode: on the new campaign screen, press Watch the world instead of Begin. Every country is run by the computer and you only watch, with no decisions to make and no dispatches.',

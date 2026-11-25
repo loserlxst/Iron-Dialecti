@@ -155,7 +155,7 @@
     cv.addEventListener('pointermove', onMove);
     cv.addEventListener('pointerup', onUp);
     cv.addEventListener('pointercancel', onUp);
-    cv.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'mouse') return; hover = null; hideMapTip(); }); // a lifted finger also 'leaves': keep a held tooltip up
+    cv.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'mouse') return; hover = null; hideMapTip(); if (Main.mode === 'maker') ID.Maker.hover(-1e5, -1e5); }); // a lifted finger also 'leaves': keep a held tooltip up
     cv.addEventListener('wheel', onWheel, { passive: false });
     window.addEventListener('resize', () => R.resize());
     const keep = () => { if (Main.mode === 'game' && UI.G && !UI.G.over) ID.Screens.autosave(UI.G); };
