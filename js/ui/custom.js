@@ -24,7 +24,7 @@
   function render() {
     const n = H.n(), c = H.get(), G = H.G(), I = ID.IDEOLOGIES[n.ideo];
     const box = document.querySelector('#modal .dbd'), top = box ? box.scrollTop : 0;
-    let h = '<div class="dlg wide cust"><div class="dhd"><div class="k">COUNTRY</div><div class="d">' + esc(n.base) + '</div><button class="x" data-act="custClose"' + tip('Done') + '>✕</button></div><div class="dbd">';
+    let h = '<div class="dhd"><div class="k">COUNTRY</div><div class="d">' + esc(n.base) + '</div><button class="x" data-act="custClose"' + tip('Done') + '>✕</button></div><div class="dbd">';
     h += '<div class="custtop">' + F.html(n, 'pflag') + '<div><h2>' + esc(n.name) + '</h2><div class="dim">' + esc(I.name) + ' · ' + esc((ID.SITUATIONS[n.sit] || ID.SITUATIONS.middling).name) + (n.leader ? ' · ' + esc(n.leader.title + ' ' + n.leader.name) : '') + '</div></div></div>';
     h += '<div class="custgrid"><div>';
     h += field('Name', txt('base', c.base, n.base, Cu.LIM.base), 'The short name, used on the map and in the news.');
@@ -50,8 +50,9 @@
     const P = store.get('id_cpresets', []);
     h += field('Presets', '<div class="row">' + btn('Save as a preset', 'custPresetSave', null, { cls: 'sm', tip: 'Keep this country’s name, colour, flag, flavour, situation and system to use again in later campaigns (in this browser).' }) + btn('Reset this country', 'custReset', null, { cls: 'sm ghost' }) + '</div>' +
       (P.length ? '<div class="plist">' + P.map((p, k) => '<div class="prow">' + (p.c.flag ? F.html({ id: -1, key: 'p' + k, ideo: p.c.ideo || n.ideo, color: p.c.color || n.color, cust: { flag: p.c.flag, fv: 'p' + k + ID.hashStr(JSON.stringify(p.c.flag)), ideo: p.c.ideo || n.ideo } }, 'mini') : '') + '<b>' + esc(p.name) + '</b>' + btn('Use', 'custPresetUse', k, { cls: 'sm' }) + btn('Delete', 'custPresetDel', k, { cls: 'sm ghost' }) + '</div>').join('') + '</div>' : ''));
-    h += '</div></div><div class="row" style="margin-top:8px">' + btn('Done', 'custClose', null, { cls: 'red' }) + '</div></div></div>';
-    UI.modal(h, 'cust');
+    h += '</div></div><div class="row" style="margin-top:8px">' + btn('Done', 'custClose', null, { cls: 'red' }) + '</div></div>';
+    const dlg = UI.modalKind === 'cust' && document.querySelector('#modal .dlg.cust');
+    if (dlg) dlg.innerHTML = h; else UI.modal('<div class="dlg wide cust">' + h + '</div>', 'cust'); // redraw in place: no entrance animation on every edit
     const nb = document.querySelector('#modal .dbd'); if (nb) nb.scrollTop = top;
   }
   function clashTip(G, n, p) { const c = Cu.clashes(G, n, p); return c.length ? 'Close to ' + c.map((o) => esc(o.base)).join(', ') : ''; }

@@ -45,8 +45,8 @@
     catch (e) { err = e.message || String(e); checks = [{ lvl: 'err', text: err }]; if (!PG) return; }
     PG.paused = true;
     R.setMode('political'); R.setGame(PG); R.quiet = true; R.selected = -1;
-    if (had) { Object.assign(R.cam, cam); R.pan(0, 0); }
     panel();
+    if (had) { Object.assign(R.cam, cam); R.pan(0, 0); }
   }
   const soon = (layout) => { clearTimeout(timer); timer = setTimeout(() => rebuild(layout), 40); };
 
@@ -59,7 +59,7 @@
     R.overlay = overlay;
     rebuild();
   };
-  MK.close = function () { R.overlay = null; def = null; PG = null; };
+  MK.close = function () { R.overlay = null; def = null; PG = null; const cvs = $('#map'); cvs.style.height = ''; delete cvs.dataset.mk; R.resize(); };
   MK.def = () => def;
   MK.relayout = () => panel();
 
@@ -83,6 +83,13 @@
     h += '</div><div class="ft">' + btn('Play this map', 'mkPlay', null, { cls: 'big red', off: errs ? 'Fix the problems listed under Checks first.' : '' }) + '<span class="sp"></span>' + btn('Back', 'mkQuit', null, { cls: 'ghost' }) + '</div></div>';
     t.innerHTML = h;
     const db = t.querySelector('.pick .db'); if (db) db.scrollTop = top;
+    fitCanvas();
+  }
+  /* On a phone held upright the panel is a sheet along the bottom: the map is drawn only in the space above it. */
+  function fitCanvas() {
+    const pk = $('#title .pick.maker'), cvs = $('#map'), sheet = UI.compact && pk && pk.getBoundingClientRect().top > 40;
+    const h = sheet ? Math.max(120, Math.round(pk.getBoundingClientRect().top)) + 'px' : '';
+    if (cvs.style.height !== h) { cvs.style.height = h; const first = !cvs.dataset.mk; cvs.dataset.mk = 1; R.resize(); if (PG && first) R.fit(); }
   }
   function landPanel() {
     let h = field('Map size', seg(def.size, Object.keys(ID.MAP_SIZES).map((k) => [k, ID.MAP_SIZES[k].name + ' <small>' + ID.MAP_SIZES[k].W + '×' + ID.MAP_SIZES[k].H + '</small>']), 'mkSize'), 'A new size keeps the shapes and the states but clears painted terrain.');

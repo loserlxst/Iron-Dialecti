@@ -139,6 +139,7 @@
   /* ---------------------------------------------------------------- codes and files */
   const b64u = (bytes) => { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const unb64u = (s) => { const b = atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)); const out = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) out[i] = b.charCodeAt(i); return out; };
+  const streams = () => { if (typeof CompressionStream === 'undefined' || typeof DecompressionStream === 'undefined') throw new Error('This browser cannot make or read map codes. Use Export file and Import file instead.'); };
   const pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
   /* What goes into a code or a file: the definition without the defaults, optionally without uploaded flags. */
   M.pack = function (def, noImages) {
@@ -149,7 +150,7 @@
     return o;
   };
   M.encode = async function (def, noImages) {
-    const json = JSON.stringify(M.pack(def, noImages));
+    streams(); const json = JSON.stringify(M.pack(def, noImages));
     return M.PREFIX + b64u(await pipe(new TextEncoder().encode(json), new CompressionStream('deflate-raw')));
   };
   M.decode = async function (code) {
@@ -160,6 +161,7 @@
     const m = /^IDM(\d+)-([A-Za-z0-9_-]+)$/.exec(code);
     if (!m) throw new Error('That is not a map code. Map codes begin with IDM1-.');
     if (+m[1] > M.FORMAT) throw new Error('That code was made by a newer version of the game.');
+    streams();
     let json;
     try { json = new TextDecoder('utf-8', { fatal: true }).decode(await pipe(unb64u(m[2]), new DecompressionStream('deflate-raw'))); } catch (e) { throw new Error('That code is damaged or cut short. Copy the whole code and try again.'); }
     if (json.length > 4e6) throw new Error('That code is too long to be a map.');
