@@ -70,7 +70,7 @@
     return r.maxMob + (ID.LAWS.mobil.opts[n.laws.mobil || 'peace'].mob || 0) + (n.mods ? ID.mod(n, 'mob') : 0);
   };
   ID.ideo = (n) => ID.IDEOLOGIES[n.ideo];
-  ID.popCap = (n) => Math.max(20, n.popLand * (1 + 0.07 * n.tech.agr) + ID.nbe(n, B.CITY) * 400);
+  ID.popCap = (n) => Math.max(20, n.popLand * (1 + 0.07 * n.tech.agr) + ID.nbe(n, B.CITY) * 400 + ((n.a && n.a.foodCap) || 0));
   /* Buildings counted by condition: a city at 40% counts as 0.4 of a city. Refreshed monthly by ID.structMonth. */
   ID.nbe = (n, t) => (n.a && n.a.nbe ? n.a.nbe[t] : n.nb[t]);
 

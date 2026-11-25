@@ -421,7 +421,7 @@
   });
   ev({ id: 'ag_harvest', sys: 1, tone: 'mixed', tray: 1, title: 'The harvest is in', text: 'The village councils meet in the threshing yards to decide what becomes of the year’s grain.',
     opts: [
-      { label: 'Fill the village stores', fx: [['fn', (G, n) => { n.grain = Math.min(ID.Economy.GRAIN_MAX, (n.grain || 0) + 1.5); }], ['note', 'Granaries +1.5 months'], ['sig', 2]], ai: (n) => (ID.Economy.harvest(n) < 1.05 ? 2 : 0.7) },
+      { label: 'Fill the village stores', fx: [['fn', (G, n) => { n.grain = Math.min(ID.Economy.pol(n).store, (n.grain || 0) + 1.5); }], ['note', 'Granaries +1.5 months'], ['sig', 2]], ai: (n) => (ID.Economy.harvest(n) < 1.05 ? 2 : 0.7) },
       { label: 'Sell to the cities', fx: [['gold', 90], ['sup', 'workers', 4], ['fn', (G, n) => { n.grain = Math.max(0, (n.grain || 0) - 1); }], ['note', 'Granaries −1 month', false]], ai: (n) => (n.gold < 100 ? 1.5 : 0.7) },
       { label: 'Hold the harvest festival', fx: [['sup', 'peasants', 6], ['stab', 3], ['sig', 8], ['fn', (G, n) => { n.grain = Math.max(0, (n.grain || 0) - 1.5); }], ['note', 'Granaries −1.5 months', false]], ai: (n) => ((n.grain || 0) > 4 ? 1.5 : 0.3) },
     ] });

@@ -51,8 +51,44 @@
      equipment did; at war, unless the arms flow rises, it drains over about two years. */
   /* food: granaries in months of need; each working city's market adds CITY_FOOD to the harvest (up to CITY_FOOD_MAX);
      population stops growing when the harvest is under GROW_AT of need, so it settles where the land feeds it */
-  E.GRAIN_MAX = 6; E.GRAIN_START = 3; E.CITY_FOOD = 0.04; E.CITY_FOOD_MAX = 0.25; E.GROW_AT = 1.05;
+  E.NEED = 0.3; E.GRAIN_MAX = 6; E.GRAIN_START = 3; E.CITY_FOOD = 0.04; E.CITY_FOOD_MAX = 0.25; E.GROW_AT = 1.05;
   E.harvest = (n) => (n.a.harvest != null ? n.a.harvest : n.foodBal);
+
+  /* The grain year. Each spring the coming harvest is forecast (input randomness: the player learns it six months
+     ahead); it arrives in September and lasts a year. A bad year makes the next one gentler, so no run of bad luck
+     piles up. What to do with grain is a policy: export the surplus (gold now, two months in store), feed the
+     people (the surplus makes the population grow faster and further, four months in store), or fill
+     the granaries (a year in store, half the growth, a small storage bill). Grain is bought and sold at a world price
+     that rises when the world's harvest is poor. */
+  E.WX = [
+    { k: 'failed', name: 'Failed harvest', m: 0.72, p: 0.06 }, { k: 'poor', name: 'Poor harvest', m: 0.86, p: 0.18 }, { k: 'fair', name: 'Fair harvest', m: 1, p: 0.32 },
+    { k: 'good', name: 'Good harvest', m: 1.08, p: 0.29 }, { k: 'bumper', name: 'Bumper harvest', m: 1.2, p: 0.15 },
+  ];
+  E.wxOf = (k) => E.WX.find((w) => w.k === k) || E.WX[2];
+  E.POLICY = {
+    export: { name: 'Export the surplus', store: 2, grow: 0, desc: 'Sell every harvest above 110% of need abroad at the world price. Gold every month; only two months in store, and the surplus feeds no extra growth.' },
+    feed: { name: 'Feed the people', store: 4, grow: 1, desc: 'The surplus stays at home: the population grows faster (up to 70% faster while the harvest runs well above need) and past what the land alone supports. Four months in store.' },
+    stock: { name: 'Fill the granaries', store: 12, grow: 0.5, desc: 'Put grain away: up to a year in store against a failed harvest, a war or a blockade, and stability +2 while nine months are in store. When the world’s harvest fails and grain is dear, part of the store is sold at that price. Half the extra growth; storage costs a little gold.' },
+  };
+  E.pol = (n) => E.POLICY[n.grainPol] || E.POLICY.feed;
+  E.GRAIN_PRICE = 0.011; // gold per person-month of grain at a normal world harvest
+  E.grainPrice = (G) => (G.world && G.world.grainP) || E.GRAIN_PRICE;
+  /* Spring: the forecast; September: the harvest comes in. The world price follows the world's harvest. */
+  E.weatherMonth = function (G) {
+    const mo = Math.floor(G.tick / 30) % 12;
+    for (const n of G.nations) {
+      if (!n || !n.alive) continue;
+      const w = n.wx || (n.wx = { cur: 'fair', next: null, last: 'fair' });
+      if (mo === 2 || !w.next) {
+        const bad = w.cur === 'poor' || w.cur === 'failed';
+        w.next = G.rng.weighted(E.WX, (x) => x.p * (bad && x.k === 'failed' ? 0 : bad && x.k === 'poor' ? 0.5 : 1)).k;
+        if (n.id === G.player && mo === 2 && w.next !== 'fair' && w.next !== 'good') ID.news(G, 'The forecast for this year’s harvest: ' + E.wxOf(w.next).name.toLowerCase() + ', in by September.', w.next === 'bumper' ? 'good' : 'bad', n.id);
+      }
+      if (mo === 8) { w.last = w.cur; w.cur = w.next; }
+    }
+    let s = 0, k = 0; for (const n of G.nations) if (n && n.alive && n.wx) { s += E.wxOf(n.wx.cur).m; k++; }
+    G.world.grainP = E.GRAIN_PRICE * clamp(1 + (1 - (k ? s / k : 1)) * 5, 0.6, 2);
+  };
   E.grainMonths = (n) => (E.harvest(n) >= 1 ? Infinity : (n.grain || 0) / (1 - E.harvest(n))); // until the granaries are empty
   E.ARS = { life: 24, war: 0.6, idle: 0.3, lossK: 0.25, loot: 0.03, shells: 0.3, player: 0.4, playerIn: 1.5 };
   /* Players found the drain confusing and ran dry at every war: the player's war burn, fallen kit and shells × 0.4, its refill × 1.5. The AI is unchanged. */
@@ -180,7 +216,8 @@
      next plan is built on, closed only by growing into it or by exposure (plan_exposed). War checks the arms books. */
   E.QUOTA = { tol: 0.98, risk: 0.012, warArms: 4 };
   E.QUOTA_NAME = { ind: 'Industry', grain: 'The harvest', arms: 'Arms output' };
-  E.quotaReal = (n, k) => (k === 'ind' ? n.ind : k === 'grain' ? E.harvest(n) : n.a.armsMade || 0);
+  // the plan's grain figure forgives half of a bad year's weather (the planners blame the sky, and the sky is half right)
+  E.quotaReal = (n, k) => (k === 'ind' ? n.ind : k === 'grain' ? E.harvest(n) / Math.sqrt(Math.min(1, E.wxOf(n.wx ? n.wx.cur : 'fair').m)) : n.a.armsMade || 0);
   // industry follows the curve plans actually grow on (slow while the new factories are built): (y/5)^2 of the way
   E.quotaTarget = (p, k, y) => (k === 'ind' ? p.base + (p.target - p.base) * Math.pow(Math.min(5, Math.max(1, y)) / 5, 2) : p[k]);
   E.quotaFmt = (k, v) => (k === 'grain' ? Math.round(v * 100) + '%' : k === 'ind' ? Math.round(v) + '' : Math.round(v * 10) / 10 + '');
@@ -306,15 +343,33 @@
     if (model === 'plan' || model === 'cyber') food *= clamp(0.9 + n.budget.welfare * 0.6, 0.9, 1.06);
     if (rec.harvest && n.mob > 0.05) food *= 1 - (n.mob - 0.05) * 2;
     food *= 1 + Math.min(E.CITY_FOOD_MAX, E.CITY_FOOD * ID.nbe(n, B.CITY)); // market towns: cities pay for part of their own bread
-    const need = Math.max(1, n.pop * 0.24);
+    const wxm = E.wxOf(n.wx ? n.wx.cur : 'fair').m;
+    const need = Math.max(1, n.pop * E.NEED), pol = E.pol(n), price = E.grainPrice(G), trades = n.laws.trade !== 'autarky' && routes.some((r) => r.border || r.sea);
+    n.a.harvestAvg = food / need; // in an ordinary year: what the land carries, before the weather
+    food *= wxm;
     let bal = food / need, importCost = 0;
+    // the surplus sold abroad (export policy): gold now, nothing left over to grow on
+    if (pol === E.POLICY.export && trades && bal > 1.1 && (n.grain || 0) >= pol.store - 0.01) { const sold = bal - 1.1; ID.flow(n, 'Grain exports', sold * need * price * 0.8); bal = 1.1; }
     n.a.harvest = bal;
-    /* granaries: surplus fills them (in months of need), a shortfall draws them down before anyone goes hungry */
+    /* granaries: surplus fills them (in months of need, up to the policy's store), a shortfall draws them down before anyone goes hungry */
     if (n.grain == null) n.grain = E.GRAIN_START;
-    if (bal >= 1) n.grain = Math.min(E.GRAIN_MAX, n.grain + (bal - 1));
+    if (bal >= 1) n.grain = Math.min(pol.store, n.grain + (bal - 1));
     else { const draw = Math.min(n.grain, 1 - bal); n.grain -= draw; bal += draw; }
-    if (bal < 1 && n.laws.trade !== 'autarky' && routes.some((r) => r.border || r.sea) && n.gold > 20) {
-      const buy = Math.min(1 - bal, 0.25); importCost = buy * need * 0.011; bal += buy;
+    if (pol === E.POLICY.stock && n.grain > 6) {
+      // when the world goes hungry and grain is dear, full granaries sell part of their store at that price
+      if (trades && price > E.GRAIN_PRICE * 1.25) { const sold = Math.min(n.grain - 6, 1); n.grain -= sold; ID.flow(n, 'Grain sold from store', sold * need * price); }
+      else ID.flow(n, 'Grain storage', -(n.grain - 6) * need * 0.00015);
+    }
+    // a country that knows its granaries are full sleeps better
+    for (let i = n.mods.length - 1; i >= 0; i--) if (n.mods[i].label === 'Full granaries') n.mods.splice(i, 1);
+    if (n.grain >= 9) ID.addMod(n, 'stab', 2, 2, 'Full granaries');
+    // what the surplus lets the people grow to (read by ID.popCap): up to a third more than the land alone supports
+    n.a.foodCap = n.popLand * clamp(n.a.harvestAvg - 1.15, 0, 0.35) * pol.grow;
+    // and grows faster on it: up to +70% growth while the harvest runs well above need (it fades as the people catch up)
+    // (an overstretched state, over 7% of the world's land, cannot settle its people as fast: the bonus fades, so conquest does not snowball through the harvest)
+    n.a.growK = 1 + clamp(bal - 1.1, 0, 0.6) * 1.2 * pol.grow * clamp(1 - (n.tiles / Math.max(1, G.landCount) - 0.07) * 8, 0.2, 1);
+    if (bal < 1 && trades && n.gold > 20) {
+      const buy = Math.min(1 - bal, 0.25); importCost = buy * need * price; bal += buy;
     }
     n.foodBal = bal;
     if (bal < 0.93) {
@@ -480,6 +535,7 @@
 
   /* World economy: the Great Depression. */
   E.worldMonth = function (G) {
+    E.weatherMonth(G);
     const w = G.world;
     if (w.depression > 0) w.depression--;
     if (!w.depressionDone && G.tick >= w.depressionAt) {

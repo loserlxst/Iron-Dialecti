@@ -121,6 +121,7 @@
     rows.push(['Food', '<span class="' + (n.famine ? 'bad' : hvp < 1 ? 'warn' : '') + '">harvest ' + Math.round(hvp * 100) + '% of need</span>, ' + (n.grain || 0).toFixed(1) + ' months in the granaries', 'A surplus fills the granaries, a shortfall empties them; famine only when they are empty.']);
     rows.push(['Industrial capacity', Math.round(n.a.ic || 0) + '', '<h5>Industrial capacity</h5>What your factories can make: factories by condition × 12 × (1 + 0.1 × industrial technology ' + n.tech.ind + ') × ore ' + (n.a.oreF || 1).toFixed(2) + '.<hr>It is most of your industrial output, and the ceiling on arms: ' + (E.armsCap(n)).toFixed(1) + ' gold of kit a month' + (e.model === 'plan' || e.model === 'cyber' ? ' (a planned economy turns 20% more of it to arms)' : '') + '. Bombing and capture cut it until the factories are repaired.']);
     h += sec('Accounts', kv(rows));
+    h += sec('Grain', UI.grainCard(G, n), Math.round((n.a.harvestAvg || E.harvest(n)) * 100) + '% in an ordinary year');
     h += sec('Trade', tradeCard(G, n), Math.round(n.tradeInc) + ' a month');
 
     // model levers

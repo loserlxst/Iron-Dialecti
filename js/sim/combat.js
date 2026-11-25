@@ -1069,7 +1069,7 @@
     const cap = ID.popCap(n);
     if (n.pop < 1) n.pop = 1;
     // people stop multiplying as the harvest nears what they eat
-    const g = 0.00015 * (0.55 + n.ls / 110) * Math.max(0, Math.min(1, (ID.Economy.harvest(n) - ID.Economy.GROW_AT) * 20)) * (1 + ID.mod(n, 'growth'));
+    const g = 0.00015 * (0.55 + n.ls / 110) * Math.max(0, Math.min(1, (ID.Economy.harvest(n) - ID.Economy.GROW_AT) * 20)) * (1 + ID.mod(n, 'growth')) * (n.a.growK || 1);
     if (n.pop < cap) n.pop += n.pop * g * (1 - n.pop / cap); else n.pop -= (n.pop - cap) * 0.006;
     const r = ID.RECRUIT[n.laws.recruit];
     if (n.troops > n.pop * 0.6) n.troops = n.pop * 0.6;

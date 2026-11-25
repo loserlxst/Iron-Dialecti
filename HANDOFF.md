@@ -1184,6 +1184,34 @@ went (`Coup.rowsText`, the `plot_uncovered` dispatch and its variants, two unuse
   Kept on purpose: royal and princely titles (sultan, emir, shah, sheikh), personal names, NRX's "the Cathedral", and
   the ideology names themselves. `node tools/inworld.js` fails on any real-world reference in a text string.
 
+## Session 15: the grain year (`sim/economy.js`)
+
+Measured before (6 worlds × 40 years): famine in 0% of country-months, harvests 140–240% of need, populations at half
+their ceiling. Food was fair but never mattered. The design follows the vault's Interesting Decisions and Randomness
+notes and the Iron Dialectic lesson that famine must be a clock, not a cliff.
+- **Weather** (`E.WX`, `E.weatherMonth` from `worldMonth`): failed ×0.72 (6%), poor ×0.86 (18%), fair (32%), good
+  ×1.08 (29%), bumper ×1.2 (15%); drawn in March (`n.wx.next`, shown as the forecast), in effect from September
+  (`n.wx.cur`); after a poor or failed year a failed one cannot follow and a poor one is half as likely.
+- **World price** `G.world.grainP` = 0.011 × (1 + 5 × (1 − mean weather)), between ×0.6 and ×2; imports pay it.
+- **Policies** (`n.grainPol`, `E.POLICY`): export (stores 2 months, harvest above 110% sold as the `Grain exports`
+  flow at 80% of the price), feed (stores 4, growth ×`n.a.growK` up to +70% while the harvest is above 110%, and
+  `n.a.foodCap` raises `ID.popCap`), stock (stores 12, half the growth, `Grain storage` cost above 6 months, sells
+  a month of store at the world price when it is above ×1.25, stability +2 at 9 months). The growth bonus fades above
+  7% of the world's land. Need per person `E.NEED` 0.30 (was 0.24). The plan's grain quota forgives half of a bad
+  year (`E.quotaReal`).
+- **AI** (`AI.grain`): stock before a forecast poor/failed harvest, when losing a war or under autarky; export when
+  rich in grain and short of gold, when the world pays ×1.3, or as a merchant republic; else feed.
+- **UI**: Grain section in the Economy panel (`UI.grainCard`: this year, the forecast from March to September, stores,
+  world price, growth bonus, the three policies); Food tooltip; alert for a poor or failed forecast.
+- **Measured**: `tools/food.js` asserts each policy wins somewhere (one state, the world held still: exporting earns
+  the most gold in ordinary years, feeding grows the population most, only stock avoids famine in a failed and a poor
+  year without imports, and a world famine pays full granaries). World soak: food short in about 6% of months,
+  famine 0.05% (3 famines in 6 × 40 years: a state at war with no partners, a broke one, a trading state in a failed
+  year). Same-save comparison over 20 years: export −10% people / +50% income, feed +4% people and the most short
+  months, stock the fewest short months. Plan quota misses are nearly all industry (347 of 375), as before.
+  Note: `simulate.js` batches are not reproducible run to run (a 13% world becomes 40% in another batch), so single
+  outliers in "largest state" are noise; the averages held at about 19–20%.
+
 ## Session 15: browser pass and what is left
 
 Checked in the desktop app's browser pane at 800×600 and at phone width (375×812), with no console errors: *Settle*

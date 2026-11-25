@@ -460,8 +460,18 @@
     const t = C.bestSettle(G, n); if (t < 0) return;
     C.settle(G, n, t);
   }
+  /* The grain policy: stock up before a forecast bad harvest or in a war, sell the surplus when gold is short or the
+     world pays well, otherwise let it feed the people. */
+  AI.grain = function (G, n) {
+    const E = ID.Economy, w = n.wx || {}, mo = Math.floor(G.tick / 30) % 12, nx = mo >= 2 && mo < 8 ? w.next : w.cur, h = n.a.harvestAvg || 1, I = ID.ideo(n); // the forecast is known from March to the harvest
+    let p = 'feed';
+    if (nx === 'failed' || nx === 'poor' || (n.nwars && n.a.losing) || n.laws.trade === 'autarky') p = 'stock';
+    else if (h > 1.25 && (n.gold < 120 || E.grainPrice(G) > E.GRAIN_PRICE * 1.3 || I.econ.model === 'trade')) p = 'export';
+    n.grainPol = p;
+  };
   AI.month = function (G, n) {
     threats(G, n);
+    AI.grain(G, n);
     expand(G, n);
     settle(G, n);
     budget(G, n);

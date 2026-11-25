@@ -3,6 +3,13 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'The grain year', items: [
+      'Harvests now vary: bumper, good, fair, poor or failed. Each March you get the forecast for the harvest that comes in in September, and a bad year makes the next one gentler.',
+      'You decide what the surplus is for, in the new Grain section of the Economy panel. Export it for gold, feed the people so the population grows faster and further, or fill the granaries with up to a year of grain.',
+      'Grain trades at a world price. When the world’s harvest fails, grain is dear: full granaries sell part of their store at that price, and imports cost more.',
+      'Your people now eat a little more, so the weather matters. Famine is still rare and always gives warning: it needs a bad year, empty granaries and no way to buy grain.',
+      'An alert warns you when a poor or failed harvest is forecast.',
+    ] },
     { date: '25 November 2026', title: 'The treasury tells the truth, and the world keeps to itself', items: [
       'Fixed: the monthly balance on the top band only counted taxes and the budget. Oil money, concessions abroad, tribute paid and received, payments from dependencies, repairs, loans and debt repayments now count too, so the number matches what your treasury really does. The Treasury tooltip lists each of them.',
       'The world is now self-contained. Dispatches, programmes and stories no longer mention real countries, peoples, cities or religions: the faithful pray in temples and shrines, the comparisons are to Tessaly and Norvik, and borrowed foreign titles are gone.',

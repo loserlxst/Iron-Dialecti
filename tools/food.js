@@ -27,6 +27,34 @@ const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0) + '%';
   ok(grainAtFamine < 0.01, 'famine starts only once the granaries are empty');
   ok(!grew, 'population does not grow while the harvest is short (from the first monthly harvest on)');
   ok(E.harvest(n) < h0 && g0 > 0, 'harvest fell from ' + Math.round(h0 * 100) + '% to ' + Math.round(E.harvest(n) * 100) + '%');
+
+  /* The grain year: each policy wins somewhere. One state, one save, the weather forced; only the policy differs. */
+  const base = ID.Game.save((() => { const G0 = ID.newGame({ scenario: 'random', headless: true, difficulty: 'iron', seed: 23 }); for (let d = 0; d < 360 * 2; d++) ID.Game.tick(G0); return G0; })());
+  const G1 = ID.Game.load(base), id = ID.alive(G1).filter((x) => !x.nwars && x.laws.trade !== 'autarky' && (x.a.routes || []).some((r) => r.border || r.sea)).sort((a, b) => b.tiles - a.tiles)[0].id;
+  // runs `months` months of one state's harvest, economy and population for policy `pol` while the rest of the world
+  // holds still (no wars or conquests to blur it); wx(n, m) gives each state's weather; prep(G, n) sets the scene
+  const play = (pol, months, wx, prep) => {
+    const G = ID.Game.load(base); G.headless = true; const n = G.nations[id];
+    let fam = 0; const g0 = n.gold - n.debt, sold = { v: 0 };
+    const weather = (m) => { let s = 0, k = 0; for (const x of ID.alive(G)) { const w = wx(x, m); x.wx = { cur: w, next: w, last: w }; s += E.wxOf(w).m; k++; } G.world.grainP = E.GRAIN_PRICE * Math.min(2, Math.max(0.6, 1 + (1 - s / k) * 5)); };
+    n.grainPol = pol; weather(0); E.month(G, n); if (prep) prep(G, n);
+    const p0 = n.pop;
+    for (let m = 0; m < months; m++) { weather(m); n.grainPol = pol; for (let d = 0; d < 30; d++) { G.tick++; ID.Combat.tickPop(G, n); } E.month(G, n); if (n.famine) fam++; sold.v += (n.a.flow && n.a.flow['Grain sold from store']) || 0; }
+    return { gold: n.gold - n.debt - g0, pop: n.pop / p0, fam, sold: sold.v, grain: n.grain, price: E.grainPrice(G) / E.GRAIN_PRICE, trades: n.laws.trade + ' ' + (n.a.routes || []).filter((r) => r.border || r.sea).length };
+  };
+  const fair = () => 'fair';
+  const A = {}; for (const p of ['export', 'feed', 'stock']) A[p] = play(p, 120, fair);
+  ok(A.export.gold > A.feed.gold && A.export.gold > A.stock.gold, 'ordinary years: exporting the surplus earns the most gold (' + ['export', 'feed', 'stock'].map((p) => p + ' ' + Math.round(A[p].gold)).join(', ') + ')');
+  ok(A.feed.pop > A.export.pop && A.feed.pop > A.stock.pop, 'ordinary years: feeding the people grows the population most (' + ['export', 'feed', 'stock'].map((p) => p + ' ×' + A[p].pop.toFixed(3)).join(', ') + ')');
+  // a lean harvest (108% in a fair year), no imports, then a failed year and a poor one: only full granaries carry it
+  const lean = (G, n) => { n.laws.trade = 'autarky'; n.foodLand *= 1.08 / Math.max(0.1, n.a.harvestAvg); };
+  const hard = (x, m) => (m < 24 ? 'fair' : m < 36 ? 'failed' : m < 48 ? 'poor' : 'fair');
+  const B = {}; for (const p of ['export', 'feed', 'stock']) B[p] = play(p, 60, hard, lean);
+  ok(B.stock.fam === 0 && B.export.fam > 0, 'a failed and a poor year without imports: stock starves ' + B.stock.fam + ' months, feed ' + B.feed.fam + ', export ' + B.export.fam);
+  // the world's harvest fails while ours is fair: full granaries sell at the high price
+  const C = play('stock', 48, (x, m) => (x.id === id ? 'fair' : m < 24 ? 'fair' : 'failed'), (G, n) => { n.laws.trade = 'free'; });
+  console.log('   (world famine: grain ' + C.grain.toFixed(1) + ', price ×' + (C.price || 0).toFixed(2) + ', trades ' + C.trades + ')');
+  ok(C.sold > 0, 'a world famine: full granaries sell ' + Math.round(C.sold) + ' gold of grain at the high price');
   if (fails) process.exit(1);
 }
 let lsSum = 0, stabSum = 0, popEnd = 0, troopsEnd = 0, months = 0, famine = 0, short = 0, starts = 0, grainSum = 0;
