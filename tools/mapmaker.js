@@ -102,7 +102,7 @@ const rejects = async (code, why) => { try { await M.decode(code); ok(false, 're
     const ok2 = M.pack(M.preset('rivals'));
     await rejects(await enc(Object.assign({}, ok2, { nations: ok2.nations.slice(0, 1) })), 'one state');
     await rejects(await enc(Object.assign({}, ok2, { nations: Array.from({ length: 41 }, (_, k) => Object.assign({}, ok2.nations[0], { key: 'N' + k })) })), 'too many states');
-    await rejects(await enc(Object.assign({}, ok2, { size: 'huge' })), 'an unknown size');
+    await rejects(await enc(Object.assign({}, ok2, { size: 'galactic' })), 'an unknown size');
     await rejects(await enc(Object.assign({}, ok2, { blobs: [[0.5, 0.5, 9]] })), 'a continent out of range');
     await rejects(await enc(Object.assign({}, ok2, { paint: [[0, 1e9, 1]] })), 'paint off the map');
     await rejects(await enc(Object.assign({}, ok2, { nations: ok2.nations.map((d, k) => (k ? d : Object.assign({}, d, { ideo: 'evil' }))) })), 'an unknown system');
@@ -129,6 +129,14 @@ const rejects = async (code, why) => { try { await M.decode(code); ok(false, 're
       for (let d = 0; d < 360 * YEARS / 2 && !G2.over; d++) ID.Game.tick(G2);
       ok(G2.scenario === 'custom' && ID.yearOf(G2.tick) >= 1910 + YEARS - 1, P.id + ': ' + YEARS + ' years headless with a save and load halfway (' + ID.alive(G2).length + ' states left)');
     } catch (e) { err = e.stack; ok(false, P.id + ': campaign crashed: ' + err); }
+  }
+
+  /* ---------------------------------------------------------------- the Enormous size as a random world */
+  {
+    const G = ID.newGame({ scenario: 'random', seed: 77, size: 'huge', headless: true }); ID.Game.observe(G, ID.alive(G)[0].id);
+    for (let d = 0; d < 360 * 5; d++) ID.Game.tick(G);
+    const L = ID.Game.load(ID.Game.save(G)); let s = true; for (let i = 0; i < G.N; i++) if (L.owner[i] !== G.owner[i]) { s = false; break; }
+    ok(G.W === 640 && ID.alive(G).length >= 20 && s, 'an Enormous random world (640×360, ' + ID.MAP_SIZES.huge.nations + ' states) runs five years and saves and loads');
   }
 
   /* ---------------------------------------------------------------- a save from before the key split */

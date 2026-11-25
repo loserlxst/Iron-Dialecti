@@ -46,16 +46,55 @@
     return def;
   };
   /* A layout: blobs and a sea level; the states are placed on it the way a random world places them. */
-  M.layout = function (name, seed, size, blobs, land, extra) {
-    const G = ID.newGame({ scenario: 'random', seed, size, blobs, land, headless: true });
-    const def = M.fromWorld(G, { name, seed, size, land, blobs: blobs || G.blobs });
+  M.layout = function (name, seed, size, blobs, land, extra, mask) {
+    const G = ID.newGame({ scenario: 'random', seed, size, blobs, land, headless: true, mg: mask ? 2 : 0, mask });
+    const def = M.fromWorld(G, { name, seed, size, land, blobs: blobs || G.blobs, mask: mask || undefined });
     if (extra) extra(def);
     return def;
   };
   const isles = (seed, n, lo, hi) => { const r = new ID.RNG(seed), out = []; for (let k = 0; k < n; k++) out.push([r4(r.range(0.08, 0.92)), r4(r.range(0.12, 0.88)), r4(r.range(lo, hi))]); return out; };
   const ring = (n, R, r) => { const out = []; for (let k = 0; k < n; k++) { const a = (k / n) * Math.PI * 2; out.push([r4(0.5 + Math.cos(a) * R * 0.62), r4(0.5 + Math.sin(a) * R), r]); } return out; };
+  /* The globe laid flat, 80° north to 60° south, as land per 5° band of latitude: [west, east] in degrees of longitude.
+     Coarse on purpose (straits and inland seas narrower than a band are left out); the generator roughens the coasts. */
+  const EARTH = [
+    [[-100, -20], [95, 110]],
+    [[-125, -80], [-60, -20], [52, 58], [70, 160]],
+    [[-180, -170], [-168, -82], [-80, -62], [-55, -22], [-24, -14], [8, 30], [30, 180]],
+    [[-168, -95], [-78, -62], [-50, -42], [5, 19], [22, 155], [160, 180]],
+    [[-165, -155], [-135, -95], [-80, -58], [-6, -2], [5, 20], [21, 140], [155, 163]],
+    [[-130, -56], [-10, -6], [-5, 2], [4, 140], [142, 144], [156, 160]],
+    [[-125, -64], [-5, 47], [54, 140], [142, 146]],
+    [[-124, -70], [-9, 3], [5, 28], [41, 47], [54, 130], [139, 146]],
+    [[-123, -76], [-9, -1], [15, 18], [20, 122], [126, 129], [130, 141]],
+    [[-120, -80], [-10, 122], [129, 141]],
+    [[-115, -97], [-82, -80], [-15, 33], [35, 48], [56, 122]],
+    [[-106, -97], [-91, -87], [-84, -75], [-17, 37], [39, 59], [69, 117]],
+    [[-105, -88], [-74, -68], [-17, 40], [42, 53], [73, 85], [95, 109], [120, 122]],
+    [[-92, -83], [-17, 51], [74, 80], [98, 100], [104, 109], [122, 126]],
+    [[-83, -60], [-13, 48], [80, 82], [99, 104], [122, 126]],
+    [[-80, -50], [9, 43], [95, 106], [109, 119], [120, 125]],
+    [[-81, -35], [9, 41], [100, 106], [110, 117], [120, 123], [131, 150]],
+    [[-80, -35], [12, 40], [105, 125], [140, 150]],
+    [[-77, -38], [13, 41], [43, 50], [130, 136], [141, 144]],
+    [[-75, -39], [12, 40], [43, 50], [122, 146]],
+    [[-70, -40], [13, 35], [43, 48], [114, 153]],
+    [[-71, -48], [15, 33], [113, 153]],
+    [[-72, -52], [17, 28], [115, 124], [134, 151]],
+    [[-73, -57], [140, 150], [173, 178]],
+    [[-74, -63], [145, 148], [170, 174]],
+    [[-75, -66], [166, 170]],
+    [[-75, -68], [-61, -58]],
+    [],
+  ];
+  M.earthMask = function () {
+    const w = 72, h = EARTH.length, bits = new Uint8Array(w * h);
+    EARTH.forEach((L, y) => { for (let x = 0; x < w; x++) { const a = -180 + x * 5, b = a + 5; for (const [p, q] of L) { const o = Math.min(b, q) - Math.max(a, p); if (o >= Math.min(2.5, (q - p) * 0.6)) bits[y * w + x] = 1; } } });
+    let land = 0; for (const v of bits) land += v;
+    return { mask: ID.maskOf(bits, w, h), land: Math.round((land / bits.length) * 100) / 100 };
+  };
   M.PRESETS = [
     { id: 'empty', name: 'An empty sea', desc: 'Nothing but water and two islands. Paint every coast, border and city yourself.', make: () => M.empty('std') },
+    { id: 'world', name: 'World map', desc: 'The continents of a globe laid flat, from the polar islands to the southern capes, with 30 states placed across them. Rename and repaint them as you like.', make: (seed) => { const E = M.earthMask(); return M.layout('The World', seed || 1914, 'world', [], E.land, null, E.mask); } },
     { id: 'meridia', name: 'The Three Continents', desc: 'The handcrafted world of 1910, fully editable as a copy.', make: () => M.fromMeridia() },
     { id: 'random', name: 'A random world', desc: 'A world from a seed, as the Random world option makes it.', make: (seed) => { const s = seed || 4242; const G = ID.newGame({ scenario: 'random', seed: s, size: 'std', headless: true }); return M.fromWorld(G, { name: 'World ' + s, seed: s, size: 'std', land: 0.37, blobs: G.blobs.map((b) => b.map(r4)) }); } },
     { id: 'pangaea', name: 'Pangaea', desc: 'One great landmass. Every war is a land war.', make: (seed) => M.layout('Pangaea', seed || 3301, 'std', [[0.5, 0.5, 0.27], [0.34, 0.4, 0.19], [0.66, 0.6, 0.19], [0.38, 0.66, 0.15], [0.63, 0.34, 0.16], [0.22, 0.55, 0.11], [0.79, 0.45, 0.11]], 0.44) },
@@ -109,6 +148,11 @@
     const own = mg >= 2 ? runs(o.own, 255, 'painted territory') : []; // generator 1 cannot keep provinces inside painted borders
     if (own.some((r) => r[2] > nN && r[2] !== 255)) bad('The painted territory names a state that is not on the map.');
     if (o.level != null && !num(o.level, -2, 3)) bad('The sea level is out of range.');
+    let mask = null;
+    if (o.mask != null) {
+      const k = o.mask; if (!k || !Number.isInteger(k.w) || !Number.isInteger(k.h) || k.w < 2 || k.h < 2 || k.w > 256 || k.h > 256 || typeof k.d !== 'string' || !/^[A-Za-z0-9_-]*$/.test(k.d) || k.d.length !== Math.ceil(Math.ceil((k.w * k.h) / 8) * 4 / 3)) bad('The land mask does not fit this map.');
+      mask = { w: k.w, h: k.h, d: k.d };
+    }
     if (o.blds != null && (!Array.isArray(o.blds) || o.blds.length > M.LIM.blds)) bad('Too many buildings.');
     const seenB = new Set();
     const blds = (o.blds || []).filter((b) => { if (!Array.isArray(b) || b.length !== 2 || !Number.isInteger(b[0]) || b[0] < 0 || b[0] >= N || M.BLDS.indexOf(b[1]) < 0) bad('A building does not fit this map.'); if (seenB.has(b[0])) return false; seenB.add(b[0]); return true; }).map((b) => b.slice());
@@ -132,7 +176,7 @@
       return x;
     });
     for (const x of nations) if (x.over && (x.over === x.key || !keys.has(x.over))) { delete x.over; delete x.dep; } // an overlord must be another state of this map
-    return { id: 'custom', v: M.FORMAT, mg, gen: o.gen !== false, level: o.level == null ? null : r4(o.level), own, blds, grow: o.grow !== false, autoBld: o.autoBld !== false, year, gv: typeof o.gv === 'string' ? o.gv.slice(0, 16).replace(/[^\w.-]/g, '') : ID.VERSION,
+    return { id: 'custom', v: M.FORMAT, mg, mask: mg >= 2 ? mask : null, gen: o.gen !== false, level: o.level == null ? null : r4(o.level), own, blds, grow: o.grow !== false, autoBld: o.autoBld !== false, year, gv: typeof o.gv === 'string' ? o.gv.slice(0, 16).replace(/[^\w.-]/g, '') : ID.VERSION,
       name: Cu.clean(o.name, M.LIM.name) || 'A custom world', seed: o.seed, size: o.size, land, noiseH, blobs, paint, rivers, nations };
   };
 
@@ -177,6 +221,7 @@
     if (def.noiseH) o.noiseH = def.noiseH;
     if (def.paint && def.paint.length) o.paint = def.paint;
     if (def.rivers && def.rivers.length) o.rivers = def.rivers;
+    if (def.mask) o.mask = def.mask;
     if (def.gen === false) o.gen = false;
     if (def.level != null) o.level = def.level;
     if (def.own && def.own.length) o.own = def.own;

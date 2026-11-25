@@ -8,7 +8,9 @@
     small: { W: 288, H: 162, nations: 12, name: 'Compact', desc: '12 states. Shorter, more crowded campaigns.' },
     std: { W: 384, H: 216, nations: 18, name: 'Standard', desc: '18 states. The intended size.' },
     large: { W: 480, H: 270, nations: 24, name: 'Vast', desc: '24 states. Long campaigns on a bigger world.' },
+    huge: { W: 640, H: 360, nations: 32, name: 'Enormous', desc: '32 states on a map 2.8 times the standard. The longest campaigns; slower on older machines.' },
     hist: { W: 384, H: 288, nations: 24, name: 'Three continents', desc: 'The handcrafted world of 1910.', hidden: 1 },
+    world: { W: 720, H: 288, nations: 30, name: 'World', desc: 'A wide map shaped like a globe laid flat (the World map preset).', hidden: 1 },
   };
 
   /* Province records from the province grid: size, centre, terrain mix, neighbours. */
@@ -246,12 +248,16 @@
     if (opts.gen !== false) {
       const noise = ID.makeNoise(seed ^ 0x9e3779b9), noise2 = ID.makeNoise((seed * 7 + 13) >>> 0);
       const elev = new Float32Array(N), asp = W / H, ns = H / (opts.noiseH || H);
+      // a land mask (the World preset): a coarse grid of land and sea, smoothed; the noise only roughens its coasts
+      const mk = opts.mask ? ID.maskBits(opts.mask) : null, mw = mk ? opts.mask.w : 0, mh = mk ? opts.mask.h : 0;
+      const mAt = (fx, fy) => { const gx = Math.max(0, Math.min(mw - 1.001, fx * mw - 0.5)), gy = Math.max(0, Math.min(mh - 1.001, fy * mh - 0.5)), x0 = gx | 0, y0 = gy | 0, tx = gx - x0, ty = gy - y0, g = (x, y) => mk[y * mw + x];
+        const v = (g(x0, y0) * (1 - tx) + g(x0 + 1, y0) * tx) * (1 - ty) + (g(x0, y0 + 1) * (1 - tx) + g(x0 + 1, y0 + 1) * tx) * ty; return v * v * (3 - 2 * v); };
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-        const fx = x / W, fy = y / H; let f = 0;
+        const fx = x / W, fy = y / H; let f = mk ? mAt(fx, fy) * 0.95 : 0;
         for (const b of blobs) { const dx = (fx - b[0]) * asp, dy = fy - b[1], r = b[2] * asp * 0.72; f += Math.exp(-(dx * dx + dy * dy) / (r * r)); }
         if (f > 1.25) f = 1.25;
-        const edge = Math.min(x, W - 1 - x, y, H - 1 - y) / (0.05 * W);
-        elev[y * W + x] = f * 0.7 + noise.fbm(fx * 6.5 * asp * 0.6 * ns, fy * 6.5 * 0.6 * ns, 5) * 0.55 - (edge < 1 ? (1 - edge) * 0.9 : 0);
+        const edge = mk ? 9 : Math.min(x, W - 1 - x, y, H - 1 - y) / (0.05 * W);
+        elev[y * W + x] = f * 0.7 + noise.fbm(fx * 6.5 * asp * 0.6 * ns, fy * 6.5 * 0.6 * ns, 5) * 0.55 * (mk ? 0.4 : 1) - (edge < 1 ? (1 - edge) * 0.9 : 0);
       }
       level = opts.level != null ? opts.level : Float32Array.from(elev).sort()[Math.floor(N * (1 - (opts.land || 0.37)))];
       const top = level + 0.85; // a fixed scale: the height of one hill does not depend on the highest peak elsewhere
@@ -322,12 +328,15 @@
     }
     return { blobs, level, region: opts.region || null, W, H, N, terrain, river, coast, prov, provinces: provMeta(W, H, terrain, coast, prov, np, land), landCount: land.length, seed, size: opts.size || 'std' };
   }
+  /* A land mask {w, h, d}: d is base64url of w×h bits, row by row, the first bit the highest. */
+  ID.maskBits = (m) => { const b = atob(m.d.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((m.d.length + 3) % 4)), out = new Uint8Array(m.w * m.h); for (let i = 0; i < out.length; i++) out[i] = (b.charCodeAt(i >> 3) >> (7 - (i & 7))) & 1; return out; };
+  ID.maskOf = (bits, w, h) => { let s = ''; for (let i = 0; i < w * h; i += 8) { let v = 0; for (let k = 0; k < 8; k++) v = (v << 1) | (bits[i + k] || 0); s += String.fromCharCode(v); } return { w, h, d: btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') }; };
   /* Runs [[start, length, value]] into a grid. */
   ID.runsGrid = (runs, N) => { const g = new Uint8Array(N); for (const [s0, len, v] of runs || []) g.fill(v, s0, Math.min(N, s0 + len)); return g; };
 
   /* Map options for a world: a scenario's own layout, or (for saves made before the scenario grew) its legacy one. */
   ID.mapOpts = (sc, seed, size) => (sc && sc.legacy && size !== sc.size ? { seed, size, blobs: sc.legacy } : { seed, size, blobs: sc ? sc.blobs : null, noiseH: sc ? sc.noiseH : 0, land: sc ? sc.land : 0, paint: sc ? sc.paint : null, rivers: sc ? sc.rivers : null,
-    mg: sc ? sc.mg : 0, gen: sc ? sc.gen : true, level: sc ? sc.level : null, region: sc && sc.own && sc.own.length ? ID.runsGrid(sc.own, ID.MAP_SIZES[size].W * ID.MAP_SIZES[size].H) : null });
+    mg: sc ? sc.mg : 0, mask: sc ? sc.mask : null, gen: sc ? sc.gen : true, level: sc ? sc.level : null, region: sc && sc.own && sc.own.length ? ID.runsGrid(sc.own, ID.MAP_SIZES[size].W * ID.MAP_SIZES[size].H) : null });
 
   /* BFS over sea from a set of start tiles; returns distance array (Int16, -1 unreachable) up to maxD. */
   ID.seaDistance = function (G, starts, maxD) {

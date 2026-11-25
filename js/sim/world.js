@@ -352,7 +352,7 @@
     const size = sc ? sc.size : (opts.size || 'std');
     const custom = opts.custom || {};
     // a random world may be given a land layout (the map maker places nations on a preset's continents this way)
-    const map = ID.genMap(sc ? ID.mapOpts(sc, seed, size) : { seed, size, blobs: opts.blobs || null, land: opts.land || 0 });
+    const map = ID.genMap(sc ? ID.mapOpts(sc, seed, size) : { seed, size, blobs: opts.blobs || null, land: opts.land || 0, mg: opts.mg || 0, mask: opts.mask || null });
     const N = map.N;
     const painted = sc && sc.own && sc.own.length ? map.region : null; // the map maker's painted territory: who owns what, fixed
     const startYear = opts.startYear || (sc && sc.year) || ID.START_YEAR;

@@ -3,6 +3,10 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'The whole world, and a bigger one', items: [
+      'A World map preset in the map maker: the continents of a globe laid flat, from the polar islands to the southern capes, with 30 states placed across them. The states have names of their own; rename, repaint and rearrange them however you like.',
+      'A new Enormous map size, 640 by 360 tiles with 32 states, for random worlds and the map maker. It is nearly three times the standard map, so campaigns run longer and older machines may run a little slower.',
+    ] },
     { date: '25 November 2026', title: 'Your own countries, your own maps', items: [
       'Customize any country before you begin, yours or anyone else’s: its name, adjective and full name, capital, first leader, map colour, motto, anthem, description and starting situation. Press Customize this country on the new campaign screen, or Customize beside each country under Other countries.',
       'Give a country your own flag: build one from a layout, colours and an emblem, or upload a picture. Your flag flies everywhere, from the map to the dispatches and the newspaper. Tick Let history change the flag if you want destinies and revolutions to bring their own.',
