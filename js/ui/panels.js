@@ -70,7 +70,6 @@
     if (I.elections) { const f = ID.Politics.electionForecast(G, n); rows.push(['Next election', n.emergency ? '<span class="bad">suspended</span>' : ID.dateOf(n.electionAt).short + ' · <span class="' + (f >= 0.5 ? 'good' : 'bad') + '">' + Math.round(f * 100) + '%</span>', 'Forecast vote for the government: faction support weighted by power, plus recent living standards. Below 50% the opposition wins and the country changes ideology peacefully.']); }
     if (n.emergency) rows.push(['Emergency rule', '<span class="bad">in force</span>', 'Votes are suspended. Participation and mandate drain every month.']);
     rows.push(['Unrest', Math.round(n.a.unrest || 0) + '', 'Average unrest across your provinces. See the Unrest map (V).']);
-    const det = ID.LAWS.security.opts[n.laws.security].detect;
     { const Cp = ID.Coup, kn = Cp.plots(G, n).filter((q) => q.known), intel = Cp.intel(n), any = Cp.plots(G, n)[0];
       const odds = any && !I.flags.noCoup ? Cp.odds(G, n, any) : Cp.odds(G, n, { src: 'army' });
       rows.push(['Known plots', kn.length ? '<span class="bad">' + kn.map((q) => esc(Cp.who(G, n, q)) + ': ' + Cp.STAGES[q.known].toLowerCase()).join('; ') + '</span>' : intel < Cp.WEAK ? '<span class="dim">your security services are too weak to tell</span>' : 'none',

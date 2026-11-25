@@ -135,6 +135,7 @@
     A.a.lastPeace = Bn.a.lastPeace = G.tick;
     G.warM[A.id * MAXN + Bn.id] = G.warM[Bn.id * MAXN + A.id] = 0;
     A.nwars = Math.max(0, A.nwars - 1); Bn.nwars = Math.max(0, Bn.nwars - 1);
+    ID.Combat.release(G, A, Bn);
     if (A.objs) delete A.objs[Bn.id]; if (Bn.objs) delete Bn.objs[A.id];
     for (let k = G.boats.length - 1; k >= 0; k--) { const bt = G.boats[k], o = G.owner[bt.target]; if ((bt.owner === A.id && o === Bn.id) || (bt.owner === Bn.id && o === A.id)) { G.boats.splice(k, 1); const w = G.nations[bt.owner]; if (w.alive) w.troops += bt.troops; } }
     for (let k = G.attacks.length - 1; k >= 0; k--) {

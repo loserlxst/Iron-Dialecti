@@ -74,6 +74,9 @@ function selfCheck() {
   run(G, d0 + 30);
   ok(!pocketOf(G, A, D), 'it surrenders within the countdown (' + d0 + ' days)');
   ok((D.cnt.prisoners || 0) > pris0, 'the defender takes prisoners (' + ID.fmtPop((D.cnt.prisoners || 0) - pris0) + '), glory ' + glory0.toFixed(1) + ' → ' + D.glory.toFixed(1));
+  const held = (G.pow || {})[D.id + ':' + A.id] || 0, tr1 = A.troops;
+  ID.Diplomacy.peace(G, A, D);
+  ok(held > 0 && Math.abs(A.troops - tr1 - held * 0.6) < 0.01 && !(G.pow || {})[D.id + ':' + A.id], 'at the peace six in ten prisoners come home (' + ID.fmtPop(held * 0.6) + ')');
 
   // an ageing beach: held, but without a port it stops carrying the pocket after C.BEACH_DAYS
   const s2 = setup(+arg('seed', 11) + 3), G2 = s2.G;

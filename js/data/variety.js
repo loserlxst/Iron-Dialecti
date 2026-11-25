@@ -93,10 +93,6 @@
     ['The shopkeepers shut', 'Every shop in the capital has its shutters down against the new turnover tax. The traders’ league says it can keep this up longer than the treasury can.'],
     ['The province will not pay', 'The assembly of the richest province has voted, almost unanimously, to hold back its taxes until the government accounts for how it spent last year’s.'],
   ]);
-  vary('plot_uncovered', [
-    ['Letters in a regimental safe', 'A quartermaster with a grudge has handed over letters from a regimental safe. They discuss the date, the units, and which ministers are to be arrested first. The date has passed, for now.'],
-    ['The cavalry school', 'The security service reports that the instructors of the cavalry school have been teaching a course not on the syllabus: how to seize a capital in a morning. The cadets were enthusiastic.'],
-  ]);
   vary('veterans_march', [
     ['The limbless at the ministry', 'Men who left their legs at the front have been wheeled to the steps of the finance ministry by their wives. They have their medals on and a banner asking for the pension they were promised.'],
     ['The demobbed', 'Half a million men have been sent home with a suit, a railway ticket and no work. They have their old sergeants, their old songs and, in a good many cases, their old rifles.'],
@@ -140,7 +136,7 @@
   /* ---- themes: two dispatches on the same subject do not arrive back to back */
   theme('labour', ['strike_wave', 'general_strike', 'union_congress', 'mine_disaster', 'foreign_strike']);
   theme('food', ['bread_riots', 'harvest_failure', 'bumper_harvest', 'peasant_petition', 'village_vs_factory']);
-  theme('army', ['officers_petition', 'ambitious_general', 'plot_uncovered', 'veterans_march', 'mutiny', 'arms_race', 'border_incident']);
+  theme('army', ['officers_petition', 'ambitious_general', 'veterans_march', 'mutiny', 'arms_race', 'border_incident']);
   theme('money', ['bank_run', 'capital_flight', 'inflation_spiral', 'speculation_boom', 'tax_revolt', 'corruption_scandal']);
   theme('mind', ['student_protests', 'brain_drain', 'dissident_novel', 'bishops_letter', 'heretical_preacher']);
   theme('plan', ['planners_error', 'shortages', 'bureaucrats_fiefs', 'organs_overreach', 'network_fault']);

@@ -1149,6 +1149,25 @@ state can reach by land at the start, 0–2% of the world's land) ever settled.
   1920, 75% by 1925, 99% by 1940, 100% by 1960; 2.8 expeditions a world (merchant republics 10 of 22, constitutional
   monarchies 6, socialist states 1); largest state 20% on average, 31% at most (21% and 32% before).
 
+## Session 15: review fixes and refinements
+
+From a review of the four parts: the AI's monthly hinterland expansion no longer waits for a colony's own expansion
+to finish (`expand` in `sim/ai.js` counts only the main army's); a covenant province only "leaves" when it really
+does (`P.secede` can refuse when the world has no free state slots); the breakout target of an encircled pocket is
+found by a search outward over land (`nearestOf` in `sim/combat.js`) instead of a scan of every tile; dead code
+went (`Coup.rowsText`, the `plot_uncovered` dispatch and its variants, two unused constants).
+- **Prisoners come home** (`C.capture`, `C.release`): captured troops are held in `G.pow['captor:victim']` (saved)
+  and at the peace (`Diplomacy.endWarState`) six in ten go home to their army, with a news line.
+- **Old saves**: a save made by the code before this session (Three Continents, 1931, two attacks and two boats at
+  sea) loads, runs four years, and saves again; attacks are given their piece on load. A coup that was waiting in an
+  old save's queue is fought out anew under the new model (`Gm.load`).
+- Tests: `tools/forced.js ancap` now asserts the land market first (an offer from a broke neighbour, the purchase
+  moving exactly its tiles, payment, the claim, no sale without money, an unhappy province leaving, no second exit in
+  two years, a save); `tools/encircle.js` asserts the prisoners' return.
+- Measured again after the expansion fix: forced ancap 25 years on average, 3 of 8 to the end, largest share 15%;
+  islands settled 44% by 1915, 88% by 1920, 91% by 1925, 100% by 1940 (colonial powers no longer stall at home, so
+  they reach the islands sooner); simulate (8 random runs) largest state 19% on average.
+
 ## Session 15: browser pass and what is left
 
 Checked in the desktop app's browser pane at 800×600 and at phone width (375×812), with no console errors: *Settle*
@@ -1165,8 +1184,7 @@ reasons are phrased from the plotters' side; land prices for the covenant raised
 Left undone or simplified:
 - Encirclement: the AI avoids thin salients with a heap penalty, not with a supply-aware plan; a cut-off salient takes
   a share of the attack by its share of the border, an approximation; the national troop pool still defends
-  everywhere (only committed attack troops belong to a pocket); prisoners are counted (`cnt.prisoners`) but never
-  returned at peace; there is no separate fleet or blockade order, only sea power ratios.
+  everywhere (only committed attack troops belong to a pocket); there is no separate fleet or blockade order, only sea power ratios.
 - Coups: scripted coups in story chapters and programmes (`['ideology', x, 'coup']`) stay scripted choices outside the
   model; the old `plot_uncovered` dispatch is no longer queued (the stage dispatches replace it) but its text remains;
   the "before" coup count has no weak-state figure (the old code did not log stability).

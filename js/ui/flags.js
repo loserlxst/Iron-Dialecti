@@ -117,7 +117,7 @@
 
   /* Poster banner for a dispatch: rays, a category glyph and the player's flag. */
   const CAT = {
-    war: ['coup', 'mutiny', 'war_profiteers', 'peace_movement', 'victory_parade', 'border_incident', 'arms_race', 'partisan_reprisals', 'atrocity_exposed', 'refugees', 'ally_attacked', 'capitulation', 'civil_war', 'plot_uncovered', 'ambitious_general', 'officers_petition', 'veterans_march'],
+    war: ['coup', 'mutiny', 'war_profiteers', 'peace_movement', 'victory_parade', 'border_incident', 'arms_race', 'partisan_reprisals', 'atrocity_exposed', 'refugees', 'ally_attacked', 'capitulation', 'civil_war', 'ambitious_general', 'officers_petition', 'veterans_march'],
     eco: ['bread_riots', 'harvest_failure', 'bumper_harvest', 'bank_run', 'inflation_spiral', 'ore_discovery', 'planners_error', 'shortages', 'council_deadlock', 'speculation_boom', 'crash', 'railway_boom', 'electrification', 'green_revolution', 'oil_shock', 'tax_revolt', 'mine_disaster', 'worlds_fair', 'pandemic', 'debt_crisis', 'great_slump', 'plan_failed', 'concession_resentment', 'network_fault', 'houses_dividend', 'capital_flight', 'nationalisation_backlash', 'expert_report', 'village_vs_factory'],
     street: ['strike_wave', 'general_strike', 'foreign_strike', 'student_protests', 'peasant_petition', 'broken_promise', 'riot_memory', 'mass_rally', 'union_congress', 'tax_revolt'],
   };

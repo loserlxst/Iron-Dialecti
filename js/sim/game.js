@@ -256,7 +256,7 @@
       prov: G.provinces.slice(1).map((P) => [P.core, Math.round(P.unrest * 10) / 10, P.opp, Math.round(P.oppStr * 10) / 10, Math.round(P.integ), P.lastOwner, P.sponsor, P.oil || 0, P.oilFound || 0, P.oilCo || 0, P.oilShare || 0, P.oilAt || 0, P.canal || 0]), fronts: G.fronts || null,
       attacks: G.attacks.map((a) => ({ id: a.id, from: a.from, to: a.to, troops: a.troops, committed: a.committed, style: a.style, amphib: a.amphib, taken: a.taken, pk: a.pk, enc: a.enc, bo: a.bo, bd: a.bd, out: a.out, holdX: a.holdX, give: a.give, last: a.last, pobj: a.pobj })),
       boats: G.boats, missiles: G.missiles, builds: G.builds, dip: G.dip, blocs: G.blocs, news: G.news.slice(-60), chronicle: G.chronicle, world: G.world, flags: G.flags,
-      evq: G.evq, tray: G.tray || [], votes: G.votes, nextId: G.nextId, over: G.over, won: G.won || null, ack: G.ack || null, endless: !!G.endless, tut: G.tut, offers: G.offers || [], shock: G.shock || [], historical: !!G.historical, story: G.story || null, beach: G.beach || [], press: G.press || null,
+      evq: G.evq, tray: G.tray || [], votes: G.votes, nextId: G.nextId, over: G.over, won: G.won || null, ack: G.ack || null, endless: !!G.endless, tut: G.tut, offers: G.offers || [], shock: G.shock || [], historical: !!G.historical, story: G.story || null, beach: G.beach || [], press: G.press || null, pow: G.pow || null,
     };
     return JSON.stringify(o, (k, v) => (k === 'dem' || k === 'lsHist' ? undefined : typeof v === 'number' && !Number.isInteger(v) ? Math.round(v * 1000) / 1000 : v));
   };
@@ -272,7 +272,7 @@
       nations: o.nations, player: o.player, attacks: [], boats: o.boats || [], missiles: o.missiles || [], builds: o.builds || [], blist: [],
       dip: o.dip || {}, warM: new Uint8Array(MAXN * MAXN), rel: new Float32Array(MAXN * MAXN), blocs: o.blocs, wars: [], border: [],
       news: o.news || [], chronicle: o.chronicle || [], stats: { pop: 1, gdp: 1, trade: 1, byIdeo: {}, byFam: {} }, world: o.world,
-      flags: o.flags || {}, dirty: [], dirtyAll: true, radList: [], mapMode: 'political', fx: [], sfx: [], capLost: [], evq: o.evq || [], tray: o.tray || [], votes: o.votes || [], over: o.over || null, won: o.won || null, ack: o.ack || null, endless: !!o.endless, nextId: o.nextId || 1, fortsDirty: true, tut: o.tut || null, offers: o.offers || [], shock: o.shock || [], beach: o.beach || [], press: o.press || null,
+      flags: o.flags || {}, dirty: [], dirtyAll: true, radList: [], mapMode: 'political', fx: [], sfx: [], capLost: [], evq: o.evq || [], tray: o.tray || [], votes: o.votes || [], over: o.over || null, won: o.won || null, ack: o.ack || null, endless: !!o.endless, nextId: o.nextId || 1, fortsDirty: true, tut: o.tut || null, offers: o.offers || [], shock: o.shock || [], beach: o.beach || [], press: o.press || null, pow: o.pow || null,
     };
     G.rng.s = o.rng >>> 0;
     G.historical = !!o.historical; G.story = o.story || null; G.fronts = o.fronts || null; if (G.historical && !G.story) ID.Story.init(G);
@@ -296,6 +296,8 @@
     ID.recalcBorders(G); ID.recomputeForts(G); ID.structMonth(G, true);
     for (const n of G.nations) if (n && n.alive) ID.Combat.refresh(G, n);
     ID.Combat.updateSupply(G); Gm.updateStats(G);
+    // saves from before the coup model (session 15): a coup waiting in the queue is fought out anew
+    for (const e of G.evq.slice()) { const n = G.nations[e.n]; if (e.id === 'coup' && n && n.alive && !n.coupNow) { G.evq.splice(G.evq.indexOf(e), 1); ID.Coup.launch(G, n, e.ctx && e.ctx.backer ? { src: 'foreign', backer: e.ctx.backer } : { src: 'army' }); } }
     return G;
   };
 })();

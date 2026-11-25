@@ -440,7 +440,7 @@
 
   function expand(G, n) {
     if (!G.wildB || !G.wildB[n.id]) return;
-    if (G.attacks.some((a) => a.from === n.id && a.to === 0) || G.boats.some((b) => b.owner === n.id && b.relief === 0)) return;
+    if (G.attacks.some((a) => a.from === n.id && a.to === 0 && !(a.pk >= 0)) || G.boats.some((b) => b.owner === n.id && b.relief === 0)) return; // a colony's own expansion does not hold up the mainland
     const target = Math.max(1, n.pop * n.mob), ready = n.troops / target;
     if (ready < 0.5 || n.a.losing) return;
     const share = n.nwars ? 0.12 : n.a.threatened ? 0.2 : 0.3;

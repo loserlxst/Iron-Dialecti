@@ -15,7 +15,7 @@
   const D = ID.DOCTRINE, EV = ID.EVENT_DEFS, R = ID.REGIME;
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const isP = (G, n) => n.id === G.player && !G.autoPlayer;
-  const YEAR = 360, MO = 30;
+  const YEAR = 360;
   const keep = (n, label, k, v) => {
     for (let i = n.mods.length - 1; i >= 0; i--) if (n.mods[i].label === label && n.mods[i].k === k) n.mods.splice(i, 1);
     if (v) n.mods.push({ k, v, m: 2, label });
@@ -83,10 +83,11 @@
       if (!G.rng.chance(0.03 * (1 + (100 - (n.sig || 50)) / 100))) continue;
       let to = null, bo = -1e9;
       for (const q of Pr.nb || []) { const o = G.nations[G.provinces[q].owner]; if (!o || o === n || !o.alive || ID.atWar(G, n.id, o.id)) continue; const op = ID.op(G, n.id, o.id); if (op > bo) { bo = op; to = o; } }
-      x.exitAt = G.tick + 2 * YEAR; n.cnt.exits = (n.cnt.exits || 0) + 1;
       const nm = Pr.name || 'A province';
       if (to) { transfer(G, Pr, n, to); if (Pr.core === n.id) Pr.core = to.id; ID.news(G, nm + ' signs with ' + to.adj + ' agencies and leaves ' + n.name + '. Under the covenant nobody may stop it.', n.id === G.player ? 'bad' : 'pol', n.id, to.id); }
-      else if (P().secede) { P().secede(G, n, Pr); ID.news(G, nm + ' leaves ' + n.name + ' and goes its own way, as the covenant allows.', n.id === G.player ? 'bad' : 'pol', n.id); }
+      else if (P().secede(G, n, Pr)) ID.news(G, nm + ' leaves ' + n.name + ' and goes its own way, as the covenant allows.', n.id === G.player ? 'bad' : 'pol', n.id);
+      else continue; // no room in the world for a new state: it stays, for now
+      x.exitAt = G.tick + 2 * YEAR; n.cnt.exits = (n.cnt.exits || 0) + 1;
       if (n.id === G.player) ID.logGrief(n, G.tick, nm + ' left the covenant.');
       if (ID.Press) ID.Press.add(G, { w: 2, kind: 'pol', a: n.id, b: to ? to.id : 0, art: 'parliament', title: nm + ' walks out of ' + n.base, key: 'acexit' + n.id, gap: 600,
         text: 'Nobody marched and nobody was shot: ' + nm + ' simply took its custom ' + (to ? 'to ' + to.adj + ' agencies' : 'elsewhere') + '. In ' + n.base + ' the right to leave is written into the covenant, and the covenant’s defenders call this the system working.' });

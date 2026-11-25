@@ -932,7 +932,7 @@
         if (t < 0) { // overrun: the last of the pocket is gone
           G.attacks.splice(k, 1);
           const A = G.nations[a.from], D = G.nations[a.to];
-          if (D && a.troops > 0.5) { D.kills += a.troops; D.cnt.prisoners = (D.cnt.prisoners || 0) + a.troops; }
+          if (D && a.troops > 0.5) { D.kills += a.troops; C.capture(G, D, A, a.troops); }
           if (A && (A.id === G.player || a.to === G.player) && a.troops >= 1) ID.news(G, 'The last ' + A.adj + ' pocket ' + (D ? 'in ' + D.name + ' ' : '') + 'is overrun: ' + ID.fmtPop(a.troops) + ' troops are taken.', A.id === G.player ? 'war' : 'good', A.id, a.to);
           continue;
         }
@@ -970,12 +970,39 @@
       a.enc = G.tick || 1; a.bd = 1e9; a.bo = -1; a.scan = -999;
       // break out toward the nearest ground of the main territory
       const m = main[a.from], x0 = a.pk % W, y0 = (a.pk / W) | 0;
-      if (m >= 0) { let bd = 1e9; for (let i = 0; i < G.N; i++) if (comp[i] === m) { const d = Math.abs(i % W - x0) + Math.abs(((i / W) | 0) - y0); if (d < bd) { bd = d; a.bo = i; } } a.bd = bd + 1; }
+      if (m >= 0) { a.bo = nearestOf(G, a.pk, m); if (a.bo >= 0) a.bd = Math.abs(a.bo % W - x0) + Math.abs(((a.bo / W) | 0) - y0) + 1; }
       const A = G.nations[a.from], D = G.nations[a.to], near = ID.placeName ? ID.placeName(G, a.pk) : '';
       if (a.from === G.player && a.troops >= 1 && ID.Events) ID.Events.queue(G, A, 'enc_pocket', { id: a.id, to: a.to, near });
       if (a.to === G.player && a.troops >= 1) ID.news(G, ID.fmtPop(a.troops) + ' ' + A.adj + ' troops are encircled' + (near ? ' near ' + near : '') + '. Hold the ring and they must surrender.', 'good', A.id, D.id);
     }
   }
+  /* The nearest tile of piece m to tile s, searching outward over land (it stops at the first one, so it only
+     looks as far as the ring is wide; a pocket on another landmass than its homeland finds none and holds). */
+  function nearestOf(G, s, m) {
+    const W = G.W, N = G.N, comp = G._comp, vis = G._vis, stack = G._stack, stp = (G._visS = (G._visS || 0) + 1);
+    let head = 0, tail = 0; stack[tail++] = s; vis[s] = stp;
+    while (head < tail) {
+      const c = stack[head++], x = c % W;
+      if (comp[c] === m && G.owner[c]) return c;
+      for (const q of [x > 0 ? c - 1 : -1, x < W - 1 ? c + 1 : -1, c >= W ? c - W : -1, c < N - W ? c + W : -1]) if (q >= 0 && vis[q] !== stp && G.terrain[q] !== T.SEA) { vis[q] = stp; stack[tail++] = q; }
+    }
+    return -1;
+  }
+  /* Prisoners are held until the peace (G.pow['captor:victim'], thousands); then most of them go home (C.release). */
+  C.capture = function (G, by, of, troops) {
+    by.cnt.prisoners = (by.cnt.prisoners || 0) + troops;
+    const P = G.pow || (G.pow = {}), k = by.id + ':' + of.id; P[k] = (P[k] || 0) + troops;
+  };
+  C.release = function (G, A, B) {
+    const P = G.pow; if (!P) return;
+    for (const [by, of] of [[A, B], [B, A]]) {
+      const k = by.id + ':' + of.id, t = P[k]; if (!t) continue;
+      delete P[k];
+      const back = t * 0.6; if (!of.alive || back < 0.5) continue; // the rest died in the camps or stayed
+      of.troops += back; of.pop += back * 0.3;
+      if (of.id === G.player || by.id === G.player) ID.news(G, ID.fmtPop(back) + ' ' + of.adj + ' prisoners come home from ' + by.name + ' under the peace.', of.id === G.player ? 'good' : 'dip', of.id, by.id);
+    }
+  };
   function surrender(G, c, id, n, Wn, give) {
     const tiles = c.tiles;
     const share = tiles.length / Math.max(1, n.tiles);
@@ -984,7 +1011,7 @@
     for (let k = G.attacks.length - 1; k >= 0; k--) { const a = G.attacks[k]; if (a.from === n.id && a.ck === id) { pocket += a.troops; G.attacks.splice(k, 1); } }
     const back = give ? pocket * 0.4 : 0; pocket -= back; // a surrender on terms sends the wounded home
     n.troops += back - lost; n.pop -= lost * 0.3 + pocket * 0.3; n.losses += lost + pocket; n.casM += (lost + pocket) * 0.6;
-    Wn.kills += lost + pocket; Wn.cnt.prisoners = (Wn.cnt.prisoners || 0) + lost + pocket;
+    Wn.kills += lost + pocket; C.capture(G, Wn, n, lost + pocket);
     const near = ID.placeName ? ID.placeName(G, c.start) : '';
     const war = ID.Diplomacy.warOf(G, Wn.id, c.o);
     for (const t of tiles) ID.setOwner(G, t, Wn.id);

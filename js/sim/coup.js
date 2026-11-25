@@ -79,7 +79,6 @@
     }
     return { p: clamp(p, 0.05, 0.92), rows };
   };
-  Cp.rowsText = (o) => o.rows.map((r) => r[0] + ' ' + sgn(r[1])).join('; ') + '.';
   /* What a coup would install. */
   Cp.ideoFor = function (G, n, pl) {
     if (pl.src === 'foreign') return P().coupIdeo(G, n, pl.backer);

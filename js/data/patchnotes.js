@@ -3,6 +3,12 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'Prisoners, and smaller fixes', items: [
+      'Troops taken prisoner in a pocket are now held until the peace, and six in ten of them come home when it is signed.',
+      'States that have settled an island keep expanding into their own hinterland at the same time.',
+      'Under Anarcho-Capitalism, a province is only reported as leaving when it actually leaves.',
+      'A coup that was under way in an older save is fought out under the new rules when you load it.',
+    ] },
     { date: '25 November 2026', title: 'Settling empty islands', items: [
       'Empty islands no longer stay empty. Any state with a port can send a settling expedition by sea: settlers and some troops, for gold and a few weeks at sea. They found a beachhead and claim the land around it.',
       'Select an unclaimed coast and press Settle: the cost and the travel time are on the button.',

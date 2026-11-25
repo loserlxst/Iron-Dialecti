@@ -19,12 +19,6 @@
 
   /* ================================================================ SYSTEM EVENTS */
   // the coup itself and the plots before it are in sim/coup.js
-  ev({ id: 'plot_uncovered', sys: 1, title: 'A plot uncovered', text: 'The security services have a list of officers who have been meeting where they should not. Nothing has happened yet.',
-    opts: [
-      { label: 'Purge the officer corps', fx: [['sup', 'military', -6], ['mod', 'atk', -0.1, 18, 'Officer purge'], ['prestige', -20], ['grievance', 4], ['fn', (G, n) => { n.a.coupAt = G.tick; }]], ai: 2 },
-      { label: 'Quiet retirements', fx: [['sup', 'military', 3], ['auth', -8], ['fn', (G, n) => { n.a.coupAt = G.tick - 360; }]], ai: 2 },
-      { label: 'Show clemency', tip: 'They will be grateful. For a while.', fx: [['sup', 'military', 9], ['fn', (G, n) => { n.a.coupAt = null; }], ['later', 14, 'ambitious_general']], ai: 1 },
-    ] });
   ev({ id: 'civil_war', sys: 1, sfx: 'alarm', title: 'The country splits',
     text: (n, G, c) => 'Rebels have proclaimed ' + G.nations[c.rebel].name + ' and hold ' + Math.round((G.nations[c.rebel].tiles / (G.nations[c.rebel].tiles + n.tiles)) * 100) + '% of the national territory. Two governments now claim the same country. History will remember only one of them — choose which you are.',
     opts: [
