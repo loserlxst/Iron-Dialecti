@@ -334,8 +334,12 @@
   UI.renderPanel = function (resetScroll) {
     if (!UI.tab || !UI.G) return;
     const d = $('#drawer'); const body = d.querySelector('.db'); const sc = body && !resetScroll ? body.scrollTop : 0;
-    const title = UI.tab === 'reg' && ID.Regime ? ID.Regime.body(P()).circle : TABS.find((x) => x[0] === UI.tab)[1];
-    d.innerHTML = '<div class="dh"><h2>' + title + '</h2><button class="x" data-act="closeTab"' + tip('Close (Esc)') + '>✕</button></div><div class="db">' + ID.Panels[UI.tab](UI.G, P()) + '</div>';
+    let title = TABS.find((x) => x[0] === UI.tab)[1], html;
+    try { if (UI.tab === 'reg' && ID.Regime) title = ID.Regime.body(P()).circle; html = ID.Panels[UI.tab](UI.G, P()); } catch (e) { // never leave the last tab's page on screen: show what broke, for the bug report
+      console.error(e);
+      html = '<p class="bad"><b>This panel failed to draw.</b> Please send a screenshot of this message.</p><pre style="white-space:pre-wrap;font-size:11px">' + esc(String(e && e.stack || e).split('\n').slice(0, 4).join('\n')) + '</pre>';
+    }
+    d.innerHTML = '<div class="dh"><h2>' + title + '</h2><button class="x" data-act="closeTab"' + tip('Close (Esc)') + '>✕</button></div><div class="db">' + html + '</div>';
     d.querySelector('.db').scrollTop = sc;
     UI.retip();
   };
