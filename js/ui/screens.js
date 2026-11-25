@@ -87,24 +87,24 @@
   };
 
   /* ---------------------------------------------------------------- campaign setup */
-  const S = (Sc.S = { scenario: 'meridia', seed: 0, size: 'std', difficulty: 'iron', nation: 0, ideos: {}, challenge: null, startYear: 0, ironman: false, retry: false, historical: true });
+  const S = (Sc.S = { scenario: 'meridia', seed: 0, size: 'std', difficulty: 'iron', nation: 0, ideos: {}, custom: {}, map: null, challenge: null, startYear: 0, ironman: false, retry: false, historical: true });
   let SG = null;
   function genSetup() {
-    const opts = { scenario: S.scenario, seed: S.seed, size: S.size, difficulty: S.difficulty, headless: false, startYear: S.startYear || 0, challenge: S.challenge, ironman: S.ironman, historical: S.historical && !S.challenge, loose: S.loose !== false };
+    const opts = { custom: S.challenge ? null : S.custom, map: S.map, scenario: S.scenario, seed: S.seed, size: S.size, difficulty: S.difficulty, headless: false, startYear: S.startYear || 0, challenge: S.challenge, ironman: S.ironman, historical: S.historical && !S.challenge, loose: S.loose !== false };
     SG = ID.newGame(opts); SG.paused = true;
     /* Governments the player rewrote: the world is rebuilt from its seed and each one applied, so going back to the historical system is exact. */
     SG.baseIdeo = {}; for (const n of SG.nations) if (n) SG.baseIdeo[n.id] = n.ideo;
-    for (const id in S.ideos) if (SG.nations[id] && SG.nations[id].alive) ID.rewriteRegime(SG, SG.nations[id], S.ideos[id]);
+    for (const id in S.ideos) { const n = SG.nations[id]; if (n && n.alive) { ID.rewriteRegime(SG, n, S.ideos[id]); if (n.cust) { n.cust.ideo = n.ideo; n.name = ID.nationTitle(n, n.ideo); } } }
     R.setMode('political'); R.setGame(SG); R.quiet = true;
     const ns = ID.alive(SG);
     if (!SG.nations[S.nation] || !SG.nations[S.nation].alive) S.nation = (ns.find((n) => n.tutorial) || ns[0]).id;
   }
   Sc.setup = function (o) {
-    Object.assign(S, { scenario: 'meridia', seed: (Math.random() * 1e6) | 0, size: 'std', difficulty: 'iron', nation: 0, ideos: {}, govOpen: false, challenge: null, startYear: 0, ironman: false, retry: false, historical: S.historical !== false }, o || {});
+    Object.assign(S, { scenario: 'meridia', seed: (Math.random() * 1e6) | 0, size: 'std', difficulty: 'iron', nation: 0, ideos: {}, custom: {}, map: null, govOpen: false, challenge: null, startYear: 0, ironman: false, retry: false, historical: S.historical !== false }, o || {});
     ID.Main.mode = 'setup'; ID.Main.bg = null; UI.G = null; UI.closeModal();
     $('#hud').hidden = true; $('#coach').hidden = true;
     genSetup();
-    if (o && o.nationBase) { const n = ID.alive(SG).find((x) => x.base === o.nationBase); if (n) S.nation = n.id; }
+    if (o && o.nationBase) { const n = ID.alive(SG).find((x) => x.key === o.nationBase); if (n) S.nation = n.id; }
     renderSetup();
     const n = SG.nations[S.nation]; R.focus(n.capital); R.selected = n.capital;
   };
@@ -145,16 +145,16 @@
     }
     h += '</div>';
     if (!ch) {
-      const others = ns.filter((n) => n.id !== S.nation), changed = others.filter((n) => n.ideo !== SG.baseIdeo[n.id]).length;
-      h += '<div class="field"><label>Other governments</label>' + btn((S.govOpen ? 'Hide' : 'Rewrite other countries’ governments') + (changed ? ' <small>' + changed + ' changed</small>' : ''), 'govToggle', null, { cls: 'ghost' });
+      const others = ns.filter((n) => n.id !== S.nation), changed = others.filter((n) => n.ideo !== SG.baseIdeo[n.id] || S.custom[n.key]).length;
+      h += '<div class="field"><label>Other countries</label>' + btn((S.govOpen ? 'Hide' : 'Rewrite other countries’ governments, names and flags') + (changed ? ' <small>' + changed + ' changed</small>' : ''), 'govToggle', null, { cls: 'ghost' });
       if (S.govOpen) {
-        h += '<small>Each country starts under the system you pick, with its laws, leader and politics to match.</small>';
-        for (const n of others) h += '<div class="govrow">' + ID.Flags.html(n, 'mini') + '<b>' + esc(n.base) + '</b>' + ideoSelect(n.ideo, SG.baseIdeo[n.id], n.id) + '</div>';
+        h += '<small>Each country starts under the system you pick, with its laws, leader and politics to match. Customize changes its name, colour, flag and more.</small>';
+        for (const n of others) h += '<div class="govrow">' + ID.Flags.html(n, 'mini') + '<b>' + esc(n.base) + '</b>' + ideoSelect(n.ideo, SG.baseIdeo[n.id], n.id) + btn('Customize', 'custOpen', n.id, { cls: 'sm ghost' + (S.custom[n.key] ? ' on' : '') }) + '</div>';
         if (changed) h += btn('Restore history', 'govReset', null, { cls: 'ghost sm' });
       }
       h += '</div>';
     }
-    h += '</div><div class="ft">' + btn('Begin', 'begin', null, { cls: 'big red' }) + btn('Watch the world', 'watch', null, { cls: 'big ghost', tip: '<h5>Observer mode</h5>Every country is run by the computer and you only watch: no decisions, no dispatches, no ending. You follow the country selected here; select any other on the map and press Follow to watch from there.' }) + '<span class="sp"></span>' + btn('Back', 'toTitle', null, { cls: 'ghost' }) + '</div></div>';
+    h += '</div><div class="ft">' + btn('Begin', 'begin', null, { cls: 'big red' }) + (ID.Maker ? btn('Copy code', 'setupCode', null, { cls: 'big ghost', tip: '<h5>Share this world</h5>Copies a code for this map, with every country’s names, flags, systems and situations, that anyone can paste into Load code on the title screen.' }) : '') + btn('Watch the world', 'watch', null, { cls: 'big ghost', tip: '<h5>Observer mode</h5>Every country is run by the computer and you only watch: no decisions, no dispatches, no ending. You follow the country selected here; select any other on the map and press Follow to watch from there.' }) + '<span class="sp"></span>' + btn('Back', 'toTitle', null, { cls: 'ghost' }) + '</div></div>';
     if (!UI.compact) h += '<div class="pickcard" id="pickcard">' + pickCard() + '</div>';
     t.innerHTML = h;
     const db = t.querySelector('.pick .db'); if (db) db.scrollTop = top;
@@ -162,11 +162,12 @@
   function pickCard() {
     const n = SG.nations[S.nation]; if (!n) return '';
     const ideo = n.ideo, I = ID.IDEOLOGIES[ideo], sit = ID.SITUATIONS[n.sit] || ID.SITUATIONS.middling, M = ID.ECON[I.econ.model];
-    const fl = ID.Flags.html({ id: n.id, base: n.base, ideo, color: n.color }, 'pflag');
+    const fl = ID.Flags.html(n, 'pflag');
     let h = '<div class="row nw" style="align-items:flex-start;gap:10px">' + fl + '<h2>' + esc(ID.nationTitle(n, ideo)) + '</h2></div><div class="row" style="margin:4px 0 8px">' + UI.ideoTag(ideo) + stars(sit.diff) + '<b style="font-size:14px">' + esc(sit.name) + '</b></div>';
-    h += '<p class="lead">' + esc(n.blurb || sit.text) + '</p>';
+    h += '<p class="lead">' + esc(ID.ren(n.blurb) || sit.text) + '</p>';
     if (n.blurb) h += '<p class="lead dim" style="font-size:14px">' + esc(sit.text) + '</p>';
     h += UI.kv([['Land', Math.round((n.tiles / SG.landCount) * 100) + '% of the world'], ['People', ID.fmtPop(n.pop)], ['Troops', ID.fmtPop(n.troops)], ['Factories', n.nb[ID.B.FACTORY] + ''], ['Neighbours', Object.keys(SG.border[n.id] || {}).length + '']]);
+    if (!S.challenge) h += '<div class="row" style="margin-top:8px">' + btn('Customize this country', 'custOpen', n.id, { cls: 'sm' + (S.custom[n.key] ? ' red' : ''), tip: '<h5>Customize</h5>Name, capital, leader, map colour, flag (built or uploaded), motto, anthem, description and starting situation.' }) + '</div>';
     h += '<div class="field" style="margin-top:10px"><label>System of government</label>' + ideoSelect(ideo, SG.baseIdeo[n.id], n.id) + '<small>' + (S.retry ? '<b class="bad">Try a different system this time.</b> ' : '') + 'Start under the historical regime, or rewrite it. Every system plays differently.</small></div>';
     h += '<p class="lead"><b>' + esc(I.name) + '.</b> ' + esc(I.short) + '</p>';
     h += UI.kv([['Economy', esc(M.name)], ['Government', esc(ID.CONTROL[I.control.type].name)], ['Legitimacy from', Object.keys(I.legit).sort((a, b) => I.legit[b] - I.legit[a]).slice(0, 2).map((k) => ID.LEGIT[k].name.toLowerCase()).join(', ')]]);
@@ -182,7 +183,7 @@
     S.nation = o; R.selected = SG.nations[o].capital; renderSetup(); ID.Audio.play('click');
   };
   acts.newGame = () => Sc.setup({});
-  acts.setScen = (a) => { S.scenario = a; S.nation = 0; S.ideos = {}; genSetup(); renderSetup(); };
+  acts.setScen = (a) => { S.scenario = a; S.nation = 0; S.ideos = {}; S.custom = {}; genSetup(); renderSetup(); };
   acts.setSize = (a) => { S.size = a; S.nation = 0; S.ideos = {}; genSetup(); renderSetup(); };
   acts.setDiff = (a) => { S.difficulty = a; renderSetup(); };
   acts.setHist = (a) => { if (a === true || a === false) { S.historical = a; } else { S.historical = a !== 'free'; S.loose = a !== 'strict'; } genSetup(); renderSetup(); };
@@ -195,7 +196,19 @@
     genSetup(); renderSetup();
   };
   acts.govToggle = () => { S.govOpen = !S.govOpen; renderSetup(); };
-  acts.govReset = () => { for (const id in S.ideos) if (+id !== S.nation) delete S.ideos[id]; genSetup(); renderSetup(); };
+  acts.govReset = () => { for (const id in S.ideos) if (+id !== S.nation) delete S.ideos[id]; const me = SG.nations[S.nation]; for (const k in S.custom) if (!me || k !== me.key) delete S.custom[k]; genSetup(); renderSetup(); };
+  /* The country editor (js/ui/custom.js) on a country of the world being set up. Ids hold across rebuilds of one world. */
+  acts.custOpen = (id) => {
+    if (!SG || !SG.nations[id] || S.challenge) return;
+    const key = SG.nations[id].key;
+    ID.CustomUI.open({
+      G: () => SG, n: () => SG.nations[id], get: () => S.custom[key] || {},
+      set: (c) => { if (Object.keys(c).length) S.custom[key] = c; else delete S.custom[key]; genSetup(); renderSetup(); },
+      ideo: (v) => { if (v === SG.baseIdeo[id]) delete S.ideos[id]; else S.ideos[id] = v; genSetup(); renderSetup(); },
+      baseIdeo: () => SG.baseIdeo[id], close: () => renderSetup(),
+    });
+  };
+  Sc.world = () => SG;
   acts.begin = () => {
     const G = SG; if (!G) return;
     G.difficulty = S.difficulty; G.challenge = S.challenge; G.ironman = !!S.ironman;
@@ -355,7 +368,7 @@
   };
   acts.retry = () => {
     const G = UI.G; if (!G) return; const n = G.nations[(G.over && G.over.nation) || G.player];
-    Sc.setup({ scenario: G.scenario, seed: G.seed, size: G.size, difficulty: G.difficulty, nationBase: n ? n.base : null, retry: true, challenge: G.challenge, startYear: G.challenge ? ID.yearOf(G.startTick || 0) : 0, ironman: G.ironman, historical: !!G.historical });
+    Sc.setup({ scenario: G.scenario, map: G.map || null, seed: G.seed, size: G.size, difficulty: G.difficulty, nationBase: n ? n.key : null, retry: true, challenge: G.challenge, startYear: G.challenge ? ID.yearOf(G.startTick || 0) : 0, ironman: G.ironman, historical: !!G.historical });
   };
   acts.chronicle = () => {
     const G = UI.G; if (!G) return; const C = ID.Game.chronicle(G);

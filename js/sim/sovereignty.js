@@ -370,7 +370,7 @@
      ideo, provs:[ids], war: id to fight, sit, color, blurb}. Population and troops move with the land. */
   Sv.spawn = function (G, o) {
     if (G.nations.length >= MAXN - 2) return null;
-    const set = new Set(o.provs); let R = G.nations.find((x) => x && x.base === o.base && !x.alive) || null;
+    const set = new Set(o.provs); let R = G.nations.find((x) => x && x.key === o.base && !x.alive) || null;
     const fresh = !R;
     if (!R) R = ID.makeNation(G, { base: o.base, adj: o.adj, sit: o.sit || 'small', color: o.color, blurb: o.blurb || '' });
     if (!R) return null;
@@ -476,7 +476,7 @@
     if (sc && sc.region) for (let p = 1; p < G.provinces.length; p++) { const P = G.provinces[p]; if (P.cy >= sc.region.y * G.H) P.region = sc.region.key; }
     Sv.initOil(G, sc ? sc.oil : null);
     if (sc && sc.canal) { const c = sc.canal; Sv.initOil(G, [[c[0], c[1], c[2], 1, c[3]]]); const P = Sv.nearest(G, c[0], c[1]); if (P) P.canal = 1; }
-    if (sc) for (const d of sc.nations) if (d.over) { const n = ID.byBase(G, d.base), o = ID.byBase(G, d.over); if (n && o) { Sv.bind(G, n, o, d.dep || 'protectorate', true); n.dep.script = 1; } }
+    if (sc) for (const d of sc.nations) if (d.over) { const n = ID.byBase(G, d.key || d.base), o = ID.byBase(G, d.over); if (n && o) { Sv.bind(G, n, o, d.dep || 'protectorate', true); n.dep.script = 1; } }
     if (sc && ID.FRONTS && G.historical) {
       G.fronts = {};
       for (const k in ID.FRONTS) { const F = ID.FRONTS[k]; G.fronts[k] = { key: k, provs: Sv.provsAt(G, F.at, F.reach), str: F.str || 10, host: 0, sponsor: 0, state: 0, born: 0 }; }

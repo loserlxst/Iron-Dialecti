@@ -272,7 +272,7 @@
   const stw = (G, a, b, cb, why) => { const A = by(G, a), B = by(G, b); if (A && B && A !== B && !ID.atWar(G, A.id, B.id)) ID.storyWar(G, a, b, cb || 'claims', why); };
   const rebind = (G, base, over, kind) => { const n = by(G, base), o = by(G, over); if (n && o && n !== o) { ID.Sov.bind(G, n, o, kind, true); n.dep.script = 1; n.dep.res = Math.max(n.dep.res, 45); } };
   const freeQ = (G, base, how) => { const n = by(G, base); if (n && n.dep) ID.Sov.free(G, n, how || 'story'); };
-  const depOf = (G, base, over) => { const n = by(G, base); return n && n.dep && G.nations[n.dep.over] && G.nations[n.dep.over].base === over; };
+  const depOf = (G, base, over) => { const n = by(G, base); return n && n.dep && G.nations[n.dep.over] && G.nations[n.dep.over].key === over; };
 
   // 1911 Varanth: the Debt Commission
   add({ id: 'st_ol_debt', date: [1911, 3], nation: 'Varanth', cond: (G) => { const v = by(G, 'Varanth'); return v && is(v, 'absmon', 'conmon'); } });
@@ -570,7 +570,7 @@
       ID.storyPeace(G, ['Neshar', 'Khemra', 'Baskhar', 'Amaran', 'Varanth']);
       for (const n of old(G)) {
         if (is(n, 'thirdpos', 'pannat')) { n.flags.discredited = 1; n.glory = Math.max(0, n.glory - 20); ID.addMod(n, 'legit', -8, 60, 'The setback'); n.charisma = Math.max(0, n.charisma - 15); }
-        if (n.base !== 'Neshar') { for (let p = 1; p < G.provinces.length; p++) { const P = G.provinces[p]; if (P.owner === n.id && G.rng.chance(0.25)) { if (P.opp !== 'revival') { P.opp = 'revival'; P.oppStr = Math.max(P.oppStr * 0.5, 10); } P.oppStr = Math.min(100, P.oppStr + 12); } } if (n.drift.revival != null) n.drift.revival = Math.min(100, n.drift.revival + 15); }
+        if (n.key !== 'Neshar') { for (let p = 1; p < G.provinces.length; p++) { const P = G.provinces[p]; if (P.owner === n.id && G.rng.chance(0.25)) { if (P.opp !== 'revival') { P.opp = 'revival'; P.oppStr = Math.max(P.oppStr * 0.5, 10); } P.oppStr = Math.min(100, P.oppStr + 12); } } if (n.drift.revival != null) n.drift.revival = Math.min(100, n.drift.revival + 15); }
       }
       const ns = by(G, 'Neshar'); if (ns) { ns.glory = Math.min(100, ns.glory + 25); ns.flags.occupier = 1; ID.addMod(ns, 'unrest', 4, 240, 'The occupied territories'); }
     } });
@@ -610,32 +610,32 @@
   pre('st_ol_turbans', 3, 'Zandar’s long year', 'For eleven months Zandar has had a demonstration every fortieth day, as each funeral of the last one’s dead becomes the next one. The shah has replaced four prime ministers and released two thousand prisoners. The exiled preacher speaks to the country by cassette tape from a suburb abroad; his tapes outsell every singer in the bazaar.');
 
   // the great powers' moments (player only): the Old Lands in their games too
-  add({ id: 'st_ol_mandate_nv', date: [1919, 8], player: 1, pcond: (G, n) => n.base === 'Norvik' && ID.Sov.dependents(G, n).some((o) => o.dep.kind === 'mandate') });
+  add({ id: 'st_ol_mandate_nv', date: [1919, 8], player: 1, pcond: (G, n) => n.key === 'Norvik' && ID.Sov.dependents(G, n).some((o) => o.dep.kind === 'mandate') });
   story({ id: 'st_ol_mandate_nv', title: 'How to rule a mandate', text: 'The peace conference has given Norvik two mandates in the Old Lands and the costs that come with them: garrisons, officials and a promise to prepare them for independence. The colonial office, the treasury and the foreign office each have a plan.',
     opts: [
       { label: 'Indirect rule through kings', tip: 'Install a king in each, advise him closely, keep the bases. Cheap, and it lasts as long as the kings do.', fx: [['fn', (G, n) => { for (const o of ID.Sov.dependents(G, n)) if (o.dep.kind === 'mandate') { o.dep.res = Math.max(0, o.dep.res - 10); o.dep.share = 0.1; } }], ['gold', 60]] },
       { label: 'Direct rule by the colonial office', tip: 'A larger share of their revenue, a larger garrison, and a revolt.', fx: [['fn', (G, n) => { for (const o of ID.Sov.dependents(G, n)) if (o.dep.kind === 'mandate') { o.dep.res = Math.min(100, o.dep.res + 15); o.dep.share = 0.25; o.dep.gar = 1; } }]] },
       { label: 'A timetable for independence', tip: 'Treaties in ten years, bases kept. The liberal press will approve; the empire lobby will not.', fx: [['fn', (G, n) => { for (const o of ID.Sov.dependents(G, n)) if (o.dep.kind === 'mandate') { o.dep.res = Math.max(0, o.dep.res - 20); o.flags.timetable = G.tick + 3600; } }], ['opAll', 4]] },
     ] });
-  add({ id: 'st_ol_arms_ka', date: [1955, 9], player: 1, pcond: (G, n) => n.base === 'Karsova' && !!by(G, 'Khemra') && ID.ideo(by(G, 'Khemra')).flags.nonAligned });
+  add({ id: 'st_ol_arms_ka', date: [1955, 9], player: 1, pcond: (G, n) => n.key === 'Karsova' && !!by(G, 'Khemra') && ID.ideo(by(G, 'Khemra')).flags.nonAligned });
   story({ id: 'st_ol_arms_ka', title: 'Arms for the Nile', text: 'The President of Khemra has asked for tanks, fighters and bombers: the western powers refuse to sell him any while he refuses to join their pact. Our ambassador says that if we sell, Khemra will not become socialist, but the Old Lands will stop being a western lake.',
     opts: [
       { label: 'Sell, through a third country', tip: 'The arms go through a fraternal republic so that everyone can pretend. Nobody will pretend.', fx: [['note2', 'Khemra', 'arms'], ['gold', 60], ['op', 'Cassine', -10]] },
       { label: 'Not to a regime that jails communists', fx: [['op', 'Khemra', -10]] },
     ] });
-  add({ id: 'st_ol_suez_cs', date: [1956, 11], player: 1, pcond: (G, n) => n.base === 'Cassine' && F(G, 'canal_nat') && !!by(G, 'Norvik') && !!by(G, 'Khemra') && ID.atWar(G, by(G, 'Norvik').id, by(G, 'Khemra').id) });
+  add({ id: 'st_ol_suez_cs', date: [1956, 11], player: 1, pcond: (G, n) => n.key === 'Cassine' && F(G, 'canal_nat') && !!by(G, 'Norvik') && !!by(G, 'Khemra') && ID.atWar(G, by(G, 'Norvik').id, by(G, 'Khemra').id) });
   story({ id: 'st_ol_suez_cs', title: 'Our allies did not tell us', text: 'Norvik and Neshar have attacked Khemra over the Canal without a word to us, in the same week that Karsova is crushing a rising in its own satellites. If we stand with our allies, the whole of the Old Lands will see us as the new empire. If we do not, we humiliate them.',
     opts: [
       { label: 'Make them withdraw', tip: 'Threaten to sell their currency. They will withdraw, and they will remember who made them.', fx: [['op', 'Norvik', -20], ['fn', (G, n) => { for (const o of old(G)) ID.addOpBoth(G, n.id, o.id, 10); ID.storyPeace(G, ['Norvik', 'Khemra', 'Neshar']); }], ['glory', 6]] },
       { label: 'Stand with our allies', fx: [['op', 'Norvik', 15], ['fn', (G, n) => { for (const o of old(G)) ID.addOpBoth(G, n.id, o.id, -12); }]] },
     ] });
-  add({ id: 'st_ol_road_he', date: [1941, 3], player: 1, pcond: (G, n) => n.base === 'Hesperia' && !!by(G, 'Baskhar') && n.nwars > 0 });
+  add({ id: 'st_ol_road_he', date: [1941, 3], player: 1, pcond: (G, n) => n.key === 'Hesperia' && !!by(G, 'Baskhar') && n.nwars > 0 });
   story({ id: 'st_ol_road_he', title: 'The road to the oil', text: 'Colonels in Baskhar want to throw out the Norvish and ask for our help. The oil of the two rivers would fuel our panzers for a year; the general staff says we cannot spare a division, and the foreign office says we can spare promises.',
     opts: [
       { label: 'Send promises and a squadron', fx: [['note2', 'Baskhar', 'arms'], ['subvert', 'Baskhar', 10]] },
       { label: 'Not now', fx: [] },
     ] });
-  add({ id: 'st_ol_crowns_au', date: [1913, 5], player: 1, pcond: (G, n) => n.base === 'Aurelia' && !!by(G, 'Varanth') });
+  add({ id: 'st_ol_crowns_au', date: [1913, 5], player: 1, pcond: (G, n) => n.key === 'Aurelia' && !!by(G, 'Varanth') });
   story({ id: 'st_ol_crowns_au', title: 'The warm-water straits', text: 'For two hundred years every emperor of Aurelia has wanted the straits at Varanth: a warm-water outlet to the southern sea. Varanth is bankrupt and friendless. The general staff has a plan, and the foreign ministry a warning: the other powers will not allow it.',
     opts: [
       { label: 'Claim the straits', fx: [['claim', 'Varanth'], ['op', 'Norvik', -10], ['op', 'Varanth', -20]] },

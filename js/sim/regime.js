@@ -12,8 +12,8 @@
   const Rg = (ID.Regime = {});
   const R = () => ID.REGIME;
 
-  Rg.national = (G, n) => !!(G && G.historical && G.scenario === 'meridia' && ID.NATIONAL && ID.NATIONAL[n.base]);
-  Rg.Q = (G, n) => (n.nq && ID.NATIONAL[n.base] ? ID.NATIONAL[n.base].q : null);
+  Rg.national = (G, n) => !!(G && G.historical && G.scenario === 'meridia' && ID.NATIONAL && ID.NATIONAL[n.key]);
+  Rg.Q = (G, n) => (n.nq && ID.NATIONAL[n.key] ? ID.NATIONAL[n.key].q : null);
   Rg.body = (n) => R().body[n.ideo] || R().body.liberal;
   Rg.sessName = (n) => { const s = Rg.body(n).session; return /^The /.test(s) ? s : 'The ' + s; };
   Rg.title = (n, seat) => Rg.body(n).t[seat];
@@ -27,7 +27,7 @@
 
   /* ---------------------------------------------------------------- people */
   function freshName(G, n) {
-    const N = Rg.national(G, n) ? ID.NATIONAL[n.base] : null;
+    const N = Rg.national(G, n) ? ID.NATIONAL[n.key] : null;
     for (let k = 0; k < 8; k++) {
       const s = N && N.names ? G.rng.pick(N.names[0]) + ' ' + G.rng.pick(N.names[1]) : ID.genLeader(G.rng, n.ideo).name;
       if (s !== n.leader.name && !(n.circle || []).some((f) => f.name === s)) return s;
@@ -46,7 +46,7 @@
 
   Rg.ensure = function (G, n) {
     if (!n || !n.alive && n.circle) return;
-    const N = Rg.national(G, n) ? ID.NATIONAL[n.base] : null;
+    const N = Rg.national(G, n) ? ID.NATIONAL[n.key] : null;
     if (!n.circle) {
       if (N && N.ideo === n.ideo && !n.flags.cast) {
         n.flags.cast = 1;
@@ -275,7 +275,7 @@
     // a turning point can come again once the question has gone back to the middle, or after ten years
     for (const side of ['lo', 'hi']) if (S.fired[side] && ((S.v > 30 && S.v < 70) || G.tick - S.fired[side] > 3600) && G.tick - S.fired[side] > 720) S.fired[side] = 0;
   };
-  Rg.nqAct = (n, id) => { const Q = ID.NATIONAL[n.base] && ID.NATIONAL[n.base].q; return Q ? Q.acts.find((a) => a.id === id) : null; };
+  Rg.nqAct = (n, id) => { const Q = ID.NATIONAL[n.key] && ID.NATIONAL[n.key].q; return Q ? Q.acts.find((a) => a.id === id) : null; };
   Rg.nqBlock = function (G, n, a) {
     if (!a) return 'Unknown action.';
     const cd = n.nq.cd[a.id] || 0; if (cd > G.tick) return 'Available again ' + ID.dateOf(cd).short + '.';
@@ -322,7 +322,7 @@
     Fo.FX.figLeader = (G, n, f) => { Rg.ensure(G, n); const g = Rg.fig(n, f[1]); if (g) Rg.makeLeader(G, n, g); };
     Fo.FX.circleLoy = (G, n, f) => { Rg.ensure(G, n); for (const g of n.circle) g.loy = c100(g.loy + f[1]); };
     Fo.FX.line = (G, n, f) => Rg.adopt(G, n, f[1], true);
-    Fo.DESC.nq = (f, n) => { const Q = n && n.nq && ID.NATIONAL[n.base] ? ID.NATIONAL[n.base].q : null; return { t: (Q ? Q.name + ': toward “' + (f[1] > 0 ? Q.high : Q.low) + '”' : 'National question') + ' ' + (f[1] > 0 ? '+' : '−') + Math.abs(f[1]), good: null }; };
+    Fo.DESC.nq = (f, n) => { const Q = n && n.nq && ID.NATIONAL[n.key] ? ID.NATIONAL[n.key].q : null; return { t: (Q ? Q.name + ': toward “' + (f[1] > 0 ? Q.high : Q.low) + '”' : 'National question') + ' ' + (f[1] > 0 ? '+' : '−') + Math.abs(f[1]), good: null }; };
     Fo.DESC.figLoy = (f, n) => { const g = n && Rg.fig(n, f[1]); return { t: (g ? g.name : seatName(n, f[1])) + ': loyalty ' + (f[2] > 0 ? '+' : '−') + Math.abs(f[2]), good: f[2] > 0 }; };
     Fo.DESC.figPurge = (f, n) => { const g = n && Rg.fig(n, f[1]); return { t: (g ? g.name : seatName(n, f[1])) + ' is removed', good: null }; };
     Fo.DESC.figHeir = (f, n) => { const g = n && Rg.fig(n, f[1]); return { t: (g ? g.name : seatName(n, f[1])) + ' becomes the heir', good: null }; };

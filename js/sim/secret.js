@@ -201,7 +201,7 @@
     if (n.flags.lendBoth) { let w = 0; for (const k in G.dip) { const d = G.dip[k]; if (d.war) w++; } if (w) { n.gold += Math.min(30, w * 3); n.a.lendIncome = Math.min(30, w * 3); } else n.a.lendIncome = 0; }
     if (n.flags.secret || n.flags.secretNo || n.flags.secretAsked || n.civilOf) return;
     for (const k in SECRETS) {
-      const S = SECRETS[k]; if (S.base !== n.base) continue;
+      const S = SECRETS[k]; if (S.base !== n.key) continue;
       let ok = false; try { ok = S.when(G, n); } catch (e) { ok = false; }
       if (!ok) continue;
       n.flags.secretAsked = 1;

@@ -837,3 +837,28 @@ html, body { overscroll-behavior: none; -webkit-text-size-adjust: 100%; text-siz
   .pick { width: min(440px, 62vw); }
 }
 .touch input, .touch select, .touch textarea { -webkit-user-select: text; user-select: text; }
+
+/* ---------------------------------------------------------------- country editor (js/ui/custom.js) */
+textarea { font: 500 15px var(--body); background: var(--paper); color: var(--ink); border: 2px solid var(--ink); padding: 4px 8px; width: 100%; resize: vertical; }
+.cust input[type=text], .cust select { width: 100%; }
+.custtop { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; } .custtop h2 { font-size: 28px; margin-bottom: 2px; }
+.custgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+.swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+.swatch { aspect-ratio: 1; min-height: 26px; border: 2px solid var(--ink); cursor: pointer; padding: 0; }
+.swatch.on { outline: 3px solid var(--red); outline-offset: 1px; }
+.seg.wrap { flex-wrap: wrap; } .seg.wrap button { flex: 0 0 auto; border-bottom: 1px solid var(--ink); }
+.fbuild { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.fbuild .seg button { padding: 4px; line-height: 0; } .fbuild .seg button svg { width: 33px; height: 22px; }
+.fbuild .emb button { padding: 5px 6px; } .fbuild .seg button.on { background: var(--paper3); outline: 3px solid var(--red); outline-offset: -3px; }
+.cin { display: flex; flex-direction: column; align-items: center; font-size: 13px; gap: 2px; }
+.cin input { width: 46px; height: 32px; border: 2px solid var(--ink); padding: 0; background: var(--paper); cursor: pointer; }
+.chk { display: flex; gap: 8px; align-items: center; font-size: 14px; margin: -4px 0 12px; cursor: pointer; } .chk input { width: 20px; height: 20px; }
+label.b { display: inline-flex; align-items: center; cursor: pointer; }
+.plist { margin-top: 8px; border-top: 1px solid var(--paper3); }
+.prow { display: grid; grid-template-columns: 26px 1fr auto auto; gap: 6px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--paper3); }
+.govrow { grid-template-columns: 28px 1fr 180px auto; }
+@media (max-width: 760px), (max-height: 500px) {
+  .custgrid { grid-template-columns: 1fr; }
+  .govrow { grid-template-columns: 24px 1fr; } .govrow select { grid-column: 1 / -1; } .govrow .b { grid-column: 1 / -1; }
+  .swatch { min-height: 32px; }
+}

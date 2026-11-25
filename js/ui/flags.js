@@ -71,12 +71,19 @@
     if (d.e && EMB[d.e]) e = '<g transform="' + tr + '" fill="' + ef + '" stroke="' + ef + '" style="--bg:' + (d.p === 'canton' || d.p === 'stripes' ? c : a) + '">' + EMB[d.e]() + '</g>';
     return '<svg viewBox="0 0 30 20" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' + body + e + '<rect width="30" height="20" fill="none" stroke="' + INK + '" stroke-width="1"/></svg>';
   }
-  const fkey = (n) => n.id + ':' + n.ideo + ':' + n.base + (n.destiny && !n.destiny.lapsed ? ':' + n.destiny.id : '');
+  F.destFlag = destFlag;
+  /* A player's own flag (js/sim/custom.js): a built spec drawn like a destiny flag, or an uploaded image. It holds unless
+     the player let history change it, and history did (a destiny, or another system than the one it was made for). */
+  const custFlag = (n) => { const C = n.cust; return C && C.flag && !(C.hist && ((n.destiny && !n.destiny.lapsed) || n.ideo !== C.ideo)) ? C.flag : null; };
+  F.custFlag = custFlag;
+  F.imgFlag = (src) => '<svg viewBox="0 0 30 20" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image width="30" height="20" preserveAspectRatio="none" href="' + src + '" xlink:href="' + src + '"/><rect width="30" height="20" fill="none" stroke="' + INK + '" stroke-width="1"/></svg>';
+  const fkey = (n) => { const c = custFlag(n); return n.id + ':' + n.ideo + ':' + (n.key || n.base) + ':' + (n.color || []).join('.') + (c ? ':c' + n.cust.fv : n.destiny && !n.destiny.lapsed ? ':' + n.destiny.id : ''); };
   F.svg = function (n, w) {
-    const key = fkey(n);
+    const key = fkey(n), cf = custFlag(n);
+    if (!cache[key] && cf) cache[key] = cf.img ? (ID.Custom.IMG.test(cf.img) ? F.imgFlag(cf.img) : '') : destFlag(cf);
     if (!cache[key] && n.destiny && !n.destiny.lapsed && n.destiny.flag) cache[key] = destFlag(n.destiny.flag);
     if (!cache[key]) {
-      const I = ID.IDEOLOGIES[n.ideo], h = ID.hashStr(n.base);
+      const I = ID.IDEOLOGIES[n.ideo], h = ID.hashStr(n.key || n.base);
       const c1 = hex(n.color), c2 = hex(I.color), c3 = lum(n.color) > 150 ? INK : PAPER;
       const fam = I.family; let body = '', emb = 'center', efill = c3, ebg = c1;
       if (n.ideo === 'ansyn' || n.ideo === 'ancom') { body = '<path d="M0 0H30L0 20Z" fill="' + (n.ideo === 'ansyn' ? '#b5221a' : INK) + '"/><path d="M30 0V20H0Z" fill="' + (n.ideo === 'ansyn' ? INK : c1) + '"/>'; emb = ''; }
@@ -101,6 +108,10 @@
     }
     return cache[key];
   };
+  /* The colour behind a flag's emblem, for copies of the flag drawn outside the page's CSS (images, the Nation screen). */
+  F.bg = (n) => { const df = custFlag(n) || (n.destiny && !n.destiny.lapsed && n.destiny.flag); return df && df.a ? (df.p === 'canton' || df.p === 'stripes' ? df.c || df.a : df.a) : hex(n.color); };
+  F.EMBLEMS = Object.keys(EMB);
+  F.emblemSvg = (k) => (EMB[k] ? EMB[k]() : '');
   F.html = (n, cls) => '<span class="flag ' + (cls || '') + '">' + F.svg(n) + '</span>';
   /* An Image of the flag for the canvas (async; returns null until loaded). */
   const imgs = {};
@@ -109,8 +120,7 @@
     let im = imgs[key];
     if (!im) {
       im = imgs[key] = new Image();
-      const bg = n.destiny && !n.destiny.lapsed && n.destiny.flag ? (n.destiny.flag.p === 'canton' || n.destiny.flag.p === 'stripes' ? n.destiny.flag.c || n.destiny.flag.a : n.destiny.flag.a) : hex(n.color);
-      im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(F.svg(n).replace(/var\(--bg\)/g, bg));
+      im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(F.svg(n).replace(/var\(--bg\)/g, F.bg(n)));
     }
     return im.complete && im.naturalWidth ? im : null;
   };

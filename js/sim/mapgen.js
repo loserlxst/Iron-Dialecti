@@ -148,6 +148,13 @@
       }
     }
 
+    // painted terrain from the map maker: run-length diffs [start, length, value] against the generated map
+    if (opts.paint || opts.rivers) {
+      for (const [s0, len, t] of opts.paint || []) for (let i = s0; i < s0 + len && i < N; i++) { terrain[i] = t; if (t === T.SEA) river[i] = 0; }
+      for (const [s0, len, v] of opts.rivers || []) for (let i = s0; i < s0 + len && i < N; i++) river[i] = v && terrain[i] !== T.SEA ? 1 : 0;
+      markCoast();
+    }
+
     // provinces: seeded BFS over land
     const land = [];
     for (let i = 0; i < N; i++) if (terrain[i] !== T.SEA) land.push(i);
@@ -216,7 +223,7 @@
   };
 
   /* Map options for a world: a scenario's own layout, or (for saves made before the scenario grew) its legacy one. */
-  ID.mapOpts = (sc, seed, size) => (sc && sc.legacy && size !== sc.size ? { seed, size, blobs: sc.legacy } : { seed, size, blobs: sc ? sc.blobs : null, noiseH: sc ? sc.noiseH : 0, land: sc ? sc.land : 0 });
+  ID.mapOpts = (sc, seed, size) => (sc && sc.legacy && size !== sc.size ? { seed, size, blobs: sc.legacy } : { seed, size, blobs: sc ? sc.blobs : null, noiseH: sc ? sc.noiseH : 0, land: sc ? sc.land : 0, paint: sc ? sc.paint : null, rivers: sc ? sc.rivers : null });
 
   /* BFS over sea from a set of start tiles; returns distance array (Int16, -1 unreachable) up to maxD. */
   ID.seaDistance = function (G, starts, maxD) {

@@ -8,8 +8,8 @@
   const P = () => UI.G.nations[UI.G.player];
   const S = (t, n) => ID.Focus.sub(t, n);
   const hex = (c) => '#' + c.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
-  const bigFlag = (n) => '<span class="bigflag">' + ID.Flags.svg(n).replace(/var\(--bg\)/g, n.destiny && !n.destiny.lapsed && n.destiny.flag ? (n.destiny.flag.p === 'canton' || n.destiny.flag.p === 'stripes' ? n.destiny.flag.c || n.destiny.flag.a : n.destiny.flag.a) : hex(n.color)) + '</span>';
-  const anthemSeed = (n) => n.base + ':' + ID.ideo(n).family + (n.destiny && !n.destiny.lapsed ? ':' + n.destiny.id : '');
+  const bigFlag = (n) => '<span class="bigflag">' + ID.Flags.svg(n).replace(/var\(--bg\)/g, ID.Flags.bg(n)) + '</span>';
+  const anthemSeed = (n) => n.key + ':' + ID.ideo(n).family + (n.destiny && !n.destiny.lapsed ? ':' + n.destiny.id : '');
 
   /* ---------------------------------------------------------------- the Nation screen */
   function destState(G, n, f) {
@@ -57,7 +57,7 @@
   };
 
   /* ---------------------------------------------------------------- superevents */
-  const flagSvg = (n) => ID.Flags.svg(n).replace(/var\(--bg\)/g, n.destiny && !n.destiny.lapsed && n.destiny.flag ? (n.destiny.flag.p === 'canton' || n.destiny.flag.p === 'stripes' ? n.destiny.flag.c || n.destiny.flag.a : n.destiny.flag.a) : hex(n.color));
+  const flagSvg = (n) => ID.Flags.svg(n).replace(/var\(--bg\)/g, ID.Flags.bg(n));
   let superNo = 0;
   UI.showSuper = function () {
     const G = UI.G, s = G.superq[0]; if (!s) return;

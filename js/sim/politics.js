@@ -342,7 +342,7 @@
   P.civilWar = function (G, n, ideo, provs, sponsor) {
     const set = new Set(provs); const I = ID.IDEOLOGIES[ideo];
     const col = I.color.map((c, k) => clamp(Math.round(c * 0.75 + n.color[k] * 0.25 + 18), 0, 255));
-    const R = ID.makeNation(G, { base: n.base, adj: n.adj, color: col, sit: 'revolution' });
+    const R = ID.makeNation(G, { key: n.key, base: n.base, adj: n.adj, color: col, sit: 'revolution' });
     if (!R) return;
     R.civilOf = n.id; n.civil = R.id; R.tree = n.tree || null;
     const before = n.tiles;

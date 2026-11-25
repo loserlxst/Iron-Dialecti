@@ -127,7 +127,7 @@
     if (ID.forbid && ID.forbid(G, n, 'emergency')) src = src.filter((o) => !(Array.isArray(o.fx) && o.fx.some((f) => f[0] === 'emergency' && f[1]))); // a system that never rules by decree is never offered it
     return src.filter((o) => !o.can || o.can(n, G, ctx));
   };
-  Ev.txt = (v, G, n, ctx) => (typeof v === 'function' ? v(n, G, ctx) : v).replace(/\{N\}/g, n.name).replace(/\{A\}/g, n.adj).replace(/\{L\}/g, n.leader.title + ' ' + n.leader.name).replace(/\{BODY\}/g, ID.ideo(n).control.body);
+  Ev.txt = (v, G, n, ctx) => ID.ren(typeof v === 'function' ? v(n, G, ctx) : v).replace(/\{N\}/g, n.name).replace(/\{A\}/g, n.adj).replace(/\{L\}/g, n.leader.title + ' ' + n.leader.name).replace(/\{BODY\}/g, ID.ideo(n).control.body);
   Ev.auto = function (G, n, def, ctx) {
     const opts = Ev.options(G, n, def, ctx); if (!opts.length) return;
     let h = G.historical && def.story ? opts.find((x) => x.hist) : null;

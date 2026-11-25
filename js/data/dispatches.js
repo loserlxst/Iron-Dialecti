@@ -182,7 +182,7 @@
   ev({ id: 'd_old_archaeology', tone: 'mixed', theme: 'abroad', title: 'The foreigners’ excavation', w: (n, G) => (oldL(G, n) ? 1 : 0),
     text: 'A foreign expedition has found a king’s tomb, untouched for three thousand years, full of gold. Its permit says that half of what it finds goes home with it.',
     opts: [{ label: 'Every piece stays here', fx: [['glory', 6], ['opAll', -3], ['legitmod', 3, 36, 'The tomb']] }, { label: 'Honour the permit', fx: [['gold', 60], ['opAll', 3]] }] });
-  ev({ id: 'd_old_refugee_camps', tone: 'bad', theme: 'people', title: 'The camps become towns', era: 2, w: (n, G) => (oldL(G, n) && ID.alive(G).some((o) => o.base === 'Neshar') ? 1.2 : 0),
+  ev({ id: 'd_old_refugee_camps', tone: 'bad', theme: 'people', title: 'The camps become towns', era: 2, w: (n, G) => (oldL(G, n) && ID.alive(G).some((o) => o.key === 'Neshar') ? 1.2 : 0),
     text: 'The refugee camps on our border have stone houses now, schools run by a relief agency, and a generation of children born there who have never seen the villages they are named after. Their fathers have guns.',
     opts: [{ label: 'Give them citizenship', fx: [['pop', 0.01], ['sup', 'peasants', -3], ['opAll', 2]] }, { label: 'Keep them refugees, and their claim alive', fx: [['mod', 'unrest', 3, 60, 'The camps'], ['legitmod', 2, 60, 'The cause']] }, { label: 'Disarm the camps', fx: [['mod', 'unrest', -2, 24, 'Disarmed camps'], ['grievance', 6]] }] });
   ev({ id: 'd_island_ferry', tone: 'mixed', theme: 'sea', title: 'The ferry company strikes', w: (n, G) => (island(G, n) ? 1.2 : 0),

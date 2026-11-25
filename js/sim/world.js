@@ -18,7 +18,7 @@
     if (id >= MAXN) return null;
     const col = o.color || ID.nationColor(id + (G.seed % 17));
     const n = {
-      id, base: o.base, adj: o.adj, name: o.base, color: col, css: 'rgb(' + col.join(',') + ')', alive: true, ai: true, ideo: null, sit: o.sit || 'middling', blurb: o.blurb || '',
+      id, key: o.key || o.base, base: o.base, adj: o.adj, name: o.base, color: col, css: 'rgb(' + col.join(',') + ')', alive: true, ai: true, ideo: null, sit: o.sit || 'middling', blurb: o.blurb || '',
       capital: -1, tiles: 0, tc: [0, 0, 0, 0, 0, 0, 0], popLand: 0, foodLand: 0, oreLand: 0, coastTiles: 0, nb: [0, 0, 0, 0, 0, 0],
       pop: 0, troops: 0, mob: 0.03, gold: 150, debt: 0, inflation: 0,
       gdp: 1, rev: 0, exp: 0, net: 0, ls: 50, lsPrev: 50, foodBal: 1, famine: 0, ind: 0, agr: 0, tradeInc: 0, ntrade: 0, eff: 1,
@@ -347,14 +347,16 @@
   const SIT_STAB = { great: 66, sick: 38, rich: 50, small: 60, backwater: 56, revolution: 44, trader: 64, middling: 58 };
 
   ID.newGame = function (opts) {
-    const sc = opts.scenario && opts.scenario !== 'random' ? ID.SCENARIOS[opts.scenario] : null;
+    const sc = opts.scenario === 'custom' ? opts.map : opts.scenario && opts.scenario !== 'random' ? ID.SCENARIOS[opts.scenario] : null;
     const seed = sc ? sc.seed : ((opts.seed >>> 0) || 1);
     const size = sc ? sc.size : (opts.size || 'std');
-    const map = ID.genMap(ID.mapOpts(sc, seed, size));
+    const custom = opts.custom || {};
+    // a random world may be given a land layout (the map maker places nations on a preset's continents this way)
+    const map = ID.genMap(sc ? ID.mapOpts(sc, seed, size) : { seed, size, blobs: opts.blobs || null, land: opts.land || 0 });
     const N = map.N;
     const startYear = opts.startYear || ID.START_YEAR;
     const G = {
-      v: 1, seed, size, scenario: sc ? sc.id : 'random', difficulty: opts.difficulty || 'iron', headless: !!opts.headless, challenge: opts.challenge || null, ironman: !!opts.ironman,
+      v: 1, seed, size, scenario: sc ? sc.id : 'random', map: sc && sc.id === 'custom' ? sc : undefined, difficulty: opts.difficulty || 'iron', headless: !!opts.headless, challenge: opts.challenge || null, ironman: !!opts.ironman,
       rng: new ID.RNG(seed ^ 0x5bd1e995), tick: (startYear - ID.START_YEAR) * 360, speed: 2, paused: true,
       W: map.W, H: map.H, N, terrain: map.terrain, river: map.river, coast: map.coast, prov: map.prov, provinces: map.provinces, landCount: map.landCount,
       owner: new Uint8Array(N), bld: new Uint8Array(N), hp: new Uint8Array(N), cut: new Uint8Array(N), cutAge: new Uint8Array(N), fortCov: new Uint8Array(N), fortQ: new Uint8Array(N), rad: new Uint8Array(N),
@@ -381,7 +383,7 @@
           const i = y * W + x; if (G.terrain[i] === T.SEA || G.terrain[i] === T.MOUNTAIN) continue;
           const dd = dx * dx + dy * dy; if (dd < bd) { bd = dd; best = i; }
         }
-        defs.push(Object.assign({}, d, { capTile: best, capProv: G.prov[best] }));
+        defs.push(ID.Custom.applyDef(Object.assign({}, d, { capTile: best, capProv: G.prov[best] }), custom[d.key || d.base]));
       }
     } else {
       const want = ID.MAP_SIZES[size].nations;
@@ -404,7 +406,7 @@
         const ideo = rng.weighted(ideos, (k) => ((counts[k] || 0) >= 2 ? 0 : ID.START_WEIGHTS[k] / (1 + (counts[k] || 0) * 1.5)));
         counts[ideo] = (counts[ideo] || 0) + 1;
         const sit = rng.pick(ID.SIT_FOR[ideo]);
-        defs.push({ base: nm.base, adj: nm.adj, ideo, sit, w: SIT_W[sit] * rng.range(0.85, 1.15), capTile: P.center, capProv: P.id });
+        defs.push(ID.Custom.applyDef({ base: nm.base, adj: nm.adj, ideo, sit, w: SIT_W[sit] * rng.range(0.85, 1.15), capTile: P.center, capProv: P.id }, custom[nm.base], true));
       }
     }
 
@@ -494,7 +496,7 @@
       if (startYear >= 1940) { n.tech.ind = 3; n.tech.mil = 3; n.tech.agr = 2; n.mob = Math.min(ID.maxMob(n), n.mob * 1.8); n.troops = n.pop * n.mob; }
       n.startTiles = n.peakTiles = n.tiles;
       n.blurb = d.blurb || ''; n.tutorial = !!d.tutorial; if (d.region) n.region = d.region;
-      if (sc && ID.FOCUS.nations[d.base]) n.tree = d.base;
+      if (sc && ID.FOCUS.nations[n.key]) n.tree = n.key;
       if (I.flags.succession) n.leader.age = rng.int(40, 66);
     });
 
@@ -532,6 +534,8 @@
     G.era = ID.eraOf(G.tick); G.startTick = G.tick;
     for (const n of nats) n.a.startIdeo = n.ideo;
     if (sc) for (const n of nats) ID.Focus.applySpirits(G, n);
+    nats.forEach((n, k) => ID.customize(G, n, defs[k]));
+    ID.Custom.setRen(G);
     G.world.depressionAt = (rng.int(1927, 1933) - ID.START_YEAR) * 360 + rng.int(0, 359);
     G.historical = !!(opts.historical && sc && sc.id === 'meridia');
     if (G.historical) { G.world.depressionAt = (1929 - ID.START_YEAR) * 360 + 9 * 30; ID.Story.init(G); G.story.loose = opts.loose !== false; }

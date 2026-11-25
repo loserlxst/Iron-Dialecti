@@ -268,7 +268,7 @@
     const nN = G.nations.length;
     const rel = []; for (let a = 1; a < nN; a++) for (let b = 1; b < nN; b++) rel.push(Math.round(G.rel[a * MAXN + b]));
     const o = {
-      v: 1, seed: G.seed, size: G.size, scenario: G.scenario, difficulty: G.difficulty, challenge: G.challenge, ironman: G.ironman, tick: G.tick, startTick: G.startTick || 0, speed: G.speed, rng: G.rng.s, era: G.era,
+      v: 1, seed: G.seed, size: G.size, scenario: G.scenario, map: G.map, difficulty: G.difficulty, challenge: G.challenge, ironman: G.ironman, tick: G.tick, startTick: G.startTick || 0, speed: G.speed, rng: G.rng.s, era: G.era,
       owner: rle(G.owner), bld: rle(G.bld), hp: rle(G.hp), rad: G.radList.map((i) => [i, G.rad[i]]),
       nations: G.nations, player: G.player, rel,
       prov: G.provinces.slice(1).map((P) => [P.core, Math.round(P.unrest * 10) / 10, P.opp, Math.round(P.oppStr * 10) / 10, Math.round(P.integ), P.lastOwner, P.sponsor, P.oil || 0, P.oilFound || 0, P.oilCo || 0, P.oilShare || 0, P.oilAt || 0, P.canal || 0]), fronts: G.fronts || null,
@@ -280,11 +280,12 @@
   };
   Gm.load = function (str) {
     const o = typeof str === 'string' ? JSON.parse(str) : str;
-    const sc = o.scenario && o.scenario !== 'random' ? ID.SCENARIOS[o.scenario] : null;
+    const sc = o.scenario === 'custom' ? o.map : o.scenario && o.scenario !== 'random' ? ID.SCENARIOS[o.scenario] : null;
+    if (o.scenario === 'custom' && !sc) throw new Error('This save is on a custom map but carries no map.');
     const map = ID.genMap(ID.mapOpts(sc, o.seed, o.size));
     const N = map.N;
     const G = {
-      v: 1, seed: o.seed, size: o.size, scenario: o.scenario, difficulty: o.difficulty, headless: false, challenge: o.challenge, ironman: o.ironman, rng: new ID.RNG(1), tick: o.tick, startTick: o.startTick || 0, speed: o.speed || 2, paused: true, era: o.era,
+      v: 1, seed: o.seed, size: o.size, scenario: o.scenario, map: o.scenario === 'custom' ? sc : undefined, difficulty: o.difficulty, headless: false, challenge: o.challenge, ironman: o.ironman, rng: new ID.RNG(1), tick: o.tick, startTick: o.startTick || 0, speed: o.speed || 2, paused: true, era: o.era,
       W: map.W, H: map.H, N, terrain: map.terrain, river: map.river, coast: map.coast, prov: map.prov, provinces: map.provinces, landCount: map.landCount,
       owner: new Uint8Array(N), bld: new Uint8Array(N), hp: new Uint8Array(N), cut: new Uint8Array(N), cutAge: new Uint8Array(N), fortCov: new Uint8Array(N), fortQ: new Uint8Array(N), rad: new Uint8Array(N),
       nations: o.nations, player: o.player, attacks: [], boats: o.boats || [], missiles: o.missiles || [], builds: o.builds || [], blist: [],
@@ -294,7 +295,9 @@
     };
     G.rng.s = o.rng >>> 0;
     G.historical = !!o.historical; G.story = o.story || null; G.fronts = o.fronts || null; if (G.historical && !G.story) ID.Story.init(G);
-    if (sc) for (const n of G.nations) if (n && !n.tree && !n.civilOf && ID.FOCUS.nations[n.base]) n.tree = n.base; // saves from before programmes existed
+    for (const n of G.nations) if (n && !n.key) n.key = n.base; // saves from before the key split: the display name was the key
+    if (sc) for (const n of G.nations) if (n && !n.tree && !n.civilOf && ID.FOCUS.nations[n.key]) n.tree = n.key; // saves from before programmes existed
+    ID.Custom.setRen(G);
     unrle(o.owner, G.owner); unrle(o.bld, G.bld); if (o.hp) unrle(o.hp, G.hp); else for (let i = 0; i < N; i++) if (G.bld[i]) G.hp[i] = 100; // saves from before building condition
     for (const [i, v] of o.rad || []) { G.rad[i] = v; G.radList.push(i); }
     for (let p = 1; p < G.provinces.length; p++) {
@@ -313,7 +316,7 @@
     for (const a of o.attacks || []) { a.heap = new ID.Heap(); a.prog = 0; a.base = G.tick; a.scan = -999; a.idle = 0; G.attacks.push(a); }
     ID.recalcBorders(G); ID.recomputeForts(G); ID.structMonth(G, true);
     for (const n of G.nations) if (n && n.alive) ID.Combat.refresh(G, n);
-    ID.Combat.updateSupply(G); Gm.updateStats(G);
+    ID.Combat.updateSupply(G); Gm.updateStats(G); ID.Custom.restore(G);
     // saves from before the coup model (session 15): a coup waiting in the queue is fought out anew
     for (const e of G.evq.slice()) { const n = G.nations[e.n]; if (e.id === 'coup' && n && n.alive && !n.coupNow) { G.evq.splice(G.evq.indexOf(e), 1); ID.Coup.launch(G, n, e.ctx && e.ctx.backer ? { src: 'foreign', backer: e.ctx.backer } : { src: 'army' }); } }
     return G;

@@ -32,7 +32,8 @@
   /* the sum of a leader's AI leanings: agg (war appetite), peace (willingness to settle), reform, purge */
   ID.leaderLean = (n, k) => { let s = 0; for (const t of (n.leader && n.leader.traits) || []) { const T = ID.TRAITS && ID.TRAITS[t]; if (T && T.ai && T.ai[k]) s += T.ai[k]; } return s; };
   ID.leaderTitle = (ideo) => TITLES[ideo] || 'Head of State';
-  ID.nationTitle = (n, ideo) => ID.IDEOLOGIES[ideo].title.replace('{N}', n.base).replace('{A}', n.adj);
+  /* A custom full name holds while the state keeps the system it was given for (js/sim/custom.js). */
+  ID.nationTitle = (n, ideo) => (n.cust && n.cust.full && n.cust.ideo === ideo ? n.cust.full : ID.IDEOLOGIES[ideo].title.replace('{N}', () => n.base).replace('{A}', () => n.adj));
 
   /* Starting situations. diff 1..5 is shown as a rating on the nation picker. */
   ID.SITUATIONS = {

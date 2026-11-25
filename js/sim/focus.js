@@ -15,7 +15,7 @@
   ID.byBase = function (G, base) {
     let best = null;
     for (const n of G.nations) {
-      if (!n || !n.alive || n.base !== base) continue;
+      if (!n || !n.alive || n.key !== base) continue;
       if (!best) { best = n; continue; }
       const a = n.civilOf ? 0 : 1, b = best.civilOf ? 0 : 1;
       if (a > b || (a === b && n.tiles > best.tiles)) best = n;
@@ -39,7 +39,7 @@
   const destActive = (n) => (n.destiny && !n.destiny.lapsed ? n.destiny : null);
   Fo.afterTree = (n) => { const d = destActive(n); return d && ID.FOCUS.after && ID.FOCUS.after[d.id]; };
   /* Names in family trees carry {A} and {N}: the state's adjective and name. */
-  Fo.sub = (t, n) => (t ? String(t).replace(/\{A\}/g, n.adj).replace(/\{N\}/g, n.base) : '');
+  Fo.sub = (t, n) => (t ? String(ID.ren(t)).replace(/\{A\}/g, () => n.adj).replace(/\{N\}/g, () => n.base) : ''); // ren: a renamed state's own text
   Fo.nm = (f, n) => Fo.sub(f.name, n);
   Fo.def = (id) => { if (!all) index(); return all[id]; };
   Fo.ensure = (n) => n.path || (n.path = { cur: null, start: 0, end: 0, done: {} });
@@ -192,7 +192,7 @@
   };
   /* National spirits: two per country of The Two Continents, applied once at the start. */
   Fo.applySpirits = function (G, n) {
-    const I = ID.IDENTITY && ID.IDENTITY[n.base]; if (!I || n.spirits) return;
+    const I = ID.IDENTITY && ID.IDENTITY[n.key]; if (!I || n.spirits) return;
     n.spirits = I.spirits.map((s) => s.name);
     for (const s of I.spirits) ID.Events.applyFx(G, n, s.fx, { spirit: s.name });
   };
@@ -206,17 +206,18 @@
   };
   /* Motto, anthem and lore for any state: written for The Two Continents, generated elsewhere. */
   ID.identityOf = function (G, n) {
-    const I = ID.IDENTITY && ID.IDENTITY[n.base], fam = ID.ideo(n).family, h = ID.hashStr(n.base + ':' + fam), P = POOL[fam] || POOL.liberal;
+    const I = ID.IDENTITY && ID.IDENTITY[n.key], fam = ID.ideo(n).family, h = ID.hashStr(n.key + ':' + fam), P = POOL[fam] || POOL.liberal;
     const pick = (a) => Fo.sub(a[h % a.length], n);
     const dest = n.destiny && !n.destiny.lapsed ? n.destiny : null;
-    let lore = I ? I.lore : '';
+    let lore = I ? ID.ren(I.lore) : '';
     if (!lore) {
       const share = n.tiles / Math.max(1, G.landCount), size = share > 0.12 ? 'great' : share > 0.05 ? 'middling' : 'small';
       const coast = G.coast && G.coast[n.capital] ? 'a harbour capital' : 'an inland capital';
       const born = n.civilOf ? ' It was born in a civil war, and remembers.' : '';
       lore = n.name + ' is a ' + size + ' state with ' + coast + ' and ' + Math.round(n.pop / 1e5) / 10 + ' million people.' + born + ' ' + ID.ideo(n).short;
     }
-    return { motto: dest ? dest.motto : I && !n.civilOf && (!n.a.startIdeo || ID.IDEOLOGIES[n.a.startIdeo].family === fam) ? I.motto : pick(P.motto), anthem: I && n.tree === n.base ? I.anthem : pick(P.anthem), lore, spirits: I && n.spirits ? I.spirits : [] };
+    const C = n.cust || {};
+    return { motto: dest ? dest.motto : C.motto || (I && !n.civilOf && (!n.a.startIdeo || ID.IDEOLOGIES[n.a.startIdeo].family === fam) ? ID.ren(I.motto) : pick(P.motto)), anthem: C.anthem || (I && n.tree === n.key ? ID.ren(I.anthem) : pick(P.anthem)), lore, spirits: I && n.spirits ? I.spirits.map((x) => Object.assign({}, x, { name: ID.ren(x.name), desc: ID.ren(x.desc) })) : [] };
   };
 
   /* ---------------------------------------------------------------- AI choice */
