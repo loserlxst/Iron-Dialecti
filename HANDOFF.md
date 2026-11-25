@@ -1011,6 +1011,77 @@ Continuous effects use `keep(n, label, k, v)`, a two-month modifier refreshed ea
   officers' coup, laws a new system forbids, the usury edict, holy war and fellow theocracies) and the soak. `ID_SKIP=engines` (read by `tools/load.js`) measures the
   game without the file.
 
+## Session 15, part 1: encirclement (`sim/combat.js`)
+
+Playtest: an enemy landing pushed deep inland, was cut off by land, and kept getting strong reinforcements and
+advancing until the player made peace. Cause: one attack per (from, to) with one frontier heap across every front,
+reinforced from the whole national pool; and any pocket holding a beach or port was sea-supplied (`cut` 2) forever.
+
+- **Pieces.** `C.updateSupply` keeps the connected components in `G._comp` (tile → piece id), `G._comps` (per piece:
+  owner, size, ports, `portI`, `beachT`/`beachI`, `shore`, `adj` = war enemies touching it, `win`, `st`, `why`, `tiles`,
+  `fromMain`) and `G._main` (main piece per nation). Every attack carries `a.ck` (its piece) and `a.pk` (an anchor tile,
+  -1 for the main army) and advances only from tiles of its piece (`pieceTest`); taken tiles join the piece at once.
+  `pieces()` re-anchors pocket attacks each pass (`comps[ck].start`), merges a pocket into the main army when the ring
+  breaks, drops it (prisoners) when its ground is gone, merges duplicates, and splits a share of the main army's troops
+  into a salient that was just cut off (its border with the enemy over the whole border).
+- **Sea supply.** A piece touched by an enemy is supplied (2) only with a coast, no blockade (an enemy `seaPower` ≥
+  `C.BLOCKADE` = 3 × ours) and a working port or a beach younger than `C.BEACH_DAYS` (120). Untouched pieces keep the
+  old behaviour (their beach is refreshed). `c.why`: shore, navy, beach, harbour (beach lost, no port), land.
+- **Reinforcement.** `C.launch(G, from, to, troops, style, quiet, anchor)`: with an anchor, the piece's own attack;
+  without, the main army; with no main front, `C.seaPiece` + `C.relief`: a convoy (a boat with `relief: to`) carrying
+  at most what `C.liftCap` allows (0.8/day × (1 + 1.5 × ports) × naval doctrine × navy mod × logistics / (1 + enemy
+  sea ratio)), banked up to 30 days per landing point in `A.lift`. The enemy navy sinks part of it on arrival.
+  Landings (`landBoat`) found a piece (`newPiece`) unless they touch the main territory.
+- **Encircled** (`a.enc` = tick): daily attrition (0.3% rising 0.006%/day, max 2%), speed × max(0.2, 1 − days/120),
+  only breakout tiles that bring it closer to the nearest main tile (`a.bo`, `a.bd`); no reinforcement. Surrender when
+  `cutAge` reaches `C.holdOf` (4 tens of days; 12 for noDecap/partisans; ×2 with logistics; + `a.holdX`): pocket
+  troops and a share of the pool become prisoners (`cnt.prisoners`), glory 2–8, news, a World Dispatch story
+  (`Press.pocket`). The besieger gains 0.12 war weariness per pass while an armed pocket holds.
+- **Player**: `enc_pocket` dispatch (fight out: `a.out`, faster and bloodier; hold for relief: +30 days; surrender on
+  terms: 40% come home). Supply map: red outline, troops and days per encircled pocket. Alerts for enemy troops
+  encircled and our own. Attack-bar chips mark pockets; their tooltip (`UI.pocketTip`) shows lift, beach days left.
+- **AI**: aims its objective at an enemy landing's beach or port, at the enemy tile nearest the breakout point of its
+  own encircled pockets, and a pocket on an ageing beach at the nearest enemy port (`a.pobj`); its attacks delay tiles
+  that would leave a thin salient (fewer than two of its tiles beside them).
+- Saves keep `pk, enc, bo, bd, out, holdX, give, last, pobj`. Test: `node tools/encircle.js [--soak 4]` (landing,
+  convoy limit, cutting the coast, attrition, breakout only, surrender, ageing beach, save; soak: 27 landings, 2 took
+  30+ tiles, 23 pocket surrenders in 4 × 40 years). Simulate (8 random runs): wars 16, conquests 3.3, largest state
+  16% (base 19 / 4.8 / 15%): wars are a little less decisive.
+
+## Session 15, part 2: coups (`sim/coup.js`, new; loads after `sim/regime.js`)
+
+Playtest: a stable, happy military and still a coup at "70% for the loyalists", which ended the campaign. Coups came
+from four places that the player could not tell apart (monthly risk with additive terms that applied to a happy army,
+foreign plots whose `coupBoost` overrode the odds with `Math.max`, the inner circle's `Rg.strike` with its own roll,
+and the `coup` event's one roll against odds rounded to 10%).
+
+- **One model.** Plotters: `army` and `capital` (`n.plot = {src, prog, known}`), `figure` (`f.plot` in the circle,
+  grown by `sim/regime.js`, by a popular general's prestige, and in juntas and personalist regimes by ambitious,
+  half-loyal figures), `foreign` (a bought figure: `f.backer`, `f.prep`). `Coup.plots(G, n)` lists them all.
+  `Coup.content(n)` (military support ≥ 60): army plots are 3% as likely, and fizzle at their date.
+- **Stages**: grumbling (prog < 34), meetings, a date (67+); 100 launches. `Coup.intel(n)` (security law, budget,
+  police chief) is the chance a month to find a plot at its stage (×0.4 at stage 1, ×0.8 at 2); at stage 3 it is
+  always found unless intel < `Coup.WEAK` (0.15). Found: `plot_stage` for the player (purge, buy off, reassign units,
+  arrest, concede, watch; `Coup.act`), `Coup.aiAct` for AI.
+- **Odds**: `Coup.odds(G, n, plot)` → `{p, rows}`: the one number used by the dispatch text, the Government panel's
+  "Known plots" tooltip, `Politics.coupOdds`, `Diplomacy.plotOdds` and the roll. Rows: army mood or the army moving,
+  the army chief, the plotter's ability, security law, police chief, stability, legitimacy, a foreign backer and its
+  preparation, bankers' weakness, a regime born of a coup (+18%), recruitment law, the `coup` modifier channel,
+  reassigned units, and the choices made during the coup.
+- **The coup**: AI targets roll once. The player gets `coup` (call in loyal regiments, arm the workers, negotiate, flee,
+  or join), four days (garrison, radio, palace, regiments outside the city; each a roll at the current odds that moves
+  them as a martingale, so the number shown before any choice is the true chance of the whole coup), `coup_day` after
+  the second (radio, amnesty, hold, flee), then the roll. Lost: `coup_lost` offers fight on from the provinces (civil war,
+  the player crosses to the loyalist rump: `Coup.fightOn`), exile (the new regime governs, `n.a.restore` brings
+  `coup_restore`, a counter-coup a year or two later), serve the new regime, or accept defeat. Armed workers that
+  lose still split the country as before. `Rg.strike` → `strikeWon`/`strikeLost`, `D.plotSignal` → `plotWon`/`plotLost`.
+- **Measured** (`node tools/coups.js --runs 16 --years 50`, self-check first; on old code it wraps the old entry
+  points): before 278 attempts, 99 successes (0.07 per state-decade), of which foreign plots 244/94; states with
+  military support above 60 suffered 199 attempts / 70 successes. After: 147 attempts, 38 successes (0.024 per
+  state-decade); foreign 66/34, figures 72/3, army 9/1; above 60 military support army coups 4 attempts / 1 success
+  (25/2 before); weak states (stability < 35) 0.64 successes per state-decade; juntas 0.04, personalist 0.06,
+  democratic socialists 0.13, technosoc 0.28 (their exported revolutions are bought coups).
+
 ## Peace by ideology (`sim/diplomacy.js`)
 
 - `D.terms(G, win, lose, score)`, called by every negotiated peace with a winner (not civil wars), returns the

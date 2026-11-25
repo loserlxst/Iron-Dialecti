@@ -293,11 +293,8 @@
   /* at war with itself, or just out of one: the army is busy, a coup now would be suicide */
   P.inCivil = (G, n) => !!((n.civil && G.nations[n.civil] && G.nations[n.civil].alive) || (n.civilOf && G.nations[n.civilOf] && G.nations[n.civilOf].alive));
   P.coupShield = (G, n) => P.inCivil(G, n) || (n.a.civilEnd != null && G.tick - n.a.civilEnd < 1080) || (n.id === G.player && n.a.coupAt != null && G.tick - n.a.coupAt < 720);
-  P.coupOdds = function (G, n, backed) {
-    const sec = ID.LAWS.security.opts[n.laws.security];
-    const base = clamp(0.35 + (50 - n.fs.military) / 100 + (50 - n.stab) / 150 + (50 - n.legit) / 150 - sec.detect * 0.2 + (backed ? 0.1 : 0), 0.08, 0.92);
-    return n.a.coupBoost && n.a.coupAt != null && G.tick - n.a.coupAt < 90 ? Math.max(base, n.a.coupBoost) : base;
-  };
+  /* The plotters' chance (sim/coup.js has the whole model and its reasons). */
+  P.coupOdds = (G, n, backed) => ID.Coup.odds(G, n, backed ? { src: 'foreign', backer: backed } : { src: 'army' }).p;
   P.coupIdeo = function (G, n, backer) {
     if (backer && G.nations[backer]) { const bi = G.nations[backer].ideo; if (ID.IDEOLOGIES[bi].control.type !== 'assembly') return bi; }
     if (n.ideo === 'junta') return G.rng.chance(0.5) ? 'personalist' : 'liberal';
@@ -305,12 +302,8 @@
     if (ID.ideo(n).family === 'socialist' && n.fs.bureaucracy < 40 && G.rng.chance(0.3)) return 'personalist';
     return G.rng.chance(0.75) ? 'junta' : G.rng.pick(['personalist', 'corporatist', 'natpop', 'natsyn']);
   };
-  P.coup = function (G, n, backer) {
-    n.a.coupAt = G.tick; n.a.coupBoost = 0; // a foreign plot's odds (set in Diplomacy.plotSignal) belong to that plot only
-    if (n.id === G.player) { ID.Events.queue(G, n, 'coup', { backer: backer || 0 }); return; }
-    if (G.rng.chance(P.coupOdds(G, n, backer))) P.changeIdeology(G, n, P.coupIdeo(G, n, backer), 'coup', backer);
-    else { n.stab -= 8; n.sm.military += 12; n.flags.coupSurvived = 1; ID.news(G, 'A coup attempt in ' + n.name + ' fails.', 'pol', n.id); if (ID.Press) ID.Press.coupFails(G, n, backer); }
-  };
+  /* A coup now (scripted events): fought out by sim/coup.js like any other. */
+  P.coup = (G, n, backer, seat) => ID.Coup.launch(G, n, backer ? { src: 'foreign', backer } : seat ? { src: 'figure', seat } : { src: 'army' });
 
   /* ---------------------------------------------------------------- uprisings and civil war */
   P.movement = function (G, n) {
@@ -612,28 +605,10 @@
     }
     if (n.cd.strike && --n.a.strikeCd <= 0) n.cd.strike = 0;
 
-    /* coup risk */
-    let risk = 0;
-    if (!I.flags.noCoup && !P.coupShield(G, n)) {
-      const shaky = 1 + Math.max(0, 45 - n.stab) / 15 + Math.max(0, 45 - n.legit) / 20;
-      risk = (Math.max(0, 56 - n.fs.military) / 56) * (n.fp.military / 16) * (rec.coup != null ? rec.coup : 1) * (1 + Math.min(n.prestige, 60) / 90) * Math.min(shaky, 3) * 0.016;
-      if (n.fs.capital < 25 && n.fp.capital > 15 && n.fs.military < 50) risk += 0.012;
-      if (n.prestige > 65 && n.legit < 45 && n.ideo !== 'junta') risk += 0.01;
-      if (I.flags.colonels && n.fs.military < 50) risk += 0.008;
-      risk *= n.ai ? 0.8 : diffP.crisis;
-      if (n.a.coupAt != null && G.tick - n.a.coupAt < (n.id === G.player ? 1440 : 720)) risk *= 0.2;
-      if (n.id === G.player) risk = Math.min(risk, 0.02);
-      if (n.age < 18) risk *= 0.3;
-      risk *= Math.max(0.15, 1 + ID.mod(n, 'coup'));
-    }
-    n.coupRisk = risk;
-    if (n.id === G.player && !G.autoPlayer && risk > 0.008 && (!n.a.coupArc || G.tick - n.a.coupArc > 900) && !ID.Events.pending(G, 'arc_coup')) { n.a.coupArc = G.tick; ID.Events.queue(G, n, 'arc_coup', {}); }
-    if (risk > 0.004 && rng.chance(risk) && !(n.id === G.player && n.a.coupArc && G.tick - n.a.coupArc < 60)) {
-      if (rng.chance(sec.detect * clamp(n.budget.security / 0.08, 0.3, 1.2))) {
-        n.a.coupAt = G.tick;
-        if (n.id === G.player) ID.Events.queue(G, n, 'plot_uncovered'); else { n.sm.military += 6; n.stab -= 2; }
-      } else { P.coup(G, n, 0); if (!n.alive || G.over) return; }
-    }
+    /* coups: who has a motive, how plots grow, what the state sees (sim/coup.js) */
+    ID.Coup.month(G, n, rec, diffP);
+    if (!n.alive || G.over) return;
+    if (n.id === G.player && !G.autoPlayer && n.a.coupWhy.army > 0.008 && (!n.a.coupArc || G.tick - n.a.coupArc > 900) && !ID.Events.pending(G, 'arc_coup')) { n.a.coupArc = G.tick; ID.Events.queue(G, n, 'arc_coup', {}); }
 
     /* uprising */
     if (!(n.civil && G.nations[n.civil] && G.nations[n.civil].alive) && !(n.civilOf && G.nations[n.civilOf] && G.nations[n.civilOf].alive) && n.age > 24 && !(n.a.civilEnd && G.tick - n.a.civilEnd < 2160)) {

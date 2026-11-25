@@ -237,6 +237,7 @@
     const ns = G.nations;
     for (let i = 1; i < ns.length; i++) { const n = ns[i]; if (n.alive) ID.Combat.tickPop(G, n); }
     ID.Politics.tickVotes(G);
+    { const pn = ns[G.player]; if (pn && pn.coupNow) ID.Coup.day(G, pn); }
     if ((G.tick & 3) === 0) for (let i = 1; i < ns.length; i++) { const n = ns[i]; if (n.alive && n.nwars && (n.ai || G.autoPlayer)) ID.AI.war(G, n); }
     if (G.tick % 5 === 0) ID.Focus.tick(G);
     if (G.tick % 30 === 0) Gm.month(G);

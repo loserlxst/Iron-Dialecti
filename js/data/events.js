@@ -18,36 +18,7 @@
   const ev = (o) => E.push(o);
 
   /* ================================================================ SYSTEM EVENTS */
-  function coupResolve(G, n, ctx, armed) {
-    const Pl = ID.Politics;
-    if (Pl.inCivil(G, n)) { n.stab = clamp(n.stab - 5, 0, 100); n.sm.military -= 6; ID.news(G, 'With the country at war with itself, the plotters find no regiments to follow them. They are arrested.', 'good', n.id); return; }
-    let odds = Math.max(0.45, 1 - Pl.coupOdds(G, n, ctx.backer)); if (armed) odds += 0.2;
-    const to = Pl.coupIdeo(G, n, ctx.backer);
-    if (G.rng.chance(odds)) {
-      n.stab = clamp(n.stab - 10, 0, 100); n.sm.military += 14; n.fs.military = Math.min(100, n.fs.military + 10); n.flags.coupSurvived = 1; n.prestige = Math.max(0, n.prestige - 25);
-      ID.addMod(n, 'atk', -0.08, 18, 'Officer purge');
-      if (armed) { n.sm.military -= 22; n.fervor = Math.min(100, n.fervor + 15); n.sm.workers += 10; }
-      ID.news(G, 'The coup in ' + n.name + ' collapses. The plotters are arrested.', 'good', n.id); ID.sfx(G, 'good');
-      return;
-    }
-    if (armed) {
-      const capP = G.prov[n.capital]; const mine = [];
-      for (let p = 1; p < G.provinces.length; p++) if (G.provinces[p].owner === n.id && p !== capP) mine.push(G.provinces[p]);
-      mine.sort((a, c) => a.urban - c.urban);
-      const provs = mine.slice(0, Math.max(1, Math.round(mine.length * 0.55))).map((x) => x.id);
-      if (provs.length) { ID.logGrief(n, G.tick, 'The coup half-succeeded: the army took the countryside.'); Pl.civilWar(G, n, to, provs, ctx.backer); return; }
-    }
-    ID.Game.defeat(G, 'coup', { ideo: to, backer: ctx.backer });
-  }
-  ev({ id: 'coup', sys: 1, sfx: 'alarm', title: 'Tanks in the capital',
-    text: (n, G, c) => 'Before dawn, units of the {A} army surround the ministries and the radio station. ' + (c.backer ? 'Your police believe ' + G.nations[c.backer].name + ' paid for it. ' : '') + 'Your staff put the loyalists’ chances at about ' + Math.round((1 - ID.Politics.coupOdds(G, n, c.backer)) * 10) * 10 + '%.',
-    opts: [
-      { label: 'Rally the loyal regiments', tip: 'Fight it out. If the loyalists lose, the regime falls and the campaign ends.', fx: [['fn', (G, n, c) => coupResolve(G, n, c, false)]] },
-      { label: 'Arm the workers', tip: 'Loyalist odds +20%. If it still fails, the country splits: you keep the cities, the army takes the countryside. If it succeeds, the army will never forgive you.',
-        can: (n) => S(n, 'workers') >= 50 || fam(n, 'socialist', 'anarchist'), fx: [['fn', (G, n, c) => coupResolve(G, n, c, true)]] },
-      { label: 'Take the chair they are offering', tip: 'Join the plotters and lead the new regime. You keep playing — as the government the coup creates.',
-        fx: [['fn', (G, n, c) => { n.flags.everEmergency = 1; ID.Politics.changeIdeology(G, n, ID.Politics.coupIdeo(G, n, c.backer), 'coup', c.backer); }]] },
-    ] });
+  // the coup itself and the plots before it are in sim/coup.js
   ev({ id: 'plot_uncovered', sys: 1, title: 'A plot uncovered', text: 'The security services have a list of officers who have been meeting where they should not. Nothing has happened yet.',
     opts: [
       { label: 'Purge the officer corps', fx: [['sup', 'military', -6], ['mod', 'atk', -0.1, 18, 'Officer purge'], ['prestige', -20], ['grievance', 4], ['fn', (G, n) => { n.a.coupAt = G.tick; }]], ai: 2 },
@@ -267,7 +238,7 @@
       { label: 'Say nothing', fx: [['later', 9, 'organs_plot']] },
     ] });
   ev({ id: 'organs_plot', sys: 1, always: 1, title: 'The service moves', text: 'The head of the political police has concluded that the state would be safer in his hands.',
-    opts: [{ label: 'So it comes to this', fx: [['fn', (G, n) => ID.Politics.coup(G, n, 0)]] }] });
+    opts: [{ label: 'So it comes to this', fx: [['fn', (G, n) => ID.Politics.coup(G, n, 0, 'police')]] }] });
   ev({ id: 'assassination', title: 'Shots at the motorcade', text: 'Two bullets through the windscreen. {L} is unhurt; the chauffeur is dead; the gunman belonged to no organisation anyone has heard of.', cd: 120,
     w: (n) => (n.grievance > 45 || (n.a.opp || 0) > 40 ? 3 : 0),
     opts: [

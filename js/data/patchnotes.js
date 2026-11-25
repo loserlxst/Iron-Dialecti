@@ -3,6 +3,14 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'Coups, rebuilt', items: [
+      'A coup now needs plotters, and the game tells you who they are: the army, a member of your inner circle, a foreign power paying one of them, or bankers hiring officers.',
+      'A content army (military support 60 or more) no longer stages coups of its own. If you are overthrown with a happy army, it was someone else, and the dispatch names them.',
+      'Plots build up over months: grumbling, then meetings, then a date. Your security services can find them at each stage, and you can purge, buy off, reassign units, arrest or concede. Under civil liberties with little money for security, a coup can still come without warning, and the game says that is why.',
+      'The coup itself is fought out over several days: the garrison, the radio, the palace and the regiments outside the city. You choose how to meet it (call in loyal regiments, arm the workers, negotiate, flee) and how to spend the second night.',
+      'The odds you are shown are the exact odds, with every reason behind them, and they are the odds that are rolled.',
+      'Losing a coup no longer ends the campaign. Fight on from the provinces, go into exile and try a counter-coup later, or serve the new regime. You can still accept defeat if you want to.',
+    ] },
     { date: '25 November 2026', title: 'Encirclement', items: [
       'Troops in a pocket now belong to that pocket. A landing or a cut-off salient fights with what it has; the enemy’s home army can no longer feed it across your country.',
       'A landing is supplied over its beach for about four months. After that it needs a captured port. Take its beach, its port or its whole coast, or bring a navy three times stronger than theirs, and it is cut off.',

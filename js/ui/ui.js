@@ -530,7 +530,8 @@
     if ((n.a.unrest || 0) > 40) add('<b>Unrest ' + Math.round(n.a.unrest) + '</b> across the country', 'gov', true);
     if (n.a.mv && n.a.mv.ideo && n.a.mv.share > 0.12 && !UI.fuzzy(n)) add('<b>' + ID.IDEOLOGIES[n.a.mv.ideo].name + '</b> movement strong in ' + Math.round(n.a.mv.share * 100) + '% of the country', 'gov', n.a.mv.share > 0.22);
     const det = ID.LAWS.security.opts[n.laws.security].detect;
-    if (det > 0 && n.coupRisk > 0.006) add('<b>Security service</b>: officers are plotting', 'gov', n.coupRisk > 0.02);
+    for (const q of ID.Coup.plots(G, n)) if (q.known) add('<b>A plot</b>: ' + esc(ID.Coup.who(G, n, q)) + ' · ' + ID.Coup.STAGES[q.known].toLowerCase(), 'gov', q.known >= 2);
+    if (det > 0 && n.coupRisk > 0.006 && !ID.Coup.plots(G, n).some((q) => q.known)) add('<b>Security service</b>: officers are restless', 'gov', n.coupRisk > 0.02);
     if (n.a.knownOps) for (const k in n.a.knownOps) if (G.tick - n.a.knownOps[k] < 720 && G.nations[+k].alive) add('<b>' + esc(G.nations[+k].base) + '</b> is funding your opposition', 'for', false, 'focus', +k);
     for (const v of G.votes) if (v.n === n.id) add('<b>' + esc(I.control.body) + '</b> votes ' + ID.dateOf(v.at).short + (v.kind === 'war' ? ' on war with ' + esc(G.nations[v.target].base) : ''), 'gov');
     if (n.auth >= 96) add('<b>Authority</b> is at its ceiling: spend it', 'gov');

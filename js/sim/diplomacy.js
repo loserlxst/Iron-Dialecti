@@ -530,13 +530,8 @@
     return best;
   };
   /* The odds if the signal were given today. */
-  D.plotOdds = function (G, n, t, f) {
-    const P = ID.Politics, army = D.plotFig(t, 'army'), pol = D.plotFig(t, 'police');
-    let p = 0.12 + (f.prep || 0) * 0.006 + (P.coupOdds(G, t, true) - 0.35) * 0.6 + (f.seat === 'army' ? 0.12 : f.seat === 'police' ? 0.06 : 0);
-    if (army && army !== f && army.loy > 60) p -= 0.1; if (pol && pol !== f && pol.loy > 60) p -= 0.06;
-    if (ID.ideo(n).flags.permRev) p += 0.06;
-    return clamp(p, 0.05, 0.9);
-  };
+  /* The odds if the signal were given today: the target's coup odds with this plotter and this paymaster (sim/coup.js). */
+  D.plotOdds = (G, n, t, f) => ID.Coup.odds(G, t, { src: 'foreign', backer: n.id, seat: f.seat, prep: f.prep || 0 }).p;
   /* The plot is found out: the man is gone and the paymaster is named. */
   D.plotExposed = function (G, n, t, f, quiet) {
     const k = n.ops.findIndex((o) => o.type === 'coup' && o.target === t.id); if (k >= 0) n.ops.splice(k, 1);
@@ -553,22 +548,29 @@
     const f = D.plotFig(t, o.seat);
     if (!f || f.backer !== n.id || f.name !== o.name) return 'Your man is gone.';
     if ((f.prep || 0) < 30) return 'Too early: the conspiracy is not yet a third ready.';
-    const p = D.plotOdds(G, n, t, f);
+    if (t.coupNow) return 'A coup is already under way there.';
+    const prep = f.prep || 0;
     n.ops.splice(n.ops.indexOf(o), 1); n.cd['coup_' + t.id] = G.tick + 4 * 360;
-    f.backer = 0;
+    f.backer = 0; f.prep = 0;
     ID.news(G, 'Before dawn, units loyal to ' + f.name + ' move on the ministries of ' + t.name + '.', 'pol', t.id);
     if (t.id === G.player && !G.autoPlayer && ID.Politics.coupShield(G, t)) { t.stab = Math.max(0, t.stab - 3); ID.news(G, 'The plot of ' + f.name + ' fizzles: the army is in no mood for adventures. ' + n.name + ' wasted its money.', 'good', t.id, n.id); return ''; }
-    if (t.id === G.player && !G.autoPlayer) { t.a.coupAt = G.tick; t.a.coupBoost = p; ID.Events.queue(G, t, 'coup', { backer: n.id, fig: f.name }); return ''; }
-    if (!G.rng.chance(p)) {
-      ID.Regime.replace(G, t, f, { loy: G.rng.int(64, 82) });
+    ID.Coup.launch(G, t, { src: 'foreign', backer: n.id, seat: f.seat, fig: f.name, prep, known: f.known || 0 });
+    return '';
+  };
+  /* The paymaster's coup fails (from sim/coup.js). */
+  D.plotLost = function (G, n, t, f) {
+    {
+      if (f) ID.Regime.replace(G, t, f, { loy: G.rng.int(64, 82) });
       t.stab -= 4; t.sm.military += 8; t.flags.coupSurvived = 1; ID.addOpBoth(G, n.id, t.id, -45); n.threat += 4;
-      ID.news(G, 'The coup in ' + t.name + ' fails. ' + f.name + ' is shot; ' + n.name + ' is named as paymaster.', 'dip', t.id, n.id);
-      if (n.id === G.player) { ID.sfx(G, 'bad'); ID.headline(G, { kicker: 'It has failed', title: 'The coup in ' + t.base + ' collapses', sub: f.name + ' is dead and our part in it is known in every capital.', a: t.id, b: n.id, tone: 'bad' }); }
+      const nm = f ? f.name : 'The plotter';
+      ID.news(G, 'The coup in ' + t.name + ' fails. ' + nm + ' is shot; ' + n.name + ' is named as paymaster.', 'dip', t.id, n.id);
+      if (n.id === G.player) { ID.sfx(G, 'bad'); ID.headline(G, { kicker: 'It has failed', title: 'The coup in ' + t.base + ' collapses', sub: nm + ' is dead and our part in it is known in every capital.', a: t.id, b: n.id, tone: 'bad' }); }
       if (ID.Press) ID.Press.coupFails(G, t, n.id);
-      return '';
     }
-    // success: our man rules, and he remembers who paid
-    const P = ID.Politics, to = P.coupIdeo(G, t, n.id), old = t.leader.name, man = { name: f.name, age: f.age, seat: f.seat };
+  };
+  /* The paymaster's coup succeeds: our man rules, and he remembers who paid. */
+  D.plotWon = function (G, n, t, f, to0) {
+    const P = ID.Politics, to = to0 || P.coupIdeo(G, t, n.id), old = t.leader.name, man = { name: f.name, age: f.age, seat: f.seat };
     ID.Regime.makeLeader(G, t, f);
     t.a.coupAt = G.tick;
     if (to !== t.ideo) { P.changeIdeology(G, t, to, 'coup', n.id); t.leader.name = man.name; t.leader.age = man.age; t.leader.from = man.seat; }
@@ -612,7 +614,7 @@
         // an AI paymaster gives the signal when the odds are fair or the moment is ripe
         if (!isP) {
           const odds = D.plotOdds(G, n, t, f);
-          if ((f.prep >= 70 || (f.prep >= 45 && t.stab < 35)) && odds > 0.3) D.plotSignal(G, n, t);
+          if ((f.prep >= 70 || (f.prep >= 45 && t.stab < 35)) && odds > 0.25) D.plotSignal(G, n, t);
           else if (f.prep >= 100 && G.tick - o.since > 420) D.stopOp(G, n, k); // it will never be ripe: withdraw quietly
         }
         continue;

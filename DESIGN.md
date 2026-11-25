@@ -317,6 +317,7 @@ js/ui/doctrine.js     doctrine card, leader traits, the doctrine at war, Doctrin
 js/ui/regime.js       the Regime panel: inner circle, session line, national question; alerts and Report items
 js/ui/press.js        The World Dispatch: the front page, back issues
 js/sim/press.js       stories from other countries and the editions they are printed in
+js/sim/coup.js        coups: plotters, plot stages, what security sees, the odds and their reasons, the days of a coup
 js/sim/secret.js      the five secret roads: triggers, tabs, secret ideologies and endings
 js/sim/sovereignty.js dependency, oil, intervention, pan-national unions, liberation fronts (ID.Sov)
 js/data/oldlands.js   the Old Lands: national layer, identities, oil fields, fronts, chapters and press
@@ -333,7 +334,8 @@ js/ui/screens.js      title, campaign setup, saves, settings, challenges, record
 js/ui/tutorial.js     guided first campaign as Cassine
 js/ui/main.js         boot, main loop, pointer and wheel input
 tools/                load.js (loads the sim in index.html's order), metrics.js (events, pacing, trees, tables),
-                      simulate.js, soak.js, budget.js, probe.js, fates.js, history.js (headless, Node)
+                      simulate.js, soak.js, budget.js, probe.js, fates.js, history.js, encircle.js (pockets and
+                      landings), coups.js (coup balance and the player's coup) (headless, Node)
 ```
 
 The `sim` layer never touches the DOM, so whole campaigns run in Node for balance testing.

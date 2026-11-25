@@ -99,9 +99,9 @@
       f.loy = c100(f.loy + (tgt - f.loy) * 0.04 + rng.range(-1, 1));
       // plots grow among the disloyal and ambitious
       if (f.loy < 32 && f.amb > 58) f.plot += (f.amb - 50) / 40; else f.plot = Math.max(0, f.plot - 0.5);
-      if (f.plot >= 3 && !f.warned) { f.warned = 1; if (isP) ID.Events.queue(G, n, 'rg_plot', { seat: f.seat, name: f.name }); else Rg.aiPlot(G, n, f); }
-      if (f.plot < 1) f.warned = 0;
-      if (f.plot >= 7) { Rg.strike(G, n, f); if (!n.alive || G.over) return; continue; }
+      // what the state sees of it, and what it does, is sim/coup.js (Coup.month); at 7 the date has come
+      if (f.plot < 1) f.known = 0;
+      if (f.plot >= 7 && !n.coupNow) { f.plot = 0; Rg.strike(G, n, f); if (!n.alive || G.over) return; continue; }
       // effects of the seat, and the pull of the holder's own convictions
       const e = Rg.figFx(n, f); for (const k in e) ADD(m, k, e[k]);
       if (f.seat === 'ideology' && n.sig != null) n.sig = c100(n.sig + 0.25 * Rg.scale(f));
@@ -133,22 +133,25 @@
     else if (n.gold > 80 + 25 * f.comp && G.rng.chance(0.6)) Rg.winOver(G, n, f.seat, true);
     else if (how === 'dismiss' && G.rng.chance(0.5)) Rg.purge(G, n, f.seat, true);
   };
-  Rg.strike = function (G, n, f) {
-    const army = Rg.fig(n, 'army'), pol = Rg.fig(n, 'police');
-    let p = 0.3 + (f.amb - 60) / 120 + (f.seat === 'army' ? 0.2 : 0) + (army && army !== f && army.loy > 60 ? -0.15 : 0) + (pol && pol !== f && pol.loy > 60 ? -0.15 : 0) + (n.stab < 35 ? 0.15 : 0) - (n.fs.military - 50) / 200;
-    p = clamp(p, 0.1, 0.8);
+  /* A figure moves against the leader: fought out like every coup (sim/coup.js), ending in strikeWon or strikeLost. */
+  Rg.strike = (G, n, f) => ID.Coup.launch(G, n, { src: 'figure', seat: f.seat, fig: f.name, known: f.known || 0 });
+  Rg.strikeWon = function (G, n, f, to) {
     const isP = n.id === G.player, I = ID.ideo(n), parl = I.control.type === 'parliament';
     const B = Rg.body(n).circle;
-    if (G.rng.chance(p)) {
+    {
       const old = n.leader.title + ' ' + n.leader.name;
       Rg.makeLeader(G, n, f);
-      const turn = f.lean !== n.ideo && ID.IDEOLOGIES[f.lean] && !parl && G.rng.chance(0.6);
+      const turn = (to ? to !== n.ideo : f.lean !== n.ideo && !parl && G.rng.chance(0.6)) && ID.IDEOLOGIES[to || f.lean];
       ID.chron(G, 'coup', f.name + ' ' + (parl ? 'topples ' : 'overthrows ') + old + ' of ' + n.name + ' from inside the ' + B + '.', n.id);
       if (isP || ID.isMajor(G, n)) ID.headline(G, { kicker: parl ? 'A palace revolt' : 'Coup in the ' + B, title: f.name + ' takes power', sub: old + ' is ' + (parl ? 'voted out by his own party' : 'arrested at his desk') + (turn ? '. The new man brings his own ideas with him.' : '.'), a: n.id, tone: 'rev' });
       if (ID.Press && !turn) ID.Press.palace(G, n, { name: f.name, title: 'the post of ' + Rg.title(n, f.seat).toLowerCase() }, true, null);
-      if (turn) ID.Politics.changeIdeology(G, n, f.lean, 'coup');
+      if (turn) ID.Politics.changeIdeology(G, n, to || f.lean, 'coup');
       else { n.stab -= parl ? 4 : 8; if (f.lean !== n.ideo && n.drift[f.lean] != null) n.drift[f.lean] = c100(n.drift[f.lean] + 25); }
-    } else {
+    }
+  };
+  Rg.strikeLost = function (G, n, f) {
+    const isP = n.id === G.player, B = Rg.body(n).circle;
+    {
       Rg.replace(G, n, f);
       n.stab -= 4; n.grievance = c100(n.grievance + 6); n.a.fear = G.tick + 360;
       if (isP) ID.headline(G, { kicker: 'A plot uncovered', title: f.name + ' has failed', sub: 'The ' + Rg.title(n, f.seat).toLowerCase() + ' moved against the government and lost. The rest of the ' + B.toLowerCase() + ' is very quiet.', a: n.id, tone: 'pol' });
