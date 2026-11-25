@@ -154,7 +154,7 @@
       }
       h += '</div>';
     }
-    h += '</div><div class="ft">' + btn('Begin', 'begin', null, { cls: 'big red' }) + (ID.Maker ? btn('Copy code', 'setupCode', null, { cls: 'big ghost', tip: '<h5>Share this world</h5>Copies a code for this map, with every country’s names, flags, systems and situations, that anyone can paste into Load code on the title screen.' }) : '') + btn('Watch the world', 'watch', null, { cls: 'big ghost', tip: '<h5>Observer mode</h5>Every country is run by the computer and you only watch: no decisions, no dispatches, no ending. You follow the country selected here; select any other on the map and press Follow to watch from there.' }) + '<span class="sp"></span>' + btn('Back', 'toTitle', null, { cls: 'ghost' }) + '</div></div>';
+    h += '</div><div class="ft">' + btn('Begin', 'begin', null, { cls: 'big red' }) + (ID.Maker && !ch ? btn('Copy code', 'setupCode', null, { cls: UI.compact ? 'ghost' : 'big ghost', tip: '<h5>Share this world</h5>Copies a code for this map, with every country’s names, flags, systems and situations, that anyone can paste into Load code on the title screen.' }) : '') + btn('Watch the world', 'watch', null, { cls: 'big ghost', tip: '<h5>Observer mode</h5>Every country is run by the computer and you only watch: no decisions, no dispatches, no ending. You follow the country selected here; select any other on the map and press Follow to watch from there.' }) + '<span class="sp"></span>' + btn('Back', 'toTitle', null, { cls: 'ghost' }) + '</div></div>';
     if (!UI.compact) h += '<div class="pickcard" id="pickcard">' + pickCard() + '</div>';
     t.innerHTML = h;
     const db = t.querySelector('.pick .db'); if (db) db.scrollTop = top;

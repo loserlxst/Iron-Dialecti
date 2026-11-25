@@ -38,11 +38,12 @@
   }
   function rebuild(layout) {
     clearTimeout(timer); timer = 0;
+    if (!def) return; // closed while a rebuild was pending
     if (layout || !base) relayout();
     savePaint();
     const cam = Object.assign({}, R.cam), had = !!PG;
     try { PG = M.build(def, { headless: false }); err = ''; checks = M.check(def, PG); }
-    catch (e) { err = e.message || String(e); checks = [{ lvl: 'err', text: err }]; if (!PG) return; }
+    catch (e) { err = e.message || String(e); checks = [{ lvl: 'err', text: err }]; if (!PG) { panel(); return; } }
     PG.paused = true;
     R.setMode('political'); R.setGame(PG); R.quiet = true; R.selected = -1;
     panel();
@@ -59,7 +60,7 @@
     R.overlay = overlay;
     rebuild();
   };
-  MK.close = function () { R.overlay = null; def = null; PG = null; const cvs = $('#map'); cvs.style.height = ''; delete cvs.dataset.mk; R.resize(); };
+  MK.close = function () { clearTimeout(timer); R.overlay = null; def = null; PG = null; const cvs = $('#map'); cvs.style.height = ''; delete cvs.dataset.mk; R.resize(); };
   MK.def = () => def;
   MK.relayout = () => panel();
 

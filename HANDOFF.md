@@ -40,6 +40,7 @@ node tools/simulate.js --runs 1 --years 20 --verbose  # with 6-yearly snapshots
 node tools/probe.js 5 18 meridia                      # per-nation internals every 6 years
 node tools/fates.js ml,agrarian,trot 66               # why did states of these ideologies end?
 node tools/structures.js                              # self-check: buildings, forts, trade, arms, the bomb, saves
+node tools/mapmaker.js                                # self-check: custom maps, map codes, customization, old saves
 node tools/metrics.js econ --runs 8 [--random]        # trade share, output spread, kit, damage, the bomb
 ```
 
@@ -67,7 +68,9 @@ exists in the sandbox for headless browser checks (use puppeteer-core from npm o
   `coast`, `prov` (province id), `owner` (nation id, 0 = none/sea), `bld`, `cut` (0 supplied,
   1 cut off, 2 sea-supplied), `cutAge`, `fortCov`, `rad`.
   **Always change ownership through `ID.setOwner(G, i, to)`** — it maintains every aggregate.
-- Nations: `G.nations[id]` (index 0 is null). Fields are listed in `ID.makeNation`. Scratch
+- Nations: `G.nations[id]` (index 0 is null). Fields are listed in `ID.makeNation`. **`n.key` is the content key**
+  (IDENTITY, trees, national questions, story beats, `ID.byBase`); `n.base`/`n.adj`/`n.name` are display only and can be
+  renamed by the player (Session 16). Scratch
   and cached values live in `n.a` (e.g. `n.a.atk`, `n.a.unrest`, `n.a.dem`, `n.a.mv`).
   `n.fs` = true faction support, `n.rep` = what the player is *shown* (biased under
   censorship), `n.fp` = faction power %, `n.src` = legitimacy sources.
@@ -1250,6 +1253,63 @@ Left undone or simplified:
   standard maps, so the balance effect is small by construction.
 - Not done: a full campaign played by hand in the browser; the published artifact and the GitHub Pages zip were not
   rebuilt.
+
+## Session 16: country customization, the map maker, map codes
+
+**Nation keys.** National content (`ID.IDENTITY`, `ID.FOCUS.nations`, `ID.NATIONAL`, the secret roads, story beats,
+`ID.byBase`, the flag hash, the anthem seed) is looked up by `n.key`, a stable key: the scenario's name (or the generated
+name on random maps). `n.base`, `n.adj` and `n.name` are display only. `ID.makeNation` sets `key: o.key || o.base`; civil-war
+rumps share their parent's key; `Gm.load` gives old saves `key = base`. Every `.base` in js/ was checked: comparisons and
+lookups use `.key`, text uses `.base`. A renamed Three Continents country's own text is rewritten in one pass by `ID.ren`
+(`js/sim/custom.js`, applied in `Focus.sub`, `Events.txt` and `identityOf`): the scenario's name and adjective become the
+player's (shortcut: one table for the world in play, set by `newGame` and `load`).
+
+**Customization** (`js/sim/custom.js`, `js/ui/custom.js`). A customization is a set of nation-definition fields: `base, adj,
+full, cap, leader, color, flag, hist, motto, anthem, blurb, sit` (and `ideo` in presets and maps). `ID.newGame({custom:
+{key: c}})` applies the definition-level ones before the world grows (`Custom.applyDef`: names, situation, colour), and
+`ID.customize(G, n, d)` the rest after (`n.cust = {full, cap, motto, anthem, flag, hist, ideo, fv, capP}`, the leader, the
+capital province's name). The setup screen keeps them in `S.custom` by key and rebuilds from the seed, so *Restore history*
+clears them exactly; challenges get none. `ID.nationTitle` uses `cust.full` while the state keeps the system it was named
+under. Flags (`ui/flags.js`): `cust.flag` is a built spec drawn by `destFlag` (hband, vtri, bicol, canton, stripes, cross,
+diag, sunburst, border, chevron, saltire + an emblem) or `{img}`, a 60×40 WebP/PNG data URL (uploads are cut to 3:2 in a
+canvas); it overrides destinies and ideology flags unless `hist` is set. `Flags.bg(n)` is the emblem background for copies
+drawn outside the page CSS. Every text field passes `Custom.clean` (letters, digits, spaces and `.,’-()&`, plus `!?:;—–“”‘…/`
+in flavour text: never `<>"'$\{}` or a backtick); flags pass `Custom.cleanFlag` (only `data:image/png|webp;base64`, hex
+colours, known layouts). Country presets: localStorage `id_cpresets`.
+
+**Map maker** (`js/sim/maps.js` = `ID.Maps`, `js/ui/maker.js` = `ID.Maker`). A map definition is the input of world
+creation: `{id:'custom', v, mg, gv, name, seed, size, land, noiseH, blobs, paint, rivers, nations}`; `paint`/`rivers` are
+run-length diffs `[start, length, value]` against the generated land (`Maps.diff`), applied by `genMap` after its rivers;
+nations are scenario definitions plus customization fields. It is played as scenario `'custom'` with the definition in
+`G.map`; the save stores it as a JSON string (the save rounds numbers to three places, which would move the land) and
+`Gm.load` validates it. `newGame` now also places a capital that is far at sea or in a province another capital holds on
+the nearest free land, and a random world accepts `blobs`/`land` (used to place states on the layout presets). Presets:
+`meridia` (an editable copy; no historical mode, no Old Lands script), `random`, `pangaea`, `archipelago`, `rivals`,
+`inland`, `island`. `Maps.check` lists errors (fewer than two states, a state that cannot be placed) and warnings (capital
+at sea or on a mountain, under 60 tiles, under 6 or over 30 states, patches under 4 tiles, little land). UI: tools Land /
+Terrain / States / Look; a drag on a handle (`Maker.down/move/up` from `main.js`) moves a shape or capital, a drag with the
+brush paints, others pan; the preview is a full `newGame` after each change (~150 ms) with the camera kept; `R.overlay`
+draws the handles. On a phone held upright the panel is a bottom sheet and the map canvas shrinks to the space above it.
+Saved maps: localStorage `id_maps`.
+
+**Codes** (`Maps.encode/decode`): `"IDM1-" + base64url(deflate-raw(JSON of Maps.pack))`, using CompressionStream (a
+browser without it is told to use files). The code carries `v` (format), `mg` (map generator, so a later generator can keep
+the old one for old maps, as `ID.mapOpts` does for legacy layouts) and `gv` (game version, `ID.VERSION`). `Maps.validate` is
+the trust boundary: sizes, ranges, counts (2–40 states, 80 shapes, 30 000 runs), known systems and situations, unique keys,
+cleaned text and flags; unknown fields are dropped; nothing is evaluated. Files: `.idmap` = `{format:'idmap', map}`.
+Measured: the Three Continents as a code is 2 996 characters; with three uploaded 60×40 flags 5 663 (real WebP from the
+browser); a layout preset about 900–1 150.
+
+**Tests**: `node tools/mapmaker.js` (every preset round-trips through a code and a file to an identical world, painted
+terrain and customization survive, damaged and hostile codes are refused or cleaned, 20 years in observer mode on each
+preset with a save and load halfway, a save from before the key split, a renamed Aurelia's tree and text). Browser pass
+(desktop and 375×812): setup and the country editor, flag builder and uploader (a text file is refused), the flags in the
+top band, map labels and banners, the map maker's tools, play on a custom map with a save and load, copy and load code
+(a cut code gives a clear error); no console errors.
+
+Left undone: fixed borders painted by province (states always grow from their capitals by weight); province names other
+than the capital; a retry from the end screen keeps a custom map but not the setup screen's customizations; random worlds
+shared by code rebuild with the same land and capitals but their own rivers and provinces.
 
 ## Peace by ideology (`sim/diplomacy.js`)
 

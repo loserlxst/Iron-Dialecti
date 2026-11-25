@@ -332,12 +332,17 @@ js/ui/nation.js       Nation screen and superevents; scenes.js paints their scen
 js/ui/tray.js         dispatch tray (ordinary dispatches wait while the clock runs)
 js/ui/madness.js      screen effects for absolute monarchs and personal dictators
 js/ui/screens.js      title, campaign setup, saves, settings, challenges, records, post-mortem, chronicle
+js/sim/custom.js      country customization: validation, the rename filter (ID.ren), ID.customize
+js/sim/maps.js        custom maps: definitions, presets, checks, map codes and .idmap files (ID.Maps)
+js/ui/custom.js       the country editor (names, colour, flag builder and uploader, flavour, presets)
+js/ui/maker.js        the map maker (land, terrain, states, saved maps, codes)
 js/ui/tutorial.js     guided first campaign as Cassine
 js/ui/main.js         boot, main loop, pointer and wheel input
 tools/                load.js (loads the sim in index.html's order), metrics.js (events, pacing, trees, tables),
                       simulate.js, soak.js, budget.js, probe.js, fates.js, history.js, encircle.js (pockets and
                       landings), coups.js (coup balance and the player's coup), forced.js (one state forced into an ideology),
-                      settle.js (settling islands by sea), inworld.js (no real-world references in the text) (headless, Node)
+                      settle.js (settling islands by sea), inworld.js (no real-world references in the text), mapmaker.js
+                      (custom maps, codes, customization, old saves) (headless, Node)
 ```
 
 The `sim` layer never touches the DOM, so whole campaigns run in Node for balance testing.

@@ -3,6 +3,17 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'Your own countries, your own maps', items: [
+      'Customize any country before you begin, yours or anyone else’s: its name, adjective and full name, capital, first leader, map colour, motto, anthem, description and starting situation. Press Customize this country on the new campaign screen, or Customize beside each country under Other countries.',
+      'Give a country your own flag: build one from a layout, colours and an emblem, or upload a picture. Your flag flies everywhere, from the map to the dispatches and the newspaper. Tick Let history change the flag if you want destinies and revolutions to bring their own.',
+      'A renamed country keeps everything that was written for it. Rename Aurelia and its programmes, destinies, motto and history speak of the new name.',
+      'Save a country as a preset and use it again in later campaigns.',
+      'A new Map maker on the title screen. Move, resize, add and delete continents and islands, set the sea level, paint terrain and rivers tile by tile, and place the states: their capitals, how far they spread, their systems and situations, and everything the country editor can change. The map shows who would own what as you work, and warns you about anything that would spoil the game.',
+      'Start from the Three Continents, a random world, or five new layouts: Pangaea, an archipelago, two rival continents, an inland sea and an island empire. Save your own maps, rename, copy and delete them.',
+      'On a custom map, countries of the Three Continents keep their own programmes and destinies wherever you put them. Other states get the family and ideology programmes, as on random worlds. The scripted history belongs to the Three Continents campaign.',
+      'Share a map with a code: Copy code in the map maker or on the new campaign screen, then Load code on the title screen. Large maps with uploaded flags can be shared as a file instead, or the code can leave the uploaded flags out.',
+      'A game on a custom map saves and loads like any other; the save carries the map.',
+    ] },
     { date: '25 November 2026', title: 'Watch the world', items: [
       'A new observer mode: on the new campaign screen, press Watch the world instead of Begin. Every country is run by the computer and you only watch, with no decisions to make and no dispatches.',
       'You follow one country: the top band, the panels and the alerts show it. Select any other country on the map and press Follow to watch from there.',
