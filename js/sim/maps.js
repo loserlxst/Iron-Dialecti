@@ -12,15 +12,27 @@
   const Cu = ID.Custom, T = ID.T;
   ID.VERSION = '2026.11.25';
   M.FORMAT = 1; // the code's own format
-  M.MAPGEN = 1; // the map generator a definition was made for; a later generator keeps this one for old maps (as ID.mapOpts does for legacy layouts)
+  M.MAPGEN = 2; // the map generator a definition was made for; a later generator keeps this one for old maps (as ID.mapOpts does for legacy layouts)
   M.PREFIX = 'IDM1-';
-  M.LIM = { nations: 40, blobs: 80, runs: 30000, name: 40, code: 400000 };
+  M.LIM = { nations: 40, blobs: 80, runs: 60000, blds: 4000, name: 40, code: 600000 };
+  M.YEARS = [1910, 1925, 1940];
+  M.BLDS = [1, 2, 3, 4]; // city, fort, port, factory (ID.B)
 
   const num = (v, lo, hi) => typeof v === 'number' && isFinite(v) && v >= lo && v <= hi;
   const r4 = (v) => Math.round(v * 10000) / 10000;
 
   /* ---------------------------------------------------------------- definitions */
-  M.blank = (o) => Object.assign({ id: 'custom', v: M.FORMAT, mg: M.MAPGEN, gv: ID.VERSION, name: 'A new world', seed: 1, size: 'std', land: 0.37, noiseH: 0, blobs: [], paint: [], rivers: [], nations: [] }, o || {});
+  M.blank = (o) => Object.assign({ id: 'custom', v: M.FORMAT, mg: M.MAPGEN, gv: ID.VERSION, name: 'A new world', seed: 1, size: 'std', land: 0.37, level: null, gen: true, noiseH: 0, blobs: [], paint: [], rivers: [], own: [], blds: [], grow: true, autoBld: true, year: 1910, nations: [] }, o || {});
+  /* An empty sea with two states on two painted islands: the start for a map drawn by hand. */
+  M.empty = function (size) {
+    const sz = ID.MAP_SIZES[size || 'std'], W = sz.W, H = sz.H, paint = [];
+    const isle = (cx, cy, rx, ry) => { for (let y = Math.round(cy - ry); y <= cy + ry; y++) { const half = Math.round(rx * Math.sqrt(Math.max(0, 1 - ((y - cy) / ry) ** 2))); if (half > 0) paint.push([y * W + Math.round(cx - half), half * 2 + 1, T.PLAINS]); } };
+    isle(W * 0.3, H * 0.5, W * 0.12, H * 0.22); isle(W * 0.7, H * 0.5, W * 0.12, H * 0.22);
+    paint.sort((a, b) => a[0] - b[0]);
+    return M.blank({ name: 'An empty sea', seed: 1, size: size || 'std', gen: false, paint, nations: [
+      { key: 'Westmark', base: 'Westmark', adj: 'Westmarkish', x: 0.3, y: 0.5, w: 1, ideo: 'conmon', sit: 'middling' },
+      { key: 'Ostrava', base: 'Ostrava', adj: 'Ostravan', x: 0.7, y: 0.5, w: 1, ideo: 'liberal', sit: 'middling' }] });
+  };
   /* The scenario of 1910 as an editable copy (no historical mode, no Old Lands script: those belong to the original). */
   M.fromMeridia = function () {
     const sc = ID.SCENARIOS.meridia;
@@ -43,6 +55,7 @@
   const isles = (seed, n, lo, hi) => { const r = new ID.RNG(seed), out = []; for (let k = 0; k < n; k++) out.push([r4(r.range(0.08, 0.92)), r4(r.range(0.12, 0.88)), r4(r.range(lo, hi))]); return out; };
   const ring = (n, R, r) => { const out = []; for (let k = 0; k < n; k++) { const a = (k / n) * Math.PI * 2; out.push([r4(0.5 + Math.cos(a) * R * 0.62), r4(0.5 + Math.sin(a) * R), r]); } return out; };
   M.PRESETS = [
+    { id: 'empty', name: 'An empty sea', desc: 'Nothing but water and two islands. Paint every coast, border and city yourself.', make: () => M.empty('std') },
     { id: 'meridia', name: 'The Three Continents', desc: 'The handcrafted world of 1910, fully editable as a copy.', make: () => M.fromMeridia() },
     { id: 'random', name: 'A random world', desc: 'A world from a seed, as the Random world option makes it.', make: (seed) => { const s = seed || 4242; const G = ID.newGame({ scenario: 'random', seed: s, size: 'std', headless: true }); return M.fromWorld(G, { name: 'World ' + s, seed: s, size: 'std', land: 0.37, blobs: G.blobs.map((b) => b.map(r4)) }); } },
     { id: 'pangaea', name: 'Pangaea', desc: 'One great landmass. Every war is a land war.', make: (seed) => M.layout('Pangaea', seed || 3301, 'std', [[0.5, 0.5, 0.27], [0.34, 0.4, 0.19], [0.66, 0.6, 0.19], [0.38, 0.66, 0.15], [0.63, 0.34, 0.16], [0.22, 0.55, 0.11], [0.79, 0.45, 0.11]], 0.44) },
@@ -91,6 +104,15 @@
       });
     };
     const paint = runs(o.paint, 6, 'painted terrain'), rivers = runs(o.rivers, 1, 'painted river');
+    const mg = o.mg || 1;
+    const nN = Array.isArray(o.nations) ? o.nations.length : 0;
+    const own = mg >= 2 ? runs(o.own, 255, 'painted territory') : []; // generator 1 cannot keep provinces inside painted borders
+    if (own.some((r) => r[2] > nN && r[2] !== 255)) bad('The painted territory names a state that is not on the map.');
+    if (o.level != null && !num(o.level, -2, 3)) bad('The sea level is out of range.');
+    if (o.blds != null && (!Array.isArray(o.blds) || o.blds.length > M.LIM.blds)) bad('Too many buildings.');
+    const seenB = new Set();
+    const blds = (o.blds || []).filter((b) => { if (!Array.isArray(b) || b.length !== 2 || !Number.isInteger(b[0]) || b[0] < 0 || b[0] >= N || M.BLDS.indexOf(b[1]) < 0) bad('A building does not fit this map.'); if (seenB.has(b[0])) return false; seenB.add(b[0]); return true; }).map((b) => b.slice());
+    const year = o.year == null ? 1910 : o.year; if (M.YEARS.indexOf(year) < 0) bad('The start year is not one the game offers.');
     if (!Array.isArray(o.nations) || o.nations.length < 2) bad('A map needs at least two states.');
     if (o.nations.length > M.LIM.nations) bad('A map can have at most ' + M.LIM.nations + ' states.');
     const keys = new Set();
@@ -102,9 +124,15 @@
       if (!ID.IDEOLOGIES[d.ideo]) bad(base + ' has an unknown system of government.');
       if (!ID.SITUATIONS[d.sit]) bad(base + ' has an unknown situation.');
       const c = Cu.cleanCustom(d); delete c.ideo; delete c.sit; delete c.base;
-      return Object.assign({ key, base, adj: c.adj || base, x: r4(d.x), y: r4(d.y), w: num(d.w, 0.2, 3) ? r4(d.w) : 1, ideo: d.ideo, sit: d.sit }, c);
+      const x = Object.assign({ key, base, adj: c.adj || base, x: r4(d.x), y: r4(d.y), w: num(d.w, 0.2, 3) ? r4(d.w) : 1, ideo: d.ideo, sit: d.sit }, c);
+      if (Number.isInteger(d.gold) && d.gold >= 0 && d.gold <= 5000) x.gold = d.gold;
+      if (Number.isInteger(d.stab) && d.stab >= 5 && d.stab <= 95) x.stab = d.stab;
+      if (Number.isInteger(d.bloc) && d.bloc >= 1 && d.bloc <= 8) x.bloc = d.bloc;
+      if (typeof d.over === 'string' && d.over && ID.Sov && ID.Sov.KIND[d.dep]) { x.over = Cu.clean(d.over, 24); x.dep = d.dep; }
+      return x;
     });
-    return { id: 'custom', v: M.FORMAT, mg: o.mg || M.MAPGEN, gv: typeof o.gv === 'string' ? o.gv.slice(0, 16).replace(/[^\w.-]/g, '') : ID.VERSION,
+    for (const x of nations) if (x.over && (x.over === x.key || !keys.has(x.over))) { delete x.over; delete x.dep; } // an overlord must be another state of this map
+    return { id: 'custom', v: M.FORMAT, mg, gen: o.gen !== false, level: o.level == null ? null : r4(o.level), own, blds, grow: o.grow !== false, autoBld: o.autoBld !== false, year, gv: typeof o.gv === 'string' ? o.gv.slice(0, 16).replace(/[^\w.-]/g, '') : ID.VERSION,
       name: Cu.clean(o.name, M.LIM.name) || 'A custom world', seed: o.seed, size: o.size, land, noiseH, blobs, paint, rivers, nations };
   };
 
@@ -116,11 +144,13 @@
     if (def.nations.length < 2) add('err', 'A map needs at least two states.');
     if (def.nations.length > 30) add('warn', def.nations.length + ' states is a crowded world; the game was balanced for 12 to 24.');
     if (def.nations.length < 6) add('warn', 'Only ' + def.nations.length + ' states: a short and lonely century.');
+    const own = def.own && def.own.length ? ID.runsGrid(def.own, G.N) : null;
     def.nations.forEach((d) => {
       const i = Math.min(H - 1, Math.round(d.y * H)) * W + Math.min(W - 1, Math.round(d.x * W)), t = G.terrain[i];
       if (t === T.SEA) add('warn', d.base + '’s capital is at sea; it moves to the nearest coast.');
       else if (t === T.MOUNTAIN) add('warn', d.base + '’s capital is on a mountain; it moves to the nearest lowland.');
-      const n = ID.byBase(G, d.key);
+      const n = ID.byBase(G, d.key), k = def.nations.indexOf(d);
+      if (own && own[i] && own[i] !== k + 1) add('warn', d.base + '’s capital is on land painted for ' + (own[i] === 255 ? 'nobody' : (def.nations[own[i] - 1] || {}).base) + '; it moves out of it.');
       if (!n) add('err', d.base + ' could not be placed.');
       else if (n.tiles < 60) add('warn', d.base + ' has very little land (' + n.tiles + ' tiles). Give it more weight or move it.');
     });
@@ -143,10 +173,17 @@
   const pipe = async (bytes, stream) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
   /* What goes into a code or a file: the definition without the defaults, optionally without uploaded flags. */
   M.pack = function (def, noImages) {
-    const o = { v: M.FORMAT, mg: def.mg || M.MAPGEN, gv: ID.VERSION, name: def.name, seed: def.seed, size: def.size, land: def.land, blobs: def.blobs, nations: def.nations.map((d) => { const x = Object.assign({}, d); if (x.adj === x.base) delete x.adj; if (x.base === x.key) delete x.base; if (x.w === 1) delete x.w; if (noImages && x.flag && x.flag.img) { delete x.flag; delete x.hist; } return x; }) };
+    const o = { v: M.FORMAT, mg: def.mg || 1, gv: ID.VERSION, name: def.name, seed: def.seed, size: def.size, land: def.land, blobs: def.blobs, nations: def.nations.map((d) => { const x = Object.assign({}, d); if (x.adj === x.base) delete x.adj; if (x.base === x.key) delete x.base; if (x.w === 1) delete x.w; if (noImages && x.flag && x.flag.img) { delete x.flag; delete x.hist; } return x; }) };
     if (def.noiseH) o.noiseH = def.noiseH;
     if (def.paint && def.paint.length) o.paint = def.paint;
     if (def.rivers && def.rivers.length) o.rivers = def.rivers;
+    if (def.gen === false) o.gen = false;
+    if (def.level != null) o.level = def.level;
+    if (def.own && def.own.length) o.own = def.own;
+    if (def.blds && def.blds.length) o.blds = def.blds;
+    if (def.grow === false) o.grow = false;
+    if (def.autoBld === false) o.autoBld = false;
+    if (def.year && def.year !== 1910) o.year = def.year;
     return o;
   };
   M.encode = async function (def, noImages) {

@@ -354,7 +354,8 @@
     // a random world may be given a land layout (the map maker places nations on a preset's continents this way)
     const map = ID.genMap(sc ? ID.mapOpts(sc, seed, size) : { seed, size, blobs: opts.blobs || null, land: opts.land || 0 });
     const N = map.N;
-    const startYear = opts.startYear || ID.START_YEAR;
+    const painted = sc && sc.own && sc.own.length ? map.region : null; // the map maker's painted territory: who owns what, fixed
+    const startYear = opts.startYear || (sc && sc.year) || ID.START_YEAR;
     const G = {
       v: 1, seed, size, scenario: sc ? sc.id : 'random', map: sc && sc.id === 'custom' ? sc : undefined, difficulty: opts.difficulty || 'iron', headless: !!opts.headless, challenge: opts.challenge || null, ironman: !!opts.ironman,
       rng: new ID.RNG(seed ^ 0x5bd1e995), tick: (startYear - ID.START_YEAR) * 360, speed: 2, paused: true,
@@ -426,14 +427,32 @@
     /* grow nations over the province graph (Dijkstra, cost scaled by 1/weight) */
     const np = G.provinces.length;
     const dist = new Float64Array(np).fill(Infinity); const who = new Int16Array(np).fill(-1); const done = new Uint8Array(np);
+    const fixed = new Uint8Array(np), grow = !sc || sc.grow !== false;
+    if (painted) {
+      // provinces never cross a painted border (genMap), so a province's centre names its owner
+      for (let p = 1; p < np; p++) { const r = painted[G.provinces[p].center]; if (r && r <= defs.length) { who[p] = r - 1; dist[p] = 0; fixed[p] = 1; } else if (r === 255) fixed[p] = 1; } // 255: painted as nobody's land
+      // a capital stays where it was put, unless that tile was painted for another state (or for nobody): then it
+      // moves to the nearest land painted for its own state, if it has any
+      defs.forEach((d, k) => {
+        if (!painted[d.capTile] || painted[d.capTile] === k + 1) return;
+        let best = -1, bd = 1e18; const tx = d.capTile % W, ty = (d.capTile / W) | 0;
+        // its own painted land first, else the nearest land nobody painted
+        for (const want of [k + 1, 0]) {
+          for (let i = 0; i < N; i++) if (painted[i] === want && G.terrain[i] !== T.SEA && !defs.some((o) => o !== d && o.capProv === G.prov[i])) { const dd = (i % W - tx) ** 2 + (((i / W) | 0) - ty) ** 2 + (G.terrain[i] === T.MOUNTAIN ? 1e6 : 0); if (dd < bd) { bd = dd; best = i; } }
+          if (best >= 0) break;
+        }
+        if (best >= 0) { d.capTile = best; d.capProv = G.prov[best]; }
+      });
+    }
     defs.forEach((d, k) => { dist[d.capProv] = 0; who[d.capProv] = k; });
     for (;;) {
+      if (!grow) break;
       let u = -1, ud = Infinity;
       for (let p = 1; p < np; p++) if (!done[p] && dist[p] < ud) { ud = dist[p]; u = p; }
       if (u < 0) break;
       done[u] = 1; const U = G.provinces[u]; const w = defs[who[u]].w;
       for (const v of U.nb) {
-        if (done[v]) continue; const V = G.provinces[v];
+        if (done[v] || fixed[v]) continue; const V = G.provinces[v];
         const c = ud + Math.hypot(U.cx - V.cx, U.cy - V.cy) * (1 + V.rough * 0.6) / w;
         if (c < dist[v]) { dist[v] = c; who[v] = who[u]; }
       }
@@ -447,7 +466,7 @@
       mine.sort((a, b) => dist[a] - dist[b]);
       let kept = 0, n = 0;
       for (const p of mine) {
-        if (p !== d.capProv && n >= 3 && kept >= tot * (1 - wildShare)) who[p] = -1;
+        if (p !== d.capProv && !fixed[p] && n >= 3 && kept >= tot * (1 - wildShare)) who[p] = -1;
         else { kept += G.provinces[p].tiles; n++; }
       }
     });
@@ -457,12 +476,16 @@
     for (let i = 0; i < N; i++) { const p = G.prov[i]; if (p && who[p] >= 0) ID.setOwner(G, i, nats[who[p]].id); }
     G.dirty.length = 0; G.capLost.length = 0;
     for (let p = 1; p < np; p++) { const o = who[p] >= 0 ? nats[who[p]].id : 0; G.provinces[p].core = o; G.provinces[p].owner = o; }
+    // buildings placed in the map maker (ports only on a coast); with autoBld off they are the only ones but the capitals' cities
+    const autoB = !sc || sc.autoBld !== false;
+    if (sc && sc.blds) for (const [i, t] of sc.blds) if (i < N && G.terrain[i] !== T.SEA && (t !== B.PORT || G.coast[i])) ID.placeBuilding(G, i, t);
 
     /* per-nation setup */
     defs.forEach((d, k) => {
       const n = nats[k]; const I = ID.IDEOLOGIES[d.ideo];
       n.capital = d.capTile; n.sit = d.sit;
       ID.placeBuilding(G, n.capital, B.CITY);
+      if (autoB) {
       const myProv = []; for (let p = 1; p < np; p++) if (who[p] === k && p !== d.capProv) myProv.push(G.provinces[p]);
       myProv.sort((a, b) => b.fertile * b.tiles - a.fertile * a.tiles);
       const nCity = clamp(Math.round(n.tiles / 420) - 1 + (d.sit === 'rich' ? 1 : 0), 0, 8);
@@ -488,6 +511,7 @@
       }
       { const nfort = d.sit === 'small' || d.sit === 'revolution' ? 3 : d.sit === 'great' || d.sit === 'trader' ? 2 : 1;
         for (let f = 0; f < nfort; f++) { const s = ID.spotNear(G, cityTiles[f % cityTiles.length], n.id, f === 0 ? 3 : 9); if (s >= 0) ID.placeBuilding(G, s, B.FORT); } }
+      }
 
       n.mob = d.sit === 'revolution' ? 0.06 : I.family === 'authoritarian' ? 0.045 : 0.03;
       ID.applyIdeology(G, n, d.ideo, true);
@@ -547,7 +571,13 @@
     G.era = ID.eraOf(G.tick); G.startTick = G.tick;
     for (const n of nats) n.a.startIdeo = n.ideo;
     if (sc) for (const n of nats) ID.Focus.applySpirits(G, n);
-    nats.forEach((n, k) => ID.customize(G, n, defs[k]));
+    nats.forEach((n, k) => {
+      const d = defs[k]; ID.customize(G, n, d);
+      if (d.gold != null) n.gold = d.gold;
+      if (d.stab != null) { n.stab = d.stab; n.legit = clamp(d.stab + 4, 5, 95); }
+    });
+    // alliances set in the map maker: the members of each group join the first one's bloc
+    if (sc) { const groups = {}; defs.forEach((d, k) => { if (d.bloc) (groups[d.bloc] = groups[d.bloc] || []).push(nats[k]); }); for (const g in groups) for (const m of groups[g].slice(1)) ID.allyWith(G, groups[g][0], m); }
     ID.Custom.setRen(G);
     G.world.depressionAt = (rng.int(1927, 1933) - ID.START_YEAR) * 360 + rng.int(0, 359);
     G.historical = !!(opts.historical && sc && sc.id === 'meridia');

@@ -1292,6 +1292,30 @@ brush paints, others pan; the preview is a full `newGame` after each change (~15
 draws the handles. On a phone held upright the panel is a bottom sheet and the map canvas shrinks to the space above it.
 Saved maps: localStorage `id_maps`.
 
+**The map maker, second version (after the user's review: "an imprecise map scramble, not a scenario maker").** The
+first version edited the generator's inputs, so every change regrew the world, and version 1 of `genMap` draws provinces
+and rivers from one random sequence, so even a painted tile moved every border. Now:
+- **Map generator 2** (`genMap2` in `sim/mapgen.js`, used when `def.mg >= 2`; every older world, save and code still uses
+  version 1 and is unchanged): province seeds are one hashed tile per 12×12 cell (per painted region in it), grown by a
+  noisy multi-source shortest path that never crosses a painted region and breaks ties by the seed's hash, so the result
+  does not depend on processing order; rivers start from a hashed tile per 24×24 cell; the sea level can be absolute
+  (`level`) and the height scale is fixed, so moving a shape moves one coast; `gen: false` is an empty sea.
+  `tools/mapmaker.js` checks that painting 40 tiles changes no terrain, river or province edge more than 40 tiles away.
+- **Painted territory** (`def.own`, runs of nation index + 1, or 255 for nobody's land): `newGame` gives painted
+  provinces their painted owner, keeps a capital where it was put unless that tile was painted for someone else, and grows
+  states into unpainted land only when `def.grow` is on (off: only painted land and each capital's province).
+  **Buildings** (`def.blds`, `[[tile, type]]`) are placed exactly; `def.autoBld` off leaves only them and the capitals'
+  cities. **Options**: `def.year` (1910, 1925, 1940) and per state `gold`, `stab`, `bloc` (1–8: one bloc per group, via
+  `ID.allyWith`) and `over`/`dep` (bound by `Sov.init`, which already read them for the Old Lands).
+- **Editor** (`ui/maker.js`): tabs Scenario, Terrain, Borders, States, Buildings, Generator; Brush / Fill / Pick tools with
+  sizes 1–25, a preview of exactly the tiles the next click changes, the tile grid from zoom 7, a status line (tile, terrain,
+  owner painted or grown, province, building), undo/redo (40 steps, Ctrl+Z / Ctrl+Y, B F I [ ]), *Fix the borders you
+  see* and *Keep the buildings you see* (turn the automatic result into painted data to refine), the generator locked
+  unless unlocked, *Turn the generator off, keep the land*, map size changes that stretch the painting. The terrain tabs
+  show the terrain map mode. `R.tileAt/zoomAt/mapAt` subtract the canvas offset, and the maker moves the canvas beside its
+  panel (above it on a phone), so the panel never covers the map. Codes: a fully bordered Three Continents is about
+  15 000 characters, with all land frozen as painting about 32 500 (files carry any size).
+
 **Codes** (`Maps.encode/decode`): `"IDM1-" + base64url(deflate-raw(JSON of Maps.pack))`, using CompressionStream (a
 browser without it is told to use files). The code carries `v` (format), `mg` (map generator, so a later generator can keep
 the old one for old maps, as `ID.mapOpts` does for legacy layouts) and `gv` (game version, `ID.VERSION`). `Maps.validate` is
@@ -1307,7 +1331,7 @@ preset with a save and load halfway, a save from before the key split, a renamed
 top band, map labels and banners, the map maker's tools, play on a custom map with a save and load, copy and load code
 (a cut code gives a clear error); no console errors.
 
-Left undone: fixed borders painted by province (states always grow from their capitals by weight); province names other
+Left undone: province names other
 than the capital; a retry from the end screen keeps a custom map but not the setup screen's customizations; random worlds
 shared by code rebuild with the same land and capitals but their own rivers and provinces.
 

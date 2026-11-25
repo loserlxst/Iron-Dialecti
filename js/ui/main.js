@@ -84,7 +84,7 @@
     hideMapTip();
   }
   function onMove(e) {
-    if (!pts.has(e.pointerId)) { hover = { x: e.clientX, y: e.clientY, t: performance.now() }; if (hoverShown) hideMapTip(); return; }
+    if (!pts.has(e.pointerId)) { hover = { x: e.clientX, y: e.clientY, t: performance.now() }; if (hoverShown) hideMapTip(); if (Main.mode === 'maker') ID.Maker.hover(e.clientX, e.clientY); return; }
     const p = pts.get(e.pointerId), dx = e.clientX - p.x, dy = e.clientY - p.y;
     p.x = e.clientX; p.y = e.clientY;
     if (pts.size === 1) {

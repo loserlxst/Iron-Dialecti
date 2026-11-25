@@ -335,7 +335,7 @@ js/ui/screens.js      title, campaign setup, saves, settings, challenges, record
 js/sim/custom.js      country customization: validation, the rename filter (ID.ren), ID.customize
 js/sim/maps.js        custom maps: definitions, presets, checks, map codes and .idmap files (ID.Maps)
 js/ui/custom.js       the country editor (names, colour, flag builder and uploader, flavour, presets)
-js/ui/maker.js        the map maker (land, terrain, states, saved maps, codes)
+js/ui/maker.js        the map maker: terrain, borders, states, buildings, generator, undo, saved maps, codes
 js/ui/tutorial.js     guided first campaign as Cassine
 js/ui/main.js         boot, main loop, pointer and wheel input
 tools/                load.js (loads the sim in index.html's order), metrics.js (events, pacing, trees, tables),

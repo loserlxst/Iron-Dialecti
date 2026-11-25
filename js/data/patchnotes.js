@@ -14,6 +14,15 @@
       'Share a map with a code: Copy code in the map maker or on the new campaign screen, then Load code on the title screen. Large maps with uploaded flags can be shared as a file instead, or the code can leave the uploaded flags out.',
       'A game on a custom map saves and loads like any other; the save carries the map.',
     ] },
+    { date: '25 November 2026', title: 'The map maker, rebuilt for precision', items: [
+      'What you paint is what you get. Painting a coast or a mountain no longer moves borders on the other side of the world: provinces, rivers and borders only change where you paint.',
+      'Paint borders tile by tile in the new Borders tab: every painted tile starts with the owner you gave it. A switch decides whether states also grow into the land you leave unpainted. Fix the borders you see turns the current borders into painted ones, so you can refine them.',
+      'Brush, Fill and Pick tools for terrain and borders, brush sizes from one tile to 25, a red preview of exactly the tiles the next click changes, the tile grid when zoomed in, and a line telling you what is under the cursor. Undo and redo with the arrows or Ctrl+Z and Ctrl+Y.',
+      'Place cities, factories, ports and forts exactly in the Buildings tab, and switch the automatic ones off.',
+      'Scenario options: start in 1910, 1925 or 1940, and give any state its treasury, its stability, an alliance, or an overlord it starts bound to.',
+      'The generator is locked unless you open it, so nothing reshapes your map by accident. Turn it off entirely, keeping the land as painting, or start from An empty sea.',
+      'The panel no longer covers the map: the map is drawn beside it, or above it on a phone, and the panel folds away.',
+    ] },
     { date: '25 November 2026', title: 'Watch the world', items: [
       'A new observer mode: on the new campaign screen, press Watch the world instead of Begin. Every country is run by the computer and you only watch, with no decisions to make and no dispatches.',
       'You follow one country: the top band, the panels and the alerts show it. Select any other country on the map and press Follow to watch from there.',

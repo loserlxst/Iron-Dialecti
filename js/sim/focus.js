@@ -292,6 +292,7 @@
     if (add.length) ID.addOpBoth(G, n.id, t.id, -10);
     return add.length;
   }
+  ID.allyWith = (G, n, t) => allyWith(G, n, t);
   function allyWith(G, n, t) {
     if (!t || t === n || !t.alive || ID.atWar(G, n.id, t.id)) return;
     if (ID.sameBloc(G, n.id, t.id)) { ID.addOpBoth(G, n.id, t.id, 10); return; }

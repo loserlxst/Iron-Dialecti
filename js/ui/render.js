@@ -8,7 +8,7 @@
   R.PAPER = PAPER; R.INK = INK; R.RED = RED;
   const cam = (R.cam = { x: 0, y: 0, z: 4 });
   let cv = null, ctx = null, mapCv = null, mapCtx = null, img = null, px = null, G = null;
-  let cw = 0, ch = 0, dpr = 1;
+  let cw = 0, ch = 0, dpr = 1, offX = 0, offY = 0;
   let natCol = [], flashes = [], labels = [], labelsAt = -1, parts = [], waves = null, shake = 0;
   R.shake = (m) => { if (!R.quiet) shake = Math.max(shake, m); };
   R.mode = 'political'; R.showBlocs = true; R.selected = -1; R.hoverNation = 0; R.buildMode = 0; R.quiet = false; R.t = 0;
@@ -23,6 +23,7 @@
     if (!cv) return;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     cw = cv.clientWidth; ch = cv.clientHeight;
+    const rc = cv.getBoundingClientRect(); offX = rc.left; offY = rc.top; // the map maker moves the canvas beside its panel
     cv.width = Math.max(1, Math.round(cw * dpr)); cv.height = Math.max(1, Math.round(ch * dpr));
     if (G) clampCam();
   };
@@ -43,12 +44,14 @@
   }
   R.pan = function (dx, dy) { cam.x -= dx / cam.z; cam.y -= dy / cam.z; clampCam(); };
   R.zoomAt = function (sx, sy, f) {
+    sx -= offX; sy -= offY;
     const mx = (sx - cw / 2) / cam.z + cam.x, my = (sy - ch / 2) / cam.z + cam.y;
     cam.z = clamp(cam.z * f, R.minZoom(), 26);
     cam.x = mx - (sx - cw / 2) / cam.z; cam.y = my - (sy - ch / 2) / cam.z; clampCam();
   };
   R.focus = function (i, z) { cam.x = i % G.W; cam.y = (i / G.W) | 0; if (z) cam.z = Math.max(cam.z, z); clampCam(); };
   R.tileAt = function (sx, sy) {
+    sx -= offX; sy -= offY;
     const x = Math.floor((sx - cw / 2) / cam.z + cam.x), y = Math.floor((sy - ch / 2) / cam.z + cam.y);
     return x < 0 || y < 0 || x >= G.W || y >= G.H ? -1 : y * G.W + x;
   };
@@ -559,7 +562,7 @@
     if (R.overlay) R.overlay(ctx, sx, sy, z); // the map maker's handles (js/ui/maker.js)
   };
   /* Map coordinates (in tiles, fractional) under a screen point. */
-  R.mapAt = (px, py) => [(px - cw / 2) / cam.z + cam.x, (py - ch / 2) / cam.z + cam.y];
+  R.mapAt = (px, py) => [(px - offX - cw / 2) / cam.z + cam.x, (py - offY - ch / 2) / cam.z + cam.y];
   R.center = () => [cam.x, cam.y];
 
   /* A small flag-like swatch for a nation, used across the UI. */

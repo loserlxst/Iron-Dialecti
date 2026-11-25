@@ -44,6 +44,52 @@ const rejects = async (code, why) => { try { await M.decode(code); ok(false, 're
     ok(n.name === 'Free State of Bobland' && n.leader.name === 'Ada Bob' && n.cust.flag.p === 'cross' && n.color[0] === 200 && G.provinces[n.cust.capP].name === 'Bobton', 'a state’s customization comes through a code');
   }
 
+  /* ---------------------------------------------------------------- the scenario maker: exact borders, local edits, buildings, options */
+  {
+    const def = M.preset('rivals'), sz = ID.MAP_SIZES[def.size], W = sz.W, N = W * sz.H;
+    const G0 = M.build(def), cap0 = ID.byBase(G0, def.nations[0].key).capital;
+    // paint a 30×20 block of land around the first state's capital for the second state, and a block of nobody's land
+    const own = new Uint8Array(N), x0 = cap0 % W - 15, y0 = ((cap0 / W) | 0) - 10;
+    for (let y = y0; y < y0 + 20; y++) for (let x = x0; x < x0 + 30; x++) if (G0.terrain[y * W + x] !== ID.T.SEA) own[y * W + x] = 2;
+    const c2 = ID.byBase(G0, def.nations[5].key).capital;
+    for (let y = ((c2 / W) | 0) + 6; y < ((c2 / W) | 0) + 12; y++) for (let x = c2 % W - 4; x < c2 % W + 4; x++) if (G0.terrain[y * W + x] !== ID.T.SEA) own[y * W + x] = 255;
+    def.own = M.diff(new Uint8Array(N), own);
+    def.blds = [[cap0 + 40, ID.B.FACTORY], [cap0 + 41, ID.B.FORT]].filter((b) => G0.terrain[b[0]] !== ID.T.SEA);
+    Object.assign(def.nations[2], { gold: 777, stab: 33, bloc: 1 }); Object.assign(def.nations[3], { bloc: 1 }); Object.assign(def.nations[4], { over: def.nations[2].key, dep: 'protectorate' });
+    def.year = 1925;
+    const d2 = await M.decode(await M.encode(def)), G = M.build(d2), s2 = same(G, M.build(def));
+    ok(!s2, 'a painted scenario (borders, buildings, options) round-trips through a code' + (s2 ? ' — differs at ' + s2 : ''));
+    const b = ID.byBase(G, def.nations[1].key);
+    let wrong = 0, nob = 0, tot = 0; for (let i = 0; i < N; i++) { if (own[i] === 2 && G.terrain[i] !== ID.T.SEA) { tot++; if (G.owner[i] !== b.id) wrong++; } if (own[i] === 255 && G.terrain[i] !== ID.T.SEA && G.owner[i]) nob++; }
+    ok(tot > 100 && !wrong, 'every painted tile has the painted owner (' + tot + ' tiles, ' + wrong + ' wrong)');
+    ok(!nob, 'land painted for nobody starts unowned');
+    let cross = 0; for (let i = 0; i < N; i++) if (G.terrain[i] !== ID.T.SEA && G.provinces[G.prov[i]].center >= 0 && (own[i] === 2) !== (own[G.provinces[G.prov[i]].center] === 2)) cross++;
+    ok(!cross, 'no province crosses a painted border');
+    const a = ID.byBase(G, def.nations[0].key);
+    ok(a && a.alive && G.owner[a.capital] === a.id, 'a capital painted over for another state moves out of that land');
+    const n2 = ID.byBase(G, def.nations[2].key), n3 = ID.byBase(G, def.nations[3].key), n4 = ID.byBase(G, def.nations[4].key);
+    ok(n2.gold === 777 && Math.round(n2.stab) === 33, 'a state starts with the treasury and stability set for it');
+    ok(n2.bloc && n2.bloc === n3.bloc, 'two states in one alliance start in one bloc');
+    ok(n4.dep && n4.dep.over === n2.id && n4.dep.kind === 'protectorate', 'a dependency starts bound to its overlord');
+    ok(ID.yearOf(G.tick) === 1925, 'the scenario starts in its year (1925)');
+    ok(d2.blds.every(([i, t]) => G.bld[i] === t), 'buildings placed by hand stand where they were placed');
+    const G3 = M.build(Object.assign({}, d2, { autoBld: false, grow: false }));
+    let fac = 0; for (const i of G3.blist) if (G3.bld[i] === ID.B.FACTORY) fac++;
+    ok(fac === d2.blds.filter((x) => x[1] === ID.B.FACTORY).length, 'with automatic buildings off, only the placed factories exist (' + fac + ')');
+    let ownedU = 0, ownedP = 0; for (let i = 0; i < N; i++) if (G3.terrain[i] !== ID.T.SEA && G3.owner[i]) { if (own[i]) ownedP++; else ownedU++; }
+    const capProvs = ID.alive(G3).reduce((s, n) => s + G3.provinces[G3.prov[n.capital]].tiles, 0);
+    ok(ownedU <= capProvs, 'with growth off, unpainted land is owned only in the capitals’ provinces (' + ownedU + ' ≤ ' + capProvs + ')');
+    // a local edit stays local: sink 40 tiles of coast in one corner and compare the rest of the world
+    const def5 = M.preset('pangaea'), G5 = M.build(def5), W5 = G5.W; let k0 = -1;
+    for (let i = 0; i < G5.N && k0 < 0; i++) if (G5.coast[i] && (i % W5) < W5 / 3 && ((i / W5) | 0) < G5.H / 3) k0 = i;
+    const sea = new Uint8Array(G5.N); sea.set(G5.terrain); for (let dy = 0; dy < 5; dy++) for (let dx = 0; dx < 8; dx++) sea[k0 + dy * W5 + dx] = ID.T.SEA;
+    const base5 = ID.genMap(Object.assign(ID.mapOpts(def5, def5.seed, def5.size), { paint: null })).terrain;
+    const G6 = M.build(Object.assign({}, def5, { paint: M.diff(base5, sea) }));
+    let far = 0, farProv = 0, land = 0; const kx = k0 % W5, ky = (k0 / W5) | 0;
+    for (let i = 0; i < G5.N; i++) { if (G5.terrain[i] === ID.T.SEA || Math.hypot(i % W5 - kx, ((i / W5) | 0) - ky) < 40) continue; land++; if (G5.terrain[i] !== G6.terrain[i] || G5.river[i] !== G6.river[i]) far++; if ((G5.prov[i] === G5.prov[i + 1]) !== (G6.prov[i] === G6.prov[i + 1])) farProv++; }
+    ok(!far && !farProv, 'painting 40 tiles changes no terrain, river or province more than 40 tiles away (' + far + ' terrain, ' + farProv + ' province edges of ' + land + ')');
+  }
+
   /* ---------------------------------------------------------------- damaged and hostile input */
   {
     const good = await M.encode(M.preset('rivals'));

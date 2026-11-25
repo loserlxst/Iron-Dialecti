@@ -11,9 +11,38 @@
     hist: { W: 384, H: 288, nations: 24, name: 'Three continents', desc: 'The handcrafted world of 1910.', hidden: 1 },
   };
 
+  /* Province records from the province grid: size, centre, terrain mix, neighbours. */
+  function provMeta(W, H, terrain, coast, prov, np, land) {
+    const provinces = [null];
+    for (let p = 1; p <= np; p++) provinces.push({ id: p, tiles: 0, sx: 0, sy: 0, tc: [0, 0, 0, 0, 0, 0, 0], coastal: 0, nbSet: new Set() });
+    for (const c of land) {
+      const P = provinces[prov[c]]; const cx = c % W, cy = (c / W) | 0;
+      P.tiles++; P.sx += cx; P.sy += cy; P.tc[terrain[c]]++; if (coast[c]) P.coastal++;
+      if (cx < W - 1 && prov[c + 1] && prov[c + 1] !== P.id) { P.nbSet.add(prov[c + 1]); provinces[prov[c + 1]].nbSet.add(P.id); }
+      if (cy < H - 1 && prov[c + W] && prov[c + W] !== P.id) { P.nbSet.add(prov[c + W]); provinces[prov[c + W]].nbSet.add(P.id); }
+    }
+    for (let p = 1; p <= np; p++) {
+      const P = provinces[p];
+      P.cx = P.sx / Math.max(1, P.tiles); P.cy = P.sy / Math.max(1, P.tiles);
+      // snap centre to a tile that is actually in the province
+      let ci = Math.round(P.cy) * W + Math.round(P.cx);
+      if (prov[ci] !== p) {
+        let bd = 1e9;
+        for (const c of land) if (prov[c] === p) { const dx = (c % W) - P.cx, dy = ((c / W) | 0) - P.cy; const d = dx * dx + dy * dy; if (d < bd) { bd = d; ci = c; } }
+      }
+      P.center = ci;
+      P.nb = Array.from(P.nbSet); delete P.nbSet; delete P.sx; delete P.sy;
+      const t = Math.max(1, P.tiles);
+      P.rough = (P.tc[T.FOREST] + P.tc[T.HILLS] + P.tc[T.MOUNTAIN]) / t;
+      P.fertile = (P.tc[T.FARM] + P.tc[T.PLAINS] * 0.5) / t;
+    }
+    return provinces;
+  }
+
   /* opts: { seed, size, blobs?: [[x,y,r],...] (fractions; handcrafted layout), land?: target land fraction,
      noiseH?: the map height the noise is scaled to (a taller map keeps the old rows' terrain) } */
   ID.genMap = function (opts) {
+    if (opts.mg >= 2) return genMap2(opts);
     const sz = ID.MAP_SIZES[opts.size || 'std'];
     const W = sz.W, H = sz.H, N = W * H;
     const rng = new ID.RNG(opts.seed);
@@ -195,35 +224,110 @@
       }
     }
 
-    const provinces = [null];
-    for (let p = 1; p <= np; p++) provinces.push({ id: p, tiles: 0, sx: 0, sy: 0, tc: [0, 0, 0, 0, 0, 0, 0], coastal: 0, nbSet: new Set() });
-    for (const c of land) {
-      const P = provinces[prov[c]]; const cx = c % W, cy = (c / W) | 0;
-      P.tiles++; P.sx += cx; P.sy += cy; P.tc[terrain[c]]++; if (coast[c]) P.coastal++;
-      if (cx < W - 1 && prov[c + 1] && prov[c + 1] !== P.id) { P.nbSet.add(prov[c + 1]); provinces[prov[c + 1]].nbSet.add(P.id); }
-      if (cy < H - 1 && prov[c + W] && prov[c + W] !== P.id) { P.nbSet.add(prov[c + W]); provinces[prov[c + W]].nbSet.add(P.id); }
-    }
-    for (let p = 1; p <= np; p++) {
-      const P = provinces[p];
-      P.cx = P.sx / Math.max(1, P.tiles); P.cy = P.sy / Math.max(1, P.tiles);
-      // snap centre to a tile that is actually in the province
-      let ci = Math.round(P.cy) * W + Math.round(P.cx);
-      if (prov[ci] !== p) {
-        let bd = 1e9;
-        for (const c of land) if (prov[c] === p) { const dx = (c % W) - P.cx, dy = ((c / W) | 0) - P.cy; const d = dx * dx + dy * dy; if (d < bd) { bd = d; ci = c; } }
-      }
-      P.center = ci;
-      P.nb = Array.from(P.nbSet); delete P.nbSet; delete P.sx; delete P.sy;
-      const t = Math.max(1, P.tiles);
-      P.rough = (P.tc[T.FOREST] + P.tc[T.HILLS] + P.tc[T.MOUNTAIN]) / t;
-      P.fertile = (P.tc[T.FARM] + P.tc[T.PLAINS] * 0.5) / t;
-    }
+    const provinces = provMeta(W, H, terrain, coast, prov, np, land);
 
     return { blobs, W, H, N, terrain, river, coast, prov, provinces, landCount: land.length, seed: opts.seed, size: opts.size || 'std' };
   };
 
+  /* ---------------------------------------------------------------- map generator 2 (the map maker's maps)
+     Version 1 places provinces and rivers with one random sequence over the whole map, so a change anywhere moves every
+     border. Version 2 is local: a tile's terrain, river and province depend only on what is near it. Provinces grow from
+     one seed per 12×12 cell (per painted region in the cell) by a noisy shortest path that never crosses a region
+     boundary; rivers start from a fixed tile per 24×24 cell and run downhill. The generator itself is optional (gen:
+     false is an empty sea to paint on) and its sea level can be absolute (level), so moving a shape changes only its own
+     coast. opts as genMap, plus { gen, level, region: Uint8Array of painted owners or null }. */
+  const hash = (i, s) => { let h = Math.imul(i ^ s, 0x9e3779b1); h ^= h >>> 15; h = Math.imul(h, 0x85ebca77); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae3d); return (h ^ (h >>> 16)) >>> 0; };
+  function genMap2(opts) {
+    const sz = ID.MAP_SIZES[opts.size || 'std'], W = sz.W, H = sz.H, N = W * H, seed = opts.seed >>> 0;
+    const terrain = new Uint8Array(N), river = new Uint8Array(N), coast = new Uint8Array(N);
+    const blobs = opts.blobs || [];
+    let level = null;
+    const nbs = (c) => { const x = c % W; return [x > 0 ? c - 1 : -1, x < W - 1 ? c + 1 : -1, c >= W ? c - W : -1, c < N - W ? c + W : -1]; };
+    if (opts.gen !== false) {
+      const noise = ID.makeNoise(seed ^ 0x9e3779b9), noise2 = ID.makeNoise((seed * 7 + 13) >>> 0);
+      const elev = new Float32Array(N), asp = W / H, ns = H / (opts.noiseH || H);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const fx = x / W, fy = y / H; let f = 0;
+        for (const b of blobs) { const dx = (fx - b[0]) * asp, dy = fy - b[1], r = b[2] * asp * 0.72; f += Math.exp(-(dx * dx + dy * dy) / (r * r)); }
+        if (f > 1.25) f = 1.25;
+        const edge = Math.min(x, W - 1 - x, y, H - 1 - y) / (0.05 * W);
+        elev[y * W + x] = f * 0.7 + noise.fbm(fx * 6.5 * asp * 0.6 * ns, fy * 6.5 * 0.6 * ns, 5) * 0.55 - (edge < 1 ? (1 - edge) * 0.9 : 0);
+      }
+      level = opts.level != null ? opts.level : Float32Array.from(elev).sort()[Math.floor(N * (1 - (opts.land || 0.37)))];
+      const top = level + 0.85; // a fixed scale: the height of one hill does not depend on the highest peak elsewhere
+      for (let i = 0; i < N; i++) terrain[i] = elev[i] > level ? T.PLAINS : T.SEA;
+      // specks: land under 14 tiles sinks, lakes under 30 tiles fill
+      const seen = new Uint8Array(N);
+      for (let i = 0; i < N; i++) {
+        if (seen[i]) continue; const isL = terrain[i] !== T.SEA, cells = [i], st = [i]; seen[i] = 1;
+        while (st.length) { const c = st.pop(); for (const n of nbs(c)) if (n >= 0 && !seen[n] && (terrain[n] !== T.SEA) === isL) { seen[n] = 1; st.push(n); cells.push(n); } }
+        if (isL && cells.length < 14) for (const c of cells) terrain[c] = T.SEA; else if (!isL && cells.length < 30) for (const c of cells) { terrain[c] = T.PLAINS; elev[c] = level + 0.01; }
+      }
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x; if (terrain[i] === T.SEA) continue;
+        const fx = x / W, fy = y / H, h = (elev[i] - level) / (top - level);
+        const ridge = 1 - Math.abs(noise2.fbm(fx * 9 * asp * 0.6 * ns, fy * 9 * 0.6 * ns, 4)) * 2.2;
+        const moist = noise.fbm(fx * 5 * asp * 0.6 * ns + 40, fy * 5 * 0.6 * ns + 40, 4), fert = noise2.fbm(fx * 8 * asp * 0.6 * ns + 90, fy * 8 * 0.6 * ns + 90, 3);
+        const m = h * 0.55 + ridge * 0.5;
+        terrain[i] = m > 0.74 && h > 0.14 ? T.MOUNTAIN : m > 0.6 && h > 0.08 ? T.HILLS : moist < -0.3 ? T.DESERT : moist > 0.16 ? T.FOREST : fert > -0.05 && h < 0.4 ? T.FARM : T.PLAINS;
+      }
+      const isCoast = (i) => nbs(i).some((n) => n >= 0 && terrain[n] === T.SEA);
+      // rivers: from a fixed tile in each 24×24 cell that is high ground, downhill to the sea
+      for (let cy = 0; cy < H; cy += 24) for (let cx = 0; cx < W; cx += 24) {
+        const hs = hash(cy * W + cx, seed ^ 0x51ed27), sx = cx + (hs % 24), sy = cy + ((hs >>> 8) % 24); if (sx >= W || sy >= H) continue;
+        let c = sy * W + sx; if (terrain[c] !== T.MOUNTAIN && terrain[c] !== T.HILLS) continue;
+        const path = [], on = new Set(); let ok = false;
+        for (let k = 0; k < 400; k++) {
+          path.push(c); on.add(c);
+          if (river[c] || isCoast(c)) { ok = true; break; }
+          let best = -1, be = Infinity;
+          for (const n of nbs(c)) { if (n < 0 || on.has(n) || terrain[n] === T.SEA) continue; const e = elev[n] + (hash(n, seed) % 1000) * 0.000012; if (e < be) { be = e; best = n; } }
+          if (best < 0) break; c = best;
+        }
+        if (!ok || path.length <= 12) continue;
+        for (const p of path) {
+          river[p] = 1; if (terrain[p] === T.PLAINS || terrain[p] === T.DESERT) terrain[p] = T.FARM;
+          for (const n of nbs(p)) if (n >= 0 && terrain[n] === T.PLAINS && hash(n, seed ^ 0x77) % 10 < 6) terrain[n] = T.FARM;
+        }
+      }
+    }
+    for (const [s0, len, t] of opts.paint || []) for (let i = s0; i < s0 + len && i < N; i++) { terrain[i] = t; if (t === T.SEA) river[i] = 0; }
+    for (const [s0, len, v] of opts.rivers || []) for (let i = s0; i < s0 + len && i < N; i++) river[i] = v && terrain[i] !== T.SEA ? 1 : 0;
+    for (let i = 0; i < N; i++) if (terrain[i] !== T.SEA && nbs(i).some((n) => n >= 0 && terrain[n] === T.SEA)) coast[i] = 1;
+
+    // provinces: a seed per 12×12 cell and region, grown by a noisy shortest path inside its region
+    const reg = opts.region || new Uint8Array(N), prov = new Uint16Array(N), land = [];
+    for (let i = 0; i < N; i++) if (terrain[i] !== T.SEA) land.push(i);
+    const G12 = 12, cost = new Float64Array(N).fill(Infinity), from = new Int32Array(N).fill(-1), heap = new ID.Heap(); let np = 0;
+    for (let cy = 0; cy < H; cy += G12) for (let cx = 0; cx < W; cx += G12) {
+      const best = {}, cnt = {};
+      for (let y = cy; y < Math.min(H, cy + G12); y++) for (let x = cx; x < Math.min(W, cx + G12); x++) {
+        const i = y * W + x; if (terrain[i] === T.SEA) continue; const r = reg[i], h = hash(i, seed ^ 0x2545f491);
+        cnt[r] = (cnt[r] || 0) + 1; if (best[r] == null || h < best[r][0]) best[r] = [h, i];
+      }
+      for (const r in best) if (cnt[r] >= 20) { const i = best[r][1]; prov[i] = ++np; cost[i] = 0; from[i] = i; heap.push(0, i); }
+    }
+    while (heap.size) {
+      const c = heap.pop(), d = heap.topP; if (d > cost[c]) continue;
+      for (const n of nbs(c)) {
+        if (n < 0 || terrain[n] === T.SEA || reg[n] !== reg[c]) continue;
+        const nd = d + 1 + (hash(n, seed ^ 0x1b873593) % 100) * 0.012;
+        // equal costs go to the seed with the lower hash, so the result never depends on the order of the heap (a local edit stays local)
+        if (nd < cost[n] || (nd === cost[n] && hash(from[c], seed) < hash(from[n], seed))) { cost[n] = nd; prov[n] = prov[c]; from[n] = from[c]; heap.push(nd, n); }
+      }
+    }
+    for (const c of land) { // land no seed reached (islets, slivers of a region): a province per piece
+      if (prov[c]) continue; prov[c] = ++np; const st = [c];
+      while (st.length) { const k = st.pop(); for (const n of nbs(k)) if (n >= 0 && terrain[n] !== T.SEA && !prov[n] && reg[n] === reg[c]) { prov[n] = np; st.push(n); } }
+    }
+    return { blobs, level, region: opts.region || null, W, H, N, terrain, river, coast, prov, provinces: provMeta(W, H, terrain, coast, prov, np, land), landCount: land.length, seed, size: opts.size || 'std' };
+  }
+  /* Runs [[start, length, value]] into a grid. */
+  ID.runsGrid = (runs, N) => { const g = new Uint8Array(N); for (const [s0, len, v] of runs || []) g.fill(v, s0, Math.min(N, s0 + len)); return g; };
+
   /* Map options for a world: a scenario's own layout, or (for saves made before the scenario grew) its legacy one. */
-  ID.mapOpts = (sc, seed, size) => (sc && sc.legacy && size !== sc.size ? { seed, size, blobs: sc.legacy } : { seed, size, blobs: sc ? sc.blobs : null, noiseH: sc ? sc.noiseH : 0, land: sc ? sc.land : 0, paint: sc ? sc.paint : null, rivers: sc ? sc.rivers : null });
+  ID.mapOpts = (sc, seed, size) => (sc && sc.legacy && size !== sc.size ? { seed, size, blobs: sc.legacy } : { seed, size, blobs: sc ? sc.blobs : null, noiseH: sc ? sc.noiseH : 0, land: sc ? sc.land : 0, paint: sc ? sc.paint : null, rivers: sc ? sc.rivers : null,
+    mg: sc ? sc.mg : 0, gen: sc ? sc.gen : true, level: sc ? sc.level : null, region: sc && sc.own && sc.own.length ? ID.runsGrid(sc.own, ID.MAP_SIZES[size].W * ID.MAP_SIZES[size].H) : null });
 
   /* BFS over sea from a set of start tiles; returns distance array (Int16, -1 unreachable) up to maxD. */
   ID.seaDistance = function (G, starts, maxD) {

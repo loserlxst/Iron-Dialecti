@@ -863,29 +863,44 @@ label.b { display: inline-flex; align-items: center; cursor: pointer; }
   .swatch { min-height: 32px; }
 }
 
-/* ---------------------------------------------------------------- map maker (js/ui/maker.js) */
+/* ---------------------------------------------------------------- scenario maker (js/ui/maker.js)
+   The panel sits on the left (a sheet along the bottom on a phone held upright); the map canvas is moved beside it by
+   maker.js, so nothing covers the map. Folded, only the header row stays. */
+.pick.maker { width: 360px; box-shadow: none; }
+.pick.maker.shut { bottom: auto; }
+.pick.maker .dh h2 { font-size: 21px; margin-right: auto; padding-right: 24px; white-space: nowrap; }
+.pick.maker .dh .x { margin-left: 0; width: 38px; flex: none; } .pick.maker .dh .x:disabled { opacity: 0.3; cursor: default; background: transparent; }
+.mktabs { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 2px solid var(--ink); flex: none; }
+.mktabs button { background: var(--paper2); border: 0; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 8px 4px; font: 700 15px var(--cond); letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer; color: var(--ink); }
+.mktabs button:nth-child(3n) { border-right: 0; } .mktabs button.on { background: var(--ink); color: var(--paper); } .mktabs button:hover:not(.on) { background: var(--paper3); }
+.mktabs i { font-style: normal; font: 700 12px var(--body); padding: 0 5px; margin-left: 3px; background: var(--ochre); color: var(--ink); } .mktabs i.bad { background: var(--red); color: var(--paper); }
 .pick.maker .db { padding-top: 10px; }
-.mktools { padding: 8px 14px 0; flex: none; } .mktools .seg button { flex: 1 1 0; }
-.tswatch { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-.tswatch button { display: flex; align-items: center; gap: 6px; padding: 5px 6px; background: var(--paper); border: 2px solid var(--ink); font: 600 13.5px var(--body); cursor: pointer; color: var(--ink); }
-.tswatch button i { width: 18px; height: 14px; border: 1.5px solid var(--ink); flex: none; } .tswatch button.on { background: var(--ink); color: var(--paper); }
+.pick.maker .ft { flex-wrap: wrap; }
+.tswatch, .olist { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.olist { grid-template-columns: repeat(2, 1fr); max-height: 260px; overflow-y: auto; }
+.tswatch button, .olist button { display: flex; align-items: center; gap: 6px; padding: 5px 6px; background: var(--paper); border: 2px solid var(--ink); font: 600 13.5px var(--body); cursor: pointer; color: var(--ink); text-align: left; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.tswatch button i, .olist button i { width: 18px; height: 14px; border: 1.5px solid var(--ink); flex: none; }
+.tswatch button i.no, .olist button i.no { background: repeating-linear-gradient(45deg, var(--paper) 0 3px, var(--ink3) 3px 5px); }
+.tswatch button.on, .olist button.on { background: var(--ink); color: var(--paper); }
+.mkgrid { display: grid; grid-template-columns: 78px 1fr; gap: 6px 8px; align-items: center; margin: 8px 0 4px; } .mkgrid label { font: 600 14px var(--body); } .mkgrid select { width: 100%; }
 ul.checks { margin: 0; padding-left: 18px; } ul.checks li { font-size: 14px; } ul.checks li.bad { color: var(--red); font-weight: 600; }
 .mklist { display: flex; flex-direction: column; margin-top: 8px; }
 .mksel .sl { margin-top: 6px; }
 .mkrow { display: grid; grid-template-columns: 1fr auto auto auto auto; gap: 6px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--paper3); } .mkrow input { width: 100%; min-width: 0; }
 .mkpre { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .mkpre .dec { margin: 0; }
 textarea.code { font: 500 13px/1.35 ui-monospace, Consolas, monospace; word-break: break-all; }
+#title #mkstat { position: absolute; z-index: 40; pointer-events: none; background: var(--ink); color: var(--paper); font: 600 13.5px var(--body); padding: 3px 10px; max-width: calc(100vw - 20px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 760px) and (min-height: 501px) {
-  .pick.maker { top: auto; height: 50vh; width: 100vw; border-top: 3px solid var(--ink); }
-  .pick.maker.min { height: auto; } .pick.maker.min .db { display: none; }
-  .pick.maker .dh h2 { font-size: 20px; }
+  .pick.maker { top: auto; height: 48vh; width: 100vw; border-right: 0; border-top: 3px solid var(--ink); }
+  .pick.maker.shut { height: auto; bottom: 0; }
+  .mktabs button { padding: 7px 2px; font-size: 14px; }
 }
+@media (max-height: 500px) { .pick.maker { width: min(330px, 46vw); } .mktabs { grid-template-columns: repeat(6, 1fr); } .mktabs button { font-size: 12px; padding: 6px 1px; } }
 @media (max-width: 760px), (max-height: 500px) {
   .mkpre { grid-template-columns: 1fr; }
   .mkrow { grid-template-columns: 1fr auto auto; } .mkrow input { grid-column: 1 / -1; }
   .tswatch { grid-template-columns: repeat(2, 1fr); }
 }
-@media (max-height: 500px) { .pick.maker.min .db { display: none; } }
 .dlg .dhd .k + .x { margin-left: auto; }
 /* segmented rows that wrap but still fill their width (the World choice, the map maker) */
 .seg.wrap.grow button { flex: 1 1 auto; }
