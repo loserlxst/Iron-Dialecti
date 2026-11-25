@@ -143,5 +143,15 @@ ok(ID.alive(G3).length > 0, 'an old save runs on');
   ok(worst < 0.15, 'the monthly balance shown matches the treasury (worst gap ' + Math.round(worst * 100) + '%, ' + who + ')');
 }
 
+// observer mode: every state plays itself, the camera moves on when the followed state falls, nothing ends the watch
+{
+  const G5 = ID.newGame({ seed: 3, scenario: 'meridia', headless: true });
+  const small = ID.alive(G5).sort((a, b) => a.tiles - b.tiles)[0]; ID.Game.observe(G5, small.id);
+  let moves = 0, last = G5.player, queued = 0;
+  while (G5.tick < 360 * 68 && !G5.over) { ID.Game.tick(G5); if (G5.player !== last) { moves++; last = G5.player; } queued += G5.evq.length; }
+  ok(!G5.over && G5.nations[G5.player].alive && queued === 0, 'observer mode runs past 1976 with no dispatches for the watcher and a living state in view (the camera moved ' + moves + ' times)');
+  const G6 = ID.Game.load(ID.Game.save(G5)); ok(G6.observer && G6.autoPlayer && G6.nations.every((x) => !x || x.ai), 'a save keeps observer mode');
+}
+
 console.log(fails ? fails + ' FAILED' : 'all passed');
 process.exit(fails ? 1 : 0);

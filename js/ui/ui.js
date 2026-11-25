@@ -250,7 +250,7 @@
     const I = ID.ideo(n); const key = n.id + n.ideo + n.name;
     if (key !== topKey || rebuild) {
       topKey = key;
-      $('#top').innerHTML = '<div class="who" data-act="nation" id="t-who">' + ID.Flags.html(n, 'tflag') + '<div><b>' + esc(n.name) + '</b><small>' + esc(I.name) + ' · ' + esc(ID.CONTROL[I.control.type].name) + '</small></div></div>' +
+      $('#top').innerHTML = '<div class="who" data-act="nation" id="t-who">' + ID.Flags.html(n, 'tflag') + '<div><b>' + esc(n.name) + '</b><small>' + (G.observer ? '<span class="good">Watching</span> · ' : '') + esc(I.name) + ' · ' + esc(ID.CONTROL[I.control.type].name) + '</small></div></div>' +
         '<div class="stats">' + STATS.map((s) => '<div class="st ' + s[2] + '" id="st-' + s[0] + '"><i>' + s[1] + '</i><b id="sv-' + s[0] + '">–</b></div>').join('') + '</div>' +
         '<div class="clock"><div class="date" id="t-date"><b id="sv-date"></b><small id="sv-era"></small></div>' +
         '<button class="b spd pause" data-act="pause" id="b-pause"' + tip('<b>Pause / resume</b> <span class="dim">(Space)</span>') + '></button>' +
@@ -442,7 +442,8 @@
       h += UI.kv(rows);
       if (G.bld[i]) h += UI.bldCard(G, n, i, false);
       h += '<div class="acts">';
-      if (ID.atWar(G, me.id, n.id)) {
+      if (G.observer) h += UI.btn('Follow ' + esc(n.base), 'follow', n.id, { cls: 'red', tip: '<h5>Follow ' + esc(n.name) + '</h5>Watch the world from here: the top band, the panels and the alerts show this state.' });
+      else if (ID.atWar(G, me.id, n.id)) {
         const cap = me.emergency ? 1 : ID.ideo(me).control.cap; const tr = me.troops * Math.min(UI.commit, cap);
         if (ID.borders(G, me.id, n.id) || G.attacks.some((a) => a.from === me.id && a.to === n.id)) h += UI.btn('Attack <span>' + ID.fmtPop(tr) + ' troops</span>', 'attack', null, { cls: 'red', tip: '<h5>Attack</h5>Commit ' + Math.round(Math.min(UI.commit, cap) * 100) + '% of your pool (' + ID.fmtPop(tr) + ') against ' + esc(n.name) + ' in the style chosen on the bar below. <span class="dim">(Enter)</span>' });
         if (G.coast[i]) { const pl = ID.Combat.planBoat(G, me, i); h += UI.btn('Naval landing here <span>' + ID.fmtPop(tr) + '</span>', 'landing', null, { off: typeof pl === 'string' ? pl : '', tip: UI.landTip(G, me, n, tr, pl) }); }
@@ -485,7 +486,7 @@
     const G = UI.G, n = P(), el = $('#atkbar'); if (!n) return;
     const mine = G.attacks.filter((a) => a.from === n.id), boats = G.boats.filter((b) => b.owner === n.id);
     const wildOK = G.wildB && G.wildB[n.id] > 0;
-    if (!n.nwars && !mine.length && !boats.length && !wildOK) { el.hidden = true; return; }
+    if (G.observer || (!n.nwars && !mine.length && !boats.length && !wildOK)) { el.hidden = true; return; } // an observer gives no orders
     const I = ID.ideo(n), cap = n.emergency ? 1 : I.control.cap, t = UI.target();
     if (UI.commit > cap) UI.commit = cap;
     if (!ID.Combat.styleOk(n, UI.style)) UI.style = 'advance';
@@ -661,13 +662,18 @@
     if (UI.modalKind) return;
     if (k === ' ') { e.preventDefault(); acts.pause(); return; }
     if (k >= '1' && k <= '5') { acts.speed(+k); return; }
-    if (k === 'Enter') { if (UI.target()) acts.attack(); return; }
+    if (k === 'Enter') { if (UI.target() && !UI.G.observer) acts.attack(); return; }
     const lk = k.toLowerCase();
     const t = TABS.find((x) => x[2].toLowerCase() === lk); if (t) { acts.tab(t[0]); return; }
     const m = MODES.find((x) => x[2].toLowerCase() === lk); if (m) { acts.mode(m[0]); return; }
     if (k === '+' || k === '=') R.zoomAt(innerWidth / 2, innerHeight / 2, 1.25); else if (k === '-' || k === '_') R.zoomAt(innerWidth / 2, innerHeight / 2, 0.8);
   };
   UI.keys = {};
+  /* What an observer may still press: the view, the clock, the menus and the papers, never a decision. */
+  UI.VIEW = new Set(['follow', 'tab', 'closeTab', 'closeModal', 'mode', 'modesTog', 'scrollMode', 'pause', 'resume', 'speed', 'speedCycle', 'menu', 'help', 'handbookT', 'patchNotes',
+    'paper', 'paperOk', 'papers', 'setPapers', 'chronicle', 'records', 'settings', 'setTray', 'setMad', 'toggleMusic', 'toggleMute', 'anthem', 'nation', 'fnation', 'focus', 'goto', 'unsel',
+    'alertsTog', 'atkTog', 'toggleBlocs', 'blocs', 'tree', 'showInTree', 'superOk', 'saveMenu', 'saveSlot', 'loadMenu', 'loadSlot', 'delSlot', 'quit', 'toTitle', 'keepPlaying', 'retry', 'endAgain', 'expandHint', 'trayOpen']);
+  acts.follow = (id) => { const G = UI.G, n = G.nations[id]; if (!n || !n.alive) return; ID.Game.follow(G, id); UI.sel = -1; R.selected = -1; UI.start(G); UI.toast('Following ' + n.name + '.', true); };
   UI.init = function () {
     tipEl = $('#tip');
     document.documentElement.classList.toggle('touch', UI.touch);
@@ -677,6 +683,7 @@
       const el = e.target.closest('[data-act]'); if (!el) return;
       if (UI.compact && UI.alertsOpen && el.dataset.act !== 'alertsTog' && el.closest('#alerts') && !el.closest('.offer')) UI.alertsOpen = false;
       if (el.dataset.off) { UI.toast(el.dataset.off); ID.Audio.play('bad'); return; }
+      if (UI.G && UI.G.observer && !$('#hud').hidden && !UI.VIEW.has(el.dataset.act)) { UI.toast('You are watching: the countries make their own decisions. Select a country and press Follow to watch from there.'); return; }
       const fn = acts[el.dataset.act]; if (!fn) return;
       let a = el.dataset.a; if (a != null) { try { a = JSON.parse(a); } catch (x) { /* plain string */ } }
       if (el.classList.contains('b') || el.classList.contains('opt')) ID.Audio.play('click');
@@ -685,6 +692,7 @@
     });
     document.addEventListener('input', (e) => {
       const el = e.target; if (!el.dataset || !el.dataset.in) return;
+      if (UI.G && UI.G.observer && !$('#hud').hidden) { UI.toast('You are watching: the countries set their own sliders.'); UI.after(); return; }
       UI.busy = true; const fn = ins[el.dataset.in]; if (fn) fn(+el.value, el);
       const lab = el.parentElement && el.parentElement.querySelector('[data-val]'); if (lab) lab.textContent = el.dataset.fmt === 'mob' ? (el.value / 10).toFixed(1) + '%' : el.value + '%';
     });

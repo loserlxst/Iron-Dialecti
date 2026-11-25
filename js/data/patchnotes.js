@@ -3,6 +3,11 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'Watch the world', items: [
+      'A new observer mode: on the new campaign screen, press Watch the world instead of Begin. Every country is run by the computer and you only watch, with no decisions to make and no dispatches.',
+      'You follow one country: the top band, the panels and the alerts show it. Select any other country on the map and press Follow to watch from there.',
+      'The watch never ends on its own. If the country you follow falls, you follow the strongest one left, and 1976 passes without a verdict. Save and load as usual.',
+    ] },
     { date: '25 November 2026', title: 'The grain year', items: [
       'Harvests now vary: bumper, good, fair, poor or failed. Each March you get the forecast for the harvest that comes in in September, and a bad year makes the next one gentler.',
       'You decide what the surplus is for, in the new Grain section of the Economy panel. Export it for gold, feed the people so the population grows faster and further, or fill the granaries with up to a year of grain.',

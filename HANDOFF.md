@@ -1214,6 +1214,15 @@ notes and the Iron Dialectic lesson that famine must be a clock, not a cliff.
   Note: `simulate.js` batches are not reproducible run to run (a 13% world becomes 40% in another batch), so single
   outliers in "largest state" are noise; the averages held at about 19–20%.
 
+## Session 15: observer mode
+
+`Gm.observe(G, id)` (`sim/game.js`): `G.observer`, `G.autoPlayer` and `G.endless` on, every state `ai`, `G.player` only the
+camera (`Gm.follow`). `Gm.defeat` moves the camera to the strongest state left (`Gm.strongest`) or, for another power's
+domination, prints it once (`G.ack`); `Gm.victory` becomes a news line. Saved (`observer`, `autoPlayer`). UI: *Watch the
+world* on the setup screen (`acts.watch`), *Follow* in the selection card (`acts.follow`), "Watching" in the top band, the
+attack bar hidden, and one guard in the click dispatcher: only acts in `UI.VIEW` (view, clock, menus, papers, saves) work;
+sliders and Enter are refused too. `tools/structures.js` runs a 68-year watch from the smallest state.
+
 ## Session 15: browser pass and what is left
 
 Checked in the desktop app's browser pane at 800×600 and at phone width (375×812), with no console errors: *Settle*

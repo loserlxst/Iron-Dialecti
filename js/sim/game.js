@@ -139,9 +139,26 @@
       stats: { stab: Math.round(n.stab), legit: Math.round(n.legit), unrest: Math.round(n.a.unrest || 0), we: Math.round(n.we), ls: Math.round(n.ls), grievance: Math.round(n.grievance) },
     };
   }
+  /* Observer mode: the AI plays every state and G.player is only the camera. Nothing ends the watch: when the
+     followed state falls the camera moves to the strongest one left, a victory is news, and 1976 is passed by. */
+  Gm.strongest = (G, not) => ID.alive(G).filter((x) => x.id !== not).sort((a, b) => ID.Diplomacy.power(b) - ID.Diplomacy.power(a))[0] || null;
+  Gm.follow = function (G, id) {
+    const n = G.nations[id]; if (!n || !n.alive) return;
+    for (const x of G.nations) if (x) x.ai = true;
+    G.player = id; G.dirtyAll = true; G.uiDirty = true;
+  };
+  Gm.observe = function (G, id) {
+    G.observer = true; G.autoPlayer = true; G.endless = true; G.evq.length = 0; if (G.tray) G.tray.length = 0;
+    Gm.follow(G, id && G.nations[id] && G.nations[id].alive ? id : (Gm.strongest(G) || {}).id);
+  };
   Gm.defeat = function (G, type, info) {
     if (G.over) return;
     const n = G.nations[G.player]; if (!n) return;
+    if (G.observer) {
+      if (type === 'eclipsed' && info && info.by) { (G.ack = G.ack || {})['dom' + info.by] = 1; ID.news(G, G.nations[info.by].name + ' now dominates the world.', 'war', info.by); return; }
+      const s = Gm.strongest(G, n.id); if (s) { ID.news(G, n.name + ' has fallen. The camera follows ' + s.name + '.', 'pol', s.id); Gm.follow(G, s.id); }
+      return;
+    }
     const pm = postMortem(G, n, type, info || {});
     ID.chron(G, 'end', n.name + ': ' + pm.head.toLowerCase() + '.', n.id);
     G.over = { result: 'defeat', type, info: info || {}, pm, year: ID.yearOf(G.tick), nation: n.id };
@@ -153,6 +170,7 @@
     if (G.over) return;
     const n = G.nations[G.player];
     (G.won = G.won || {})[Gm.winKey(n, type)] = ID.yearOf(G.tick);
+    if (G.observer) { ID.chron(G, 'end', n.name + ' achieves ' + name + '.', n.id); ID.news(G, n.name + ' achieves ' + name + '.', 'good', n.id); return; }
     ID.chron(G, 'end', n.name + ' achieves ' + name + '.', n.id);
     G.over = { result: 'victory', type, name, year: ID.yearOf(G.tick), nation: n.id };
     ID.sfx(G, 'victory');
@@ -256,7 +274,7 @@
       prov: G.provinces.slice(1).map((P) => [P.core, Math.round(P.unrest * 10) / 10, P.opp, Math.round(P.oppStr * 10) / 10, Math.round(P.integ), P.lastOwner, P.sponsor, P.oil || 0, P.oilFound || 0, P.oilCo || 0, P.oilShare || 0, P.oilAt || 0, P.canal || 0]), fronts: G.fronts || null,
       attacks: G.attacks.map((a) => ({ id: a.id, from: a.from, to: a.to, troops: a.troops, committed: a.committed, style: a.style, amphib: a.amphib, taken: a.taken, pk: a.pk, enc: a.enc, bo: a.bo, bd: a.bd, out: a.out, holdX: a.holdX, give: a.give, last: a.last, pobj: a.pobj })),
       boats: G.boats, missiles: G.missiles, builds: G.builds, dip: G.dip, blocs: G.blocs, news: G.news.slice(-60), chronicle: G.chronicle, world: G.world, flags: G.flags,
-      evq: G.evq, tray: G.tray || [], votes: G.votes, nextId: G.nextId, over: G.over, won: G.won || null, ack: G.ack || null, endless: !!G.endless, tut: G.tut, offers: G.offers || [], shock: G.shock || [], historical: !!G.historical, story: G.story || null, beach: G.beach || [], press: G.press || null, pow: G.pow || null,
+      evq: G.evq, tray: G.tray || [], votes: G.votes, nextId: G.nextId, over: G.over, won: G.won || null, ack: G.ack || null, endless: !!G.endless, observer: !!G.observer, autoPlayer: !!G.autoPlayer, tut: G.tut, offers: G.offers || [], shock: G.shock || [], historical: !!G.historical, story: G.story || null, beach: G.beach || [], press: G.press || null, pow: G.pow || null,
     };
     return JSON.stringify(o, (k, v) => (k === 'dem' || k === 'lsHist' ? undefined : typeof v === 'number' && !Number.isInteger(v) ? Math.round(v * 1000) / 1000 : v));
   };
@@ -272,7 +290,7 @@
       nations: o.nations, player: o.player, attacks: [], boats: o.boats || [], missiles: o.missiles || [], builds: o.builds || [], blist: [],
       dip: o.dip || {}, warM: new Uint8Array(MAXN * MAXN), rel: new Float32Array(MAXN * MAXN), blocs: o.blocs, wars: [], border: [],
       news: o.news || [], chronicle: o.chronicle || [], stats: { pop: 1, gdp: 1, trade: 1, byIdeo: {}, byFam: {} }, world: o.world,
-      flags: o.flags || {}, dirty: [], dirtyAll: true, radList: [], mapMode: 'political', fx: [], sfx: [], capLost: [], evq: o.evq || [], tray: o.tray || [], votes: o.votes || [], over: o.over || null, won: o.won || null, ack: o.ack || null, endless: !!o.endless, nextId: o.nextId || 1, fortsDirty: true, tut: o.tut || null, offers: o.offers || [], shock: o.shock || [], beach: o.beach || [], press: o.press || null, pow: o.pow || null,
+      flags: o.flags || {}, dirty: [], dirtyAll: true, radList: [], mapMode: 'political', fx: [], sfx: [], capLost: [], evq: o.evq || [], tray: o.tray || [], votes: o.votes || [], over: o.over || null, won: o.won || null, ack: o.ack || null, endless: !!o.endless, observer: !!o.observer, autoPlayer: !!o.autoPlayer, nextId: o.nextId || 1, fortsDirty: true, tut: o.tut || null, offers: o.offers || [], shock: o.shock || [], beach: o.beach || [], press: o.press || null, pow: o.pow || null,
     };
     G.rng.s = o.rng >>> 0;
     G.historical = !!o.historical; G.story = o.story || null; G.fronts = o.fronts || null; if (G.historical && !G.story) ID.Story.init(G);
