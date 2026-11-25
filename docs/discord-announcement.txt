@@ -1,0 +1,28 @@
+**Iron Dialectic update: your countries, your maps**
+
+Big update. You can now customize any country in the game, build your own maps in the new map maker, and share them with a code.
+
+**Customize any country**
+On the New campaign screen, hit "Customize this country" (or Customize next to anyone under Other countries). You can change the name, full state name, capital, first leader, map colour, motto, anthem, description, starting situation and system of government.
+For the flag you can keep the game's own, build one from layouts, colours and emblems, or upload a picture. Whatever you pick shows up everywhere, from the map labels to the newspaper.
+Renaming a country keeps its content. Call Aurelia whatever you like and it still gets Aurelia's programmes and destinies, with your name in them.
+You can also save a country as a preset and bring it back in later campaigns.
+
+**The map maker**
+It's a main button on the title screen now.
+- Paint terrain, rivers and borders tile by tile with brush, fill and pick tools. A red preview shows exactly what your next click will change, and there's undo and redo.
+- Painted borders stay exactly as you drew them when the game starts. A switch decides whether states also grow into the land you left blank.
+- Place cities, factories, ports and forts yourself, or let the game do it.
+- Set the start year (1910, 1925 or 1940), and give any state its own treasury, stability, alliance or overlord.
+- Presets to start from: an empty sea, a World map (the globe's continents with 30 states), the Three Continents, a random world, Pangaea, an archipelago, two rival continents, an inland sea and an island empire.
+
+**Share your maps**
+Hit Share to get a code. Anyone can paste it into Load code on the title screen to play or edit your map. Big maps can go out as a .idmap file instead. Saves carry their map with them, so a save on a custom map loads without the code.
+
+**Also new**
+- An Enormous map size (640×360, 32 states) for random worlds and the map maker. Older machines may run a bit slower on it.
+- A Join the Discord button on the title screen.
+
+Post your maps and countries here, I want to see what you build.
+
+Play it here: https://averageasher1-creator.github.io/iron-dialectic/

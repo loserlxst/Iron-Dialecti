@@ -1,0 +1,165 @@
+IRON DIALECTIC — WHAT'S NEW: YOUR COUNTRIES, YOUR MAPS
+=======================================================
+
+This update adds four things: country customization, the map maker, map codes
+for sharing, and two new map sizes (including a World map). Everything below
+works with a mouse or trackpad and on phones and tablets.
+
+
+1. CUSTOMIZE ANY COUNTRY
+------------------------
+On the New campaign screen, press "Customize this country" under the state you
+picked, or open "Other countries" and press Customize next to anyone else.
+
+What you can change:
+  - Name, adjective and full state name. Leave the full name blank and it
+    follows the system of government, as before ("Republic of X", "Kingdom
+    of X"). A full name you write stays until the country changes its system.
+  - Capital name and the first leader's name. Later leaders are picked the
+    usual way.
+  - Map colour, from a palette that stays readable on the map. If the colour
+    is too close to a neighbour's, the editor warns you.
+  - Flag. Three choices:
+      The game's flag: drawn from the country's colour and system, and it
+      changes when history changes the country.
+      Build one: pick a layout (stripes, cross, canton, saltire and more),
+      up to four colours and an emblem.
+      Upload: any PNG, JPEG, WebP or GIF. It's cropped to 3:2 and shrunk to
+      60×40, so it stays small.
+    A custom flag shows up everywhere: the map labels, the top band,
+    dispatches, The World Dispatch, the panels and the end screens.
+    "Let history change the flag": tick this if you want a destiny or a
+    revolution to replace your flag with its own. Leave it off and your flag
+    stays no matter what.
+  - Motto, anthem title and a short description. Blank fields use the
+    game's own text.
+  - Starting situation (great power, sick empire, rich and divided, small and
+    threatened, agrarian backwater, young revolution, trading state, middle
+    power) and starting system of government.
+
+Renaming keeps a country's content. Rename Aurelia to "Bobland" and it still
+gets Aurelia's programmes, destinies and history, and they now say Bobland.
+
+Presets: "Save as a preset" keeps a country design in your browser so you can
+reuse it in later campaigns.
+
+"Restore history" puts every country back exactly as it was. Challenges always
+use the original countries.
+
+
+2. THE MAP MAKER
+----------------
+Open it from the title screen. You can start from a preset or from one of
+your saved maps.
+
+Presets:
+  - An empty sea (two islands; you paint everything else)
+  - World map (new: the continents of a globe, with 30 states)
+  - The Three Continents (the 1910 campaign map, as an editable copy)
+  - A random world
+  - Pangaea, Archipelago, Two rival continents, The inland sea,
+    The island empire
+
+The panel has six tabs. Each one says at the top what it's for, and the
+dark line along the bottom of the map always says what your next click or
+drag will do and what's under the cursor.
+
+  SCENARIO  Name, start year (1910, 1925 or 1940), map size, two switches
+            for what the game fills in automatically, a list of problems to
+            fix before play, and saving and sharing.
+
+  TERRAIN   Paint sea, plains, farmland, forest, hills, mountain and desert,
+            and add or erase rivers. Terrain decides food, population and
+            how hard the land is to attack.
+
+  BORDERS   Paint which state owns each tile. Painted land belongs to that
+            state at the start, exactly as drawn. "Nobody" paints unclaimed
+            hinterland, and "Erase" removes painted borders.
+            Switch: "States grow into land you have not painted". On, states
+            spread from their capitals into unpainted land. Off, unpainted
+            land belongs to nobody (except each capital's own province).
+            "Lock in the borders you see" turns the current borders into
+            painted ones so you can adjust them tile by tile.
+
+  STATES    Add a state (click "Add a state", then click land for its
+            capital), drag a capital to move it, and edit a state:
+              Edit country... opens the full country editor (name, flag,
+                colour, system, situation, leader, motto...)
+              Growth: how far it spreads into unpainted land
+              Treasury and Stability: set a starting value, or leave them
+                on "default" so the game decides
+              Alliance: states in the same alliance start in one bloc
+              Overlord: the state starts as a dependency of another (a
+                protectorate, vilayet, mandate, treaty state or client)
+
+  BUILDINGS Place cities, factories, ports (coast only) and forts on exact
+            tiles. Switch: "Also add the usual cities, factories, ports and
+            forts". Turn it off and only your buildings exist (plus a city at
+            each capital). "Lock in the buildings you see" turns the
+            automatic ones into placed ones you can remove one by one.
+
+  GENERATOR The generator that made the starting land. It's locked so
+            nothing reshapes your map by accident. Unlock it to move, resize,
+            add or delete continents, change the sea level or roll new
+            coastlines. Your painting always stays on top. You can also turn
+            the generator off for good and keep the land as painting.
+
+Tools (Terrain and Borders tabs):
+  Brush  drag to paint; sizes from 1 to 25 tiles across. A red preview shows
+         exactly which tiles the next click changes.
+  Fill   click once to fill a whole connected area of the same kind.
+  Pick   click a tile to copy its terrain or owner into the brush.
+
+Keys: Ctrl+Z undo, Ctrl+Y redo, B brush, F fill, I pick, [ and ] brush size.
+On a touch screen, one finger paints and two fingers move and zoom.
+
+Painting is local. Painting a coastline or a mountain range changes the
+provinces, rivers and borders right there and nowhere else.
+
+Before you play, the Scenario tab lists problems. Red ones stop play (for
+example, too little land for every state). Yellow ones are warnings: a
+capital at sea, a state with very little land, lone specks of land.
+
+Programmes and destinies on custom maps: the countries of the Three
+Continents keep their own programme trees and destinies wherever you put
+them, even renamed. Every other state gets the family and ideology
+programmes, as on random worlds. The scripted history (the great war of 1914
+and so on) belongs to the Three Continents campaign only.
+
+"Play this map" takes you to the New campaign screen with your map selected.
+Pick a state and begin. Saved games carry the map inside them, so they load
+without the map code.
+
+
+3. SHARING MAPS: CODES AND FILES
+--------------------------------
+  - Copy code: in the map maker (Share) and on the New campaign screen. It
+    gives you a code starting with IDM1- that contains the whole map: land,
+    borders, buildings, states, flags and options.
+  - Load code: on the title screen and in the map maker. Paste a code, then
+    "Play it" or "Open in the map maker". A damaged or cut-off code shows an
+    error instead of crashing.
+  - Codes from other players are checked before they load: names are
+    cleaned, numbers are kept within limits, and only PNG or WebP flag images
+    are accepted.
+  - Code length: a preset is about 1,000 to 3,000 characters. Uploaded flags
+    and painted borders make codes longer. A fully painted world can run to
+    15,000 to 30,000 characters. You can leave uploaded flags out of a code,
+    or use Export file / Import file (.idmap) for big maps.
+  - Copy code on the New campaign screen also works for the Three Continents
+    and random worlds, with your country customizations included.
+
+
+4. NEW MAP SIZES
+----------------
+  - Enormous: 640×360 tiles, 32 states. Available for random worlds and in
+    the map maker. It's nearly three times the standard map, so campaigns are
+    longer and older computers may run a bit slower.
+  - World: 720×288, a wide map in the proportions of a globe laid flat. Used
+    by the World map preset and available in the map maker.
+
+
+5. ON THE TITLE SCREEN
+----------------------
+Map maker is now one of the main buttons, Load code sits with the smaller
+buttons, and there's a "Join the Discord" button.

@@ -1,0 +1,338 @@
+IRON DIALECTIC — THE MECHANICS THE TUTORIAL DOESN'T COVER
+=========================================================
+
+The tutorial teaches the basics: the top band, factions, legitimacy, the
+economy, laws, programmes, the hinterland, the clock, alerts and a first war.
+This guide covers everything else that tends to confuse people, roughly in
+the order you'll run into it.
+
+Two habits help most:
+  - Hover anything (or press and hold on a touch screen). Almost every number
+    in the game has a tooltip that says what moves it.
+  - When things go wrong, open the Report (key R). Your ministers list each
+    problem, its cause, and buttons that deal with it.
+
+
+PART 1 — THE NUMBERS ON THE TOP BAND
+------------------------------------
+
+TREASURY and BALANCE
+  The balance (+ or − per month) counts everything that really moves money:
+  taxes and the budget, but also oil, concessions, tribute paid or received,
+  payments from dependencies, repairs, loans and debt repayments. Hover the
+  treasury to see each item. If the treasury goes below zero you borrow
+  automatically. That adds debt, and each time you borrow, inflation goes up.
+
+INFLATION and DEBT
+  Inflation falls on its own when you stop borrowing. It lowers living
+  standards and business confidence. Above 60 it becomes hyperinflation, a
+  crisis that hits stability. Debt has to be serviced every month. Very high
+  debt can turn into a debt crisis.
+
+INDUSTRY
+  Mostly from factories, multiplied by industrial technology and the ore in
+  your land. It is also the ceiling on how many arms you can make (see Kit).
+
+FOOD and THE GRAIN YEAR
+  Harvests vary: bumper, good, fair, poor or failed. Each March you get a
+  forecast for the harvest that arrives in September, and a bad year makes
+  the next one gentler. The Economy panel's Grain section lets you choose
+  what the surplus is for:
+    Export  stores 2 months; sells the surplus for gold. Best in normal years.
+    Feed    stores 4 months; the population grows faster and further.
+    Stock   stores a year; growth is slower, but this is the only policy that
+            gets you through a failed year without imports. Full granaries
+            sell part of their grain when the world price is high.
+  Grain has a world price. When harvests fail worldwide, imports get
+  expensive. Famine needs a bad year, empty granaries and no way to buy, and
+  you always get warning.
+
+PEOPLE
+  The population grows toward a ceiling set by your land (farmland most),
+  cities and the grain policy. People move with land: lose a province and
+  you lose the people living there.
+
+TROOPS
+  Your uncommitted pool. It refills toward your mobilisation level (a share
+  of the population, set on the War panel; the ceiling depends on your
+  recruitment law). Soldiers are taken out of the workforce, so a huge army
+  costs output. The Troops tooltip shows attack, defence and war weariness.
+
+STABILITY
+  Built from legitimacy plus the support of each faction, weighted by how
+  much power that faction has. Unrest and war weariness cut it. The tooltip
+  shows where it's heading.
+    Below 38: opposition movements can rise.
+    Below 33 for six months: an uprising can break out (new regimes get two
+      years' grace).
+    At 0 for most of a year: the state dissolves and the campaign ends.
+
+LEGITIMACY
+  Your system's right to rule. Each ideology draws on different sources
+  (elections, prosperity, tradition, charisma, revolutionary fervour,
+  victories...), weighted differently. The tooltip shows yours. Lose the
+  source you lean on most and stability follows.
+
+AUTHORITY
+  The currency of decisions. You spend it on laws, decisions, emergency
+  measures, conceding to factions and inner-circle actions. How fast it
+  comes back depends on your system. When it's full, an alert tells you to
+  spend it.
+
+
+PART 2 — POLITICS
+-----------------
+
+FACTION POWER vs SUPPORT
+  Power is how much a faction matters (from your country's structure:
+  factories give workers power, a big army gives the military power, and so
+  on). Support is what it thinks of you. A hostile faction with no power is
+  an annoyance. A hostile faction with a quarter of the power will end you.
+  "Concede" buys support for gold and authority, once every 18 months.
+
+CENSORSHIP AND WHAT YOU'RE SHOWN
+  Under a press law with censorship, the support figures you see for your own
+  factions are biased. They look better than the truth. You trade accurate
+  information for calm. Other countries' numbers aren't biased that way.
+
+DRIFT
+  Every regime slowly slides toward another system, driven by specific
+  pressures (listed on the State panel). You can remove the causes, or
+  embrace the change on your own terms before it embraces you. When a drift
+  reaches 70 you get a warning dispatch.
+
+ELECTIONS, VOTES AND THE BODY
+  Systems with a parliament, congress or council make you win votes for laws
+  and for offensive wars. Losing an election isn't a defeat: the country
+  carries on under new management. Defensive wars never need a vote.
+
+UNREST AND OPPOSITION MOVEMENTS
+  Every province has unrest. It's raised by poor living standards, low
+  stability, famine, war weariness, strikes, and being occupied rather than
+  core land. Provinces can grow an opposition movement of another ideology
+  (the Opposition map mode, C, shows them). Strong movements in unstable
+  states can rise in revolt or start a civil war.
+
+OCCUPIED LAND AND INTEGRATION
+  Land you conquer is not core land at first. It shows an integration
+  percentage. Until it reaches 100% it adds unrest and can break away or
+  restore its old state. Hold it peacefully and it integrates.
+
+THE INNER CIRCLE (REGIME PANEL, KEY I)
+  Five seats: army, police, economy, ideology and foreign affairs. Each
+  figure has competence, loyalty, ambition and a leaning. A capable, loyal
+  figure strengthens their seat. A disloyal one works against you, and one
+  who leans toward another ideology pulls your drift that way. Ambitious,
+  disloyal figures plot. You can win them over, name an heir, purge, recall
+  or dismiss them, which costs gold or authority. Successions go to the heir
+  or the strongest figure.
+
+SESSIONS AND LINES
+  Every few years your system holds a session (party congress, imperial
+  council, a new government programme after an election...). You choose one
+  of three "lines": lasting modifiers plus loyalty from the figures who agree
+  with it.
+
+COUPS
+  A coup is a plot that grows through three stages: grumbling, meetings, a
+  date. Your security law, security budget and police chief decide how
+  likely you are to find a plot at each stage. Found plots give you options:
+  purge, buy off, reassign units, arrest, concede or watch. A content army
+  (military support 60 or more) almost never plots on its own.
+  If a coup starts, the dispatch shows the real odds and you play out four
+  days of choices. Lose and you can still fight on from the provinces, go
+  into exile, or serve the new regime.
+
+DOCTRINES AND LEADERS
+  Every ideology has a signature gauge (shown on the State panel) with its
+  own actions, a war trait and a special war order. Mastering the doctrine
+  (through its ideology programme tree) makes it stronger. Leaders carry
+  traits that shift both their bonuses and how the AI behaves.
+
+DESTINIES AND IDENTITY
+  Some programmes are destinies: they rename your state, change its flag and
+  leader, and open a new programme tree of their own. One destiny per state.
+  If you later change your system of government, the destiny lapses and the
+  old name returns. The Nation screen (click your flag in the top band) shows
+  your motto, anthem, epithets and history.
+
+EMERGENCY MEASURES
+  Short programmes that appear when a specific trouble hits (bankruptcy,
+  famine, a failing front...). Starting one shelves your current programme,
+  which resumes when the measure finishes.
+
+
+PART 3 — WAR, BEYOND THE BASICS
+-------------------------------
+
+SIZE MATTERS BOTH WAYS
+  A sprawling state (over 7% of the world's land) is overstretched: less
+  output, weaker attacks, more unrest. A small one (under 3.5%) runs well:
+  better efficiency, science, trade and defence. A much weaker defender
+  fights as a nation in arms and defends up to 35% better.
+
+WHAT YOU COMMIT CAN'T DEFEND
+  Troops you commit to an attack leave the pool. An empty pool makes every
+  one of your tiles cheap to take. Keep a reserve.
+
+KIT (EQUIPMENT)
+  Kit 100% means as much equipment per soldier as the world's average army.
+  It multiplies attack (and defence a little less). Your army draws on an
+  arsenal, which fills from the arms budget (capped by your factories),
+  arms bought from friendly partners, and depots captured with enemy cities
+  and factories. War drains it: every month you fight, every soldier lost,
+  every barrage. Fill the arsenal before a war, and bomb the enemy's
+  factories so theirs can't refill.
+
+WAR WEARINESS
+  Rises while you fight and lose people. It cuts stability and living
+  standards, and above about 55 you'll be offered peace feelers. It falls
+  faster in peace.
+
+POSTURE
+  Offensive, Balanced, Dig in or Elastic defence, on the war bar. An elastic
+  defence gives ground slowly and makes every enemy tile expensive.
+  Changing posture costs 20 days of reorganisation.
+
+ATTACK STYLES
+  Each style trades speed for losses. Siege ignores most of a fortress,
+  infiltration ignores half of it. Some styles are only allowed under some
+  systems. The War page of the Handbook lists them all.
+
+OBJECTIVES
+  Select an enemy city or capital and press "Make this the objective". The
+  front becomes a spearhead toward it: 10% faster, a little costlier on its
+  flanks, and good at cutting off pockets. Taking it costs the enemy troops,
+  stability and morale, and your attack surges for three weeks.
+
+SUPPLY, POCKETS AND ENCIRCLEMENT
+  The Supply map (B) shows three states: supplied by land (joined to your
+  capital), supplied by sea (through a port or a beachhead), and cut off.
+  Cut-off land with an enemy next to it surrenders within about 40 days,
+  along with the troops in it. Encircled pockets are outlined in red with a
+  countdown. Prisoners are held until the peace, and six in ten come home.
+
+FORTRESSES
+  A fort covers every tile within 6. At full condition attackers there
+  advance much slower and lose far more men. Shelling and bombing also kill
+  fewer troops under fort cover.
+
+BUILDING CONDITION
+  Every building has a condition from 0 to 100%, and what it does scales with
+  it. Land taken in war damages its buildings; artillery, bombing, missiles
+  and the bomb damage more. Repairs are automatic and paid from the treasury,
+  slower at war. A wreck (0%) does nothing until rebuilt for half its price.
+
+LANDINGS AND SETTLING
+  Naval landings need a port. Select an enemy coast and choose a landing.
+  Sea power (ports, naval programmes, technology) decides how much of the
+  convoy survives. Empty islands can be settled: select an unclaimed coast
+  and press Settle. The button shows the cost and travel time.
+
+ARTILLERY, BOMBING AND THE BOMB
+  Barrages and bombing raids cost gold and have cooldowns. They kill troops
+  in a radius and damage buildings (bombing is best against factories and
+  ports). The atomic programme needs military technology, working factories,
+  and a share of your revenue for years. Other countries' intelligence learns
+  of it halfway through. Warheads need silos. A bomb destroys everything in
+  its radius and poisons the land for years.
+
+CAPITULATION AND PEACE TERMS
+  A state that loses its capital and two thirds of its land capitulates: you
+  can annex it, install your system, or take an indemnity. Negotiated peace
+  terms depend on the winner's ideology family:
+    Liberal        reparations, and bases if you won clearly
+    Conservative   tribute: a share of the loser's revenue for ten years
+    Socialist / anarchist  your movement is planted in the loser
+    others         land only
+  After a peace, a truce lasts eight years.
+
+THREAT AND COALITIONS
+  Wars of conquest, especially without a casus belli, raise your threat.
+  High threat lets others declare war on you with a "containment" or
+  "coalition" justification, and coalitions form against the runaway power.
+
+
+PART 4 — THE WORLD AROUND YOU
+-----------------------------
+
+OPINION, TREATIES AND BLOCS
+  Opinion runs from −100 to +100 and is driven mostly by how close your
+  ideologies are. Trade treaties pay both sides; the route's value depends on
+  distance, ports and ideological fit (planned and market economies trade
+  less well together). Blocs call their members to defend each other.
+
+DEPENDENCIES AND SOVEREIGNTY (KEY U)
+  A dependency (vilayet, protectorate, mandate, treaty state, client) pays
+  its overlord a share of revenue, and the overlord can veto its wars and
+  laws. Resistance grows over time. At 80 or more the country can rise. You
+  can also petition for a treaty, or wait for the overlord to weaken.
+
+OIL
+  Oil fields are found over time and pay well, especially after the oil shock
+  of the 1970s. Foreign companies may hold concessions. Nationalising them
+  angers the company's home state, which may accept compensation, embargo
+  you, plot a coup or invade.
+
+THE SLUMP
+  Somewhere around 1927 to 1933 a world depression hits. Trade falls,
+  business confidence collapses and market economies suffer most. Individual
+  countries can also fall into their own slumps when confidence is low.
+
+FORTUNE
+  The game avoids long runs of bad news. After a string of disasters, good
+  dispatches become more likely.
+
+
+PART 5 — DISPATCHES, REPORTS AND THE PAPER
+------------------------------------------
+
+THE DISPATCH TRAY
+  Urgent dispatches (crises, history) stop the clock. Ordinary ones wait at
+  the left of the map while time runs. Leave one for three months and your
+  ministers settle it for you. You can make every dispatch stop the clock in
+  Settings.
+
+THE REPORT (R)
+  Ranked problems with their causes and one-click fixes. Urgent items light
+  up the Report tab and add an alert.
+
+THE WORLD DISPATCH
+  A newspaper with stories from other countries: revolutions, wars, coups,
+  new programmes. It's the easiest way to notice a neighbour turning hostile.
+  Settings decide how often it pops up.
+
+PROPAGANDA BANNERS
+  Under an absolute monarch or a personal dictator, a banner of slogans
+  sweeps across the map now and then, more often as the cult grows. You can
+  switch it off in Settings.
+
+
+PART 6 — WINNING AND LOSING
+---------------------------
+
+  You win by:
+    Domination    holding 55% of the world's land
+    Ideological   60% of the world's people under your ideology's family,
+                  with you as its largest state
+    Hegemony      35% of world output plus trade treaties with most of the
+                  world, held for five years
+    Grand objective  each ideology has its own (see the Handbook)
+  If nobody has won by 1976, history gives a verdict by score.
+
+  A victory doesn't end the game. You can keep playing past it, past 1976,
+  and past a coup or revolution that leaves your country alive.
+
+  You lose when your state is conquered, a coup you resisted succeeds and
+  you don't fight on, you lose a civil war, or stability sits at zero for
+  most of a year and the country falls apart.
+
+
+PART 7 — MAP MODES AND KEYS
+---------------------------
+  Z political · X ideology · C opposition · V unrest · B supply · N terrain
+  R report · G state · E economy · L laws · P programme · M war · F foreign
+  O world · I regime · U sovereignty · H handbook
+  Space pause · 1–5 speed · Enter attack the selected enemy · Esc close/menu
+  On a touch screen: tap to select, double-tap to attack or expand, press and
+  hold anything to have it explained.
