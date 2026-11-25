@@ -164,7 +164,7 @@
   N.Tyrrha = {
     ideo: 'merchant', leader: ['Elias Boustani', 61, ['diplomat', 'corrupt'], 'President of the Council'],
     cast: [['tannoury', 'army', 'General Fadi Tannoury', 'junta', 2, 58, 60, 50], ['tabet', 'police', 'Selim Tabet', 'merchant', 2, 64, 45, 53],
-      ['sursoq', 'economy', 'Nicolas Sursoqi', 'merchant', 3, 70, 40, 58], ['jaafari', 'ideology', 'Imam Musa Jaafari', 'revival', 2, 54, 72, 44], ['khoury', 'foreign', 'Charles Khoury', 'liberal', 3, 68, 45, 47]],
+      ['sursoq', 'economy', 'Nicolas Sursoqi', 'merchant', 3, 70, 40, 58], ['jaafari', 'ideology', 'Preacher Musa Jaafari', 'revival', 2, 54, 72, 44], ['khoury', 'foreign', 'Charles Khoury', 'liberal', 3, 68, 45, 47]],
     names: [['Elias', 'Selim', 'Camille', 'Rashid', 'Kamal', 'Pierre', 'Riad', 'Sabri', 'Fuad', 'Musa'], ['Boustani', 'Tabet', 'Khoury', 'Haddad', 'Salam', 'Frangieh', 'Chamoun', 'Karami', 'Arslan', 'Eddé']],
     q: { name: 'The National Pact', low: 'Every confession for itself', high: 'One Tyrrhan nation', init: 52,
       desc: 'Seventeen confessions share one mountain and one harbour by an unwritten pact: the presidency to one, the premiership to another, the speaker’s chair to a third, and a census that nobody dares take because it would show who has grown. It works as long as nobody counts.',
@@ -204,7 +204,7 @@
       ],
       hi: 'nq_sa_hi', hiAt: 82, lo: 'nq_sa_lo', loAt: 8 },
   };
-  ev({ id: 'nq_sa_hi', title: 'Zealots in the holy mosque', text: 'Two hundred armed zealots have seized the great mosque at dawn prayers and proclaimed that the house has betrayed the faith for foreign money. Their leader names a redeemer. The preachers must decide whether to bless an assault on the holiest place in the kingdom.',
+  ev({ id: 'nq_sa_hi', title: 'Zealots in the holy shrine', text: 'Two hundred armed zealots have seized the great shrine at dawn prayers and proclaimed that the house has betrayed the faith for foreign money. Their leader names a redeemer. The preachers must decide whether to bless an assault on the holiest place in the kingdom.',
     opts: [
       { label: 'Storm it, with the preachers’ blessing', tip: 'The blessing will be given, and its price will be paid for a generation: every reform since the oil is reversed.', fx: [['nq', -25], ['sup', 'clergy', 10], ['mod', 'sci', -0.06, 120, 'The reforms reversed'], ['stab', -4]] },
       { label: 'Storm it with foreign commandos', fx: [['nq', 5], ['sup', 'clergy', -15], ['opAll', -4], ['drift', 'revival', 15]] },
@@ -218,7 +218,7 @@
   N.Zandar = {
     ideo: 'conmon', leader: ['Kaveh Mirza', 46, ['ailing', 'spendthrift'], 'Shah'],
     cast: [['bakhtar', 'army', 'General Teymour Bakhtar', 'junta', 2, 52, 80, 47], ['daneshvar', 'police', 'Farrokh Daneshvar', 'absmon', 2, 70, 45, 51],
-      ['amini', 'economy', 'Davud Amini', 'liberal', 3, 58, 55, 49], ['lankarani', 'ideology', 'Ayatollah Kazem Lankarani', 'revival', 3, 40, 70, 56], ['nakhjavan', 'foreign', 'Firuz Nakhjavan', 'conmon', 2, 66, 40, 53]],
+      ['amini', 'economy', 'Davud Amini', 'liberal', 3, 58, 55, 49], ['lankarani', 'ideology', 'Grand Jurist Kazem Lankarani', 'revival', 3, 40, 70, 56], ['nakhjavan', 'foreign', 'Firuz Nakhjavan', 'conmon', 2, 66, 40, 53]],
     names: [['Firuz', 'Davud', 'Teymour', 'Kaveh', 'Bahram', 'Hossein', 'Ali', 'Mehdi', 'Karim', 'Abbas'], ['Bakhtar', 'Amini', 'Daneshvar', 'Nakhjavan', 'Farmanfarma', 'Qavam', 'Esfandiari', 'Zahedi', 'Ghaffari', 'Sanjabi']],
     q: { name: 'The Oil and the Throne', low: 'The shah’s oil', high: 'The nation’s oil', init: 30,
       desc: 'A Norvish company holds the oil by a concession signed in 1909 by a shah who needed money for a trip abroad. The parliament that the revolution of 1906 created says the oil belongs to the nation; the court says the nation is the shah. Whoever wins this argument will rule Zandar.',
@@ -286,7 +286,7 @@
 
   // 1912 Zandar: the concession
   add({ id: 'st_ol_concession', date: [1912, 5], nation: 'Zandar' });
-  story({ id: 'st_ol_concession', title: 'Sixty years for everything under the ground', text: 'The Norvish company whose concession of 1909 covers all of Zandar’s oil has struck the largest field yet found. The parliament discovers that the shah who signed it sold sixty years of the nation’s wealth for the price of a European holiday. The company offers a larger royalty. The deputies want the concession torn up.',
+  story({ id: 'st_ol_concession', title: 'Sixty years for everything under the ground', text: 'The Norvish company whose concession of 1909 covers all of Zandar’s oil has struck the largest field yet found. The parliament discovers that the shah who signed it sold sixty years of the nation’s wealth for the price of a holiday abroad. The company offers a larger royalty. The deputies want the concession torn up.',
     opts: [
       { label: 'Confirm the concession', hist: 1, sf: 'concession_kept', tip: 'A better royalty and Norvik’s friendship. The deputies will not forget.', fx: [['gold', 140], ['op', 'Norvik', 15], ['nq', -6], ['particip', -6]] },
       { label: 'Tear it up', sf: 'concession_torn', tip: 'The oil becomes the nation’s, forty years early. Norvik will answer.', fx: [['oil', 'nationalise'], ['nq', 18]] },
@@ -361,7 +361,7 @@
       { label: 'Petition the League of nations', sf: 'petition20', fx: [['dep', 'res', 6], ['legitmod', 4, 60, 'The petition'], ['opAll', 3]] },
       { label: 'Keep order for the mandate', sf: 'loyal20', tip: 'Rewarded by Norvik; remembered by everyone else.', fx: [['dep', 'res', -15], ['gold', 90], ['sup', 'clergy', -10], ['figLoy', 'army', -10]] },
     ] });
-  pre('st_ol_revolt', 2, 'Unrest on the two rivers', 'The Norvish administration in Baskhar has raised taxes to pay for itself and posted British-trained political officers to the tribal districts. The holy cities are full of preachers who say a foreign Christian government cannot command believers. A Norvish officer has been shot at a ford.');
+  pre('st_ol_revolt', 2, 'Unrest on the two rivers', 'The Norvish administration in Baskhar has raised taxes to pay for itself and posted Norvish-trained political officers to the tribal districts. The holy cities are full of preachers who say a foreign unbelieving government cannot command believers. A Norvish officer has been shot at a ford.');
 
   // 1920 Varanth: the treaty that promised Dersa a state
   add({ id: 'st_ol_sevres', date: [1920, 8], nation: 'Varanth', cond: (G) => { const v = by(G, 'Varanth'); return v && is(v, 'absmon', 'conmon'); } });
@@ -551,7 +551,7 @@
   add({ id: 'st_ol_landing', date: [1958, 7], nation: 'Tyrrha', cond: (G) => { const t = by(G, 'Tyrrha'); return t && !t.civil && !is(t, 'pannat', 'thirdpos'); } });
   story({ id: 'st_ol_landing', title: 'The landing on the beach', text: 'Half of Tyrrha wants to join the United Republic and half wants nothing to do with it, and both halves have taken up arms in the old quarter of the capital. The President has asked Cassine for help. Cassine’s marines can be on the beach in thirty-six hours, among the sunbathers.',
     opts: [
-      { label: 'Call in the marines', hist: 1, sf: 'landing', tip: 'Calm by Christmas, a Cassinese base, and a quarrel postponed rather than settled.', fx: [['dep', 'bind', 'Cassine', 'client'], ['nq', 8], ['mod', 'unrest', -6, 24, 'The marines'], ['opAll', -3]] },
+      { label: 'Call in the marines', hist: 1, sf: 'landing', tip: 'Calm by midwinter, a Cassinese base, and a quarrel postponed rather than settled.', fx: [['dep', 'bind', 'Cassine', 'client'], ['nq', 8], ['mod', 'unrest', -6, 24, 'The marines'], ['opAll', -3]] },
       { label: 'A new president from the army', sf: 'landing_general', tip: 'The commander of the army, trusted by every confession because he has never had an opinion.', fx: [['nq', 12], ['sup', 'military', 8], ['figLoy', 'army', 10]] },
       { label: 'Join the United Republic', sf: 'landing_union', can: (n) => (n.nq && n.nq.v < 45 ? '' : 'Too many Tyrrhans would fight it.'), fx: [['ideology', 'pannat', 'revolution'], ['union'], ['nq', -20]] },
     ] });
@@ -574,7 +574,7 @@
       }
       const ns = by(G, 'Neshar'); if (ns) { ns.glory = Math.min(100, ns.glory + 25); ns.flags.occupier = 1; ID.addMod(ns, 'unrest', 4, 240, 'The occupied territories'); }
     } });
-  now('st_ol_naksa', 'The defeat that changed everything', 'Six days, and the map of the Old Lands is redrawn again. The pan-national regimes that promised to liberate Amaran have lost the rest of it, and their own deserts besides. The President of Khemra has offered his resignation on television, and a million people in the streets have refused it; but something has broken that a crowd cannot mend. In the mosques, the preachers say the nation failed because it forgot the faith. Young men are listening.', { art: 'crisis' });
+  now('st_ol_naksa', 'The defeat that changed everything', 'Six days, and the map of the Old Lands is redrawn again. The pan-national regimes that promised to liberate Amaran have lost the rest of it, and their own deserts besides. The President of Khemra has offered his resignation on television, and a million people in the streets have refused it; but something has broken that a crowd cannot mend. In the shrines, the preachers say the nation failed because it forgot the faith. Young men are listening.', { art: 'crisis' });
 
   // 1973 world: the embargo
   add({ id: 'st_ol_embargo', date: [1973, 10], title: 'The oil weapon', cond: (G) => !!by(G, 'Sahrem'),
@@ -593,15 +593,15 @@
   pre('st_ol_marshes', 3, 'Shots across the waterway', 'Patrol boats of Baskhar and Zandar have exchanged fire on the waterway that divides them, for the third time this year. Each government accuses the other of arming its minorities; both are right. Arms dealers from four countries are staying in the same hotel in the Baskhari capital.');
   // 1975 Tyrrha: the sectarian war
   add({ id: 'st_ol_bus', date: [1975, 4], nation: 'Tyrrha', cond: (G) => { const t = by(G, 'Tyrrha'); return t && !t.civil && t.nq && t.nq.v < 60; } });
-  story({ id: 'st_ol_bus', title: 'The bus at the crossroads', text: 'Gunmen of one confession have fired on a church congregation; gunmen of the other have stopped a bus at a crossroads and killed everyone on it. The militias have come out with all their weapons. The army is splitting along the same lines as the country. Whatever you do, Tyrrha will not be the same for fifteen years; the question is only how much of it is left.',
+  story({ id: 'st_ol_bus', title: 'The bus at the crossroads', text: 'Gunmen of one confession have fired on a temple congregation; gunmen of the other have stopped a bus at a crossroads and killed everyone on it. The militias have come out with all their weapons. The army is splitting along the same lines as the country. Whatever you do, Tyrrha will not be the same for fifteen years; the question is only how much of it is left.',
     opts: [
       { label: 'The militias fight it out', hist: 1, sf: 'bus_war', tip: 'Civil war. Every neighbour will arm its own side.', fx: [['civilwar', 'revival', 0.4], ['nq', -20]] },
       { label: 'The army takes the barracks and the radio', sf: 'bus_army', tip: 'If the army holds together, a junta can stop it. If not, there will be two armies.', fx: [['ideology', 'junta', 'coup'], ['nq', 8], ['mod', 'unrest', 8, 36, 'Martial law']] },
       { label: 'Ask a neighbour to keep the peace', sf: 'bus_varanth', tip: 'Varanth’s army will come, will stop the war, and will not leave.', fx: [['dep', 'bind', 'Varanth', 'protectorate'], ['nq', 10], ['legitmod', -10, 120, 'Foreign peacekeepers']] },
     ] });
-  // 1975 Zandar: the turbans
+  // 1975 Zandar: the preachers
   add({ id: 'st_ol_turbans', date: [1975, 11], nation: 'Zandar', cond: (G) => { const z = by(G, 'Zandar'); return z && is(z, 'absmon', 'conmon', 'junta'); } });
-  story({ id: 'st_ol_turbans', title: 'The turbans', text: 'A year of strikes, marches and funerals that became new marches. The oil workers are out, the bazaar is shut, and a million people in the capital are chanting the name of a preacher in exile. The shah is ill; his generals are divided; his foreign friends are making contingency plans. The preacher’s representatives say he will return the day the shah leaves.',
+  story({ id: 'st_ol_turbans', title: 'The preachers', text: 'A year of strikes, marches and funerals that became new marches. The oil workers are out, the bazaar is shut, and a million people in the capital are chanting the name of a preacher in exile. The shah is ill; his generals are divided; his foreign friends are making contingency plans. The preacher’s representatives say he will return the day the shah leaves.',
     opts: [
       { label: 'The shah leaves', hist: 1, sf: 'turbans', tip: 'The religious revolution: the oil, the bases and the old regime’s generals all go together.', fx: [['ideology', 'revival', 'revolution'], ['oil', 'nationalise'], ['fn', (G, n) => { if (n.dep) ID.Sov.free(G, n, 'rising'); }]] },
       { label: 'The army fires on the crowds', sf: 'turbans_fire', tip: 'It may work. It did not work in any of the other places where it was tried.', fx: [['ideology', 'junta', 'coup'], ['stab', -15], ['drift', 'revival', 25], ['grievance', 20]] },
@@ -646,7 +646,7 @@
   const SUP = {
     st_ol_mandates: { quote: 'We were promised a kingdom. We were given a mandate. The difference is the width of a pencil line.', by: 'a delegate of the two rivers, outside the conference hall', text: 'The victors divide the provinces of a dead empire among themselves, in trust for peoples who were not asked. Lines drawn this summer will be fought over for a century.', ok: 'It is decided elsewhere', sound: 'stamp', art: 'wall' },
     st_ol_partition: { quote: 'We locked the door and took the key. We would be back in a week.', by: 'a refugee from the coast, fifty years later', text: 'One people gets a state at last, after the worst persecution in its history. Another loses its villages, its fields and its homes, and becomes a people of camps and keys. Both will remember this day, under different names.', ok: 'There is no good answer', sound: 'alarm', art: 'crowd' },
-    st_ol_naksa: { quote: 'We lost more than a war. We lost the idea that we would win.', by: 'a poet of the Old Lands, 1967', text: 'Six days end the dream of the secular nation. The officers who promised liberation have delivered defeat, and a generation turns away from them toward the mosque.', ok: 'Mourn the dream', sound: 'alarm', art: 'crisis' },
+    st_ol_naksa: { quote: 'We lost more than a war. We lost the idea that we would win.', by: 'a poet of the Old Lands, 1967', text: 'Six days end the dream of the secular nation. The officers who promised liberation have delivered defeat, and a generation turns away from them toward the shrine.', ok: 'Mourn the dream', sound: 'alarm', art: 'crisis' },
     st_ol_embargo: { quote: 'For a century they told us what our oil was worth. This month we told them.', by: 'an oil minister of the Old Lands', text: 'The price of oil quadruples. The industrial world queues at its pumps, and the Old Lands discover that they have a weapon, and that it cuts both ways.', ok: 'The world has changed', sound: 'stamp', art: 'industry' },
   };
   for (const b of ID.STORY) if (SUP[b.id]) b.sup = SUP[b.id];

@@ -41,7 +41,7 @@
     ['freedom', 'The new freedom', 'Freedom from the trusts as well as from the state.', [['nq', -10], ['sup', 'workers', 6], ['mod', 'ls', 2, PERM, 'The new freedom']]],
     ['gilded', 'The gilded age', 'Railroads, steel and oil, and no questions asked of the men who build them.', [['nq', 10], ['mod', 'prod', 0.06, PERM, 'The gilded age'], ['sup', 'capital', 8]]],
     ['security', 'Social security', 'An old-age pension and unemployment insurance for every worker.', [['nq', -10], ['mod', 'ls', 2, PERM, 'Social security'], ['mod', 'stab', 2, PERM, 'Social security']]],
-    ['mass', 'Mass production', 'The assembly line in every industry, and five dollars a day to the men who work it.', [['nq', 6], ['mod', 'prod', 0.06, PERM, 'Mass production'], ['mod', 'eff', 0.03, PERM, 'Mass production']]],
+    ['mass', 'Mass production', 'The assembly line in every industry, and double wages for the men who work it.', [['nq', 6], ['mod', 'prod', 0.06, PERM, 'Mass production'], ['mod', 'eff', 0.03, PERM, 'Mass production']]],
     ['great', 'The great society', 'An end to poverty, written into the budget.', [['nq', -15], ['mod', 'stab', 4, PERM, 'The great society'], ['mod', 'legit', 4, PERM, 'The great society'], ['mod', 'growth', 0.1, PERM, 'The great society']]],
     ['arsenal', 'The arsenal of the world', 'Cassine builds what the world needs, including the world’s wars.', [['nq', 10], ['mod', 'prod', 0.08, PERM, 'Arsenal of the world'], ['mod', 'atk', 0.06, PERM, 'Arsenal of the world'], ['equip', 0.1]]],
   ]);
@@ -84,14 +84,14 @@
   proj('Lys', 'ly', [
     ['arsenal', 'The Arsenal of Lys', 'Three thousand shipwrights, a galley a day, a cruiser a month.', [['mod', 'def', 0.05, PERM, 'Arsenal of Lys']]],
     ['freeport', 'The free port of the straits', 'No dues for ships that stop to trade, only for ships that pass.', [['nq', -15], ['mod', 'trade', 0.12, PERM, 'Free port']]],
-    ['tollhouse', 'The great toll-house', 'A customs house the size of a cathedral, and an account for every flag.', [['nq', 15], ['mod', 'rev', 0.08, PERM, 'Great toll-house']]],
+    ['tollhouse', 'The great toll-house', 'A customs house the size of a great temple, and an account for every flag.', [['nq', 15], ['mod', 'rev', 0.08, PERM, 'Great toll-house']]],
     ['bank', 'The Bank of the Straits', 'Lend to every power that sails through, at a rate it cannot refuse.', [['nq', -6], ['mod', 'rev', 0.05, PERM, 'Bank of the Straits'], ['gold', 150]]],
     ['batteries', 'The shore batteries', 'Guns on both shores, ranged on every channel.', [['nq', 8], ['mod', 'def', 0.10, PERM, 'Shore batteries']]],
     ['crossroads', 'Crossroads of the world', 'Every road between the continents runs through the market of Lys.', [['nq', -15], ['mod', 'trade', 0.12, PERM, 'Crossroads of the world'], ['opAll', 10]]],
     ['keys', 'The keys of two continents', 'Lys holds the gate, and the gate is shut until Lys says otherwise.', [['nq', 15], ['mod', 'rev', 0.10, PERM, 'Keys of two continents'], ['mod', 'def', 0.08, PERM, 'Keys of two continents']]],
   ]);
   proj('Karsova', 'ka', [
-    ['goelro', 'The electrification plan', 'Power stations on every river: communism is soviet power plus electricity.', [['mod', 'prod', 0.04, PERM, 'Electrification']]],
+    ['goelro', 'The electrification plan', 'Power stations on every river: communism is council power plus electricity.', [['mod', 'prod', 0.04, PERM, 'Electrification']]],
     ['collect', 'Total collectivisation', 'Every farm into the collective by the spring sowing.', [['nq', -20], ['gold', 150], ['mod', 'prod', 0.06, PERM, 'Collectivisation'], ['sup', 'peasants', -10]]],
     ['nep', 'The new economic policy', 'A tax in kind, a free market for the rest, and patience.', [['nq', 15], ['mod', 'food', 0.06, PERM, 'New economic policy'], ['mod', 'ls', 2, PERM, 'New economic policy']]],
     ['steel', 'The steel city', 'A city of a quarter of a million on an empty steppe, around a single blast furnace.', [['nq', -5], ['mod', 'prod', 0.08, PERM, 'The steel city']]],
@@ -122,7 +122,7 @@
     ['world', 'The world market', 'Buy abroad what is cheaper abroad, and sell the world machines.', [['nq', -5], ['mod', 'trade', 0.10, PERM, 'World market'], ['opAll', 5]]],
     ['ersatz', 'Ersatz industry', 'Fuel from coal, rubber from lime, fibre from wood.', [['nq', 15], ['mod', 'prod', 0.04, PERM, 'Ersatz industry']]],
     ['chem', 'The chemical cartel', 'Six firms, one cartel, the finest laboratories on either continent.', [['mod', 'prod', 0.06, PERM, 'Chemical cartel'], ['mod', 'sci', 0.05, PERM, 'Chemical cartel']]],
-    ['reserve', 'The strategic reserve', 'Oil in the salt mines, ore in the forests, rubber in the cathedrals.', [['nq', 20], ['mod', 'def', 0.05, PERM, 'Strategic reserve']]],
+    ['reserve', 'The strategic reserve', 'Oil in the salt mines, ore in the forests, rubber in the great temples.', [['nq', 20], ['mod', 'def', 0.05, PERM, 'Strategic reserve']]],
     ['workshop', 'The workshop of the east', 'Hesperia makes what the eastern continent uses, and everyone pays in time.', [['mod', 'prod', 0.08, PERM, 'Workshop of the east'], ['mod', 'trade', 0.06, PERM, 'Workshop of the east'], ['mod', 'ls', 2, PERM, 'Workshop of the east']]],
     ['longwar', 'Ready for the long war', 'The next war will not be lost for want of oil.', [['nq', 25], ['mod', 'atk', 0.08, PERM, 'Long war'], ['mod', 'wePace', -0.15, PERM, 'Long war'], ['equip', 0.1]]],
   ]);
@@ -131,7 +131,7 @@
     ['national', 'The national oil company', 'The wells belong to the faithful, and so does the company.', [['nq', -20], ['mod', 'rev', 0.06, PERM, 'National oil company'], ['opAll', -4]]],
     ['consort', 'The consortium', 'Five foreign firms, one concession, a royalty paid in gold.', [['nq', 15], ['gold', 250], ['mod', 'prod', 0.04, PERM, 'Consortium']]],
     ['pipeline', 'The pipeline to the coast', 'Our oil, our pipe, our port.', [['mod', 'trade', 0.08, PERM, 'Pipeline'], ['mod', 'rev', 0.04, PERM, 'Pipeline']]],
-    ['royalty', 'The royalty fund', 'Every barrel pays for a school, a clinic or a mosque.', [['nq', 5], ['mod', 'ls', 2, PERM, 'Royalty fund'], ['gold', 150]]],
+    ['royalty', 'The royalty fund', 'Every barrel pays for a school, a clinic or a shrine.', [['nq', 5], ['mod', 'ls', 2, PERM, 'Royalty fund'], ['gold', 150]]],
     ['lamp', 'The lamp of the faithful', 'Oil lights the lamps of the faith across the world.', [['nq', -10], ['mod', 'legit', 5, PERM, 'Lamp of the faithful'], ['mod', 'def', 0.08, PERM, 'Lamp of the faithful'], ['sig', 10]]],
     ['petro', 'The petro-state', 'No taxes, no shortages, no questions.', [['nq', 10], ['mod', 'rev', 0.10, PERM, 'The petro-state'], ['mod', 'growth', 0.1, PERM, 'The petro-state']]],
   ]);

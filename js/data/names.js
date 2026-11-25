@@ -20,13 +20,13 @@
   };
 
   const FIRST = ['Aldric', 'Benno', 'Casimir', 'Dario', 'Emil', 'Farid', 'Gregor', 'Henrik', 'Ilya', 'Joren', 'Kemal', 'Lucan', 'Marek', 'Nadir', 'Oskar', 'Pavel', 'Quint', 'Rurik', 'Stefan', 'Tomas', 'Ulric', 'Viktor', 'Yusuf', 'Zoran', 'Anya', 'Brisa', 'Celia', 'Dara', 'Elin', 'Freya', 'Greta', 'Hana', 'Irena', 'Jana', 'Katya', 'Lena', 'Mira', 'Nora', 'Olga', 'Petra', 'Rosa', 'Sana', 'Tilda', 'Vera'];
-  const LAST = ['Varga', 'Kessler', 'Dorn', 'Halloran', 'Ivanek', 'Morrow', 'Castell', 'Brandt', 'Orlov', 'Sabine', 'Tarrant', 'Veld', 'Arkady', 'Lindqvist', 'Montague', 'Navarro', 'Okoro', 'Petrescu', 'Rahimi', 'Sokol', 'Tanaka', 'Ueda', 'Volkov', 'Weiss', 'Yilmaz', 'Zamora', 'Achebe', 'Barros', 'Chen', 'Dimitrov', 'Estrada', 'Falk', 'Grau', 'Hoxha', 'Ito', 'Jansen'];
+  const LAST = ['Varga', 'Kessler', 'Dorn', 'Halloran', 'Ivanek', 'Morrow', 'Castell', 'Brandt', 'Orlov', 'Sabine', 'Tarrant', 'Veld', 'Arkady', 'Lindqvist', 'Montague', 'Navarro', 'Okoro', 'Petrescu', 'Rahimi', 'Sokol', 'Tanaka', 'Ueda', 'Volkov', 'Weiss', 'Yilmaz', 'Zamora', 'Achebe', 'Barros', 'Chen', 'Dimitrov', 'Estrada', 'Falk', 'Grau', 'Haxen', 'Ito', 'Jansen'];
   const TITLES = {
     ml: 'General Secretary', trot: 'Chairman of the Council of Commissars', council: 'Speaker of the Congress', mao: 'Chairman', marketsoc: 'Premier', demsoc: 'Prime Minister',
     ansyn: 'Federation Secretary', ancom: 'Rotating Delegate', liberal: 'President', socdem: 'Chancellor', minarchy: 'First Citizen', conmon: 'Monarch', absmon: 'Emperor',
     theocracy: 'Supreme Guardian', agrarian: 'Elder of the Assembly', junta: 'General', corporatist: 'Head of Government', technocracy: 'Director-General', personalist: 'The Leader',
     merchant: 'Doge', cybernetic: 'Chief Co-ordinator', natpop: 'The Tribune', thirdpos: 'Chairman of the Command Council', pannat: 'Secretary of the Regional Command', revival: 'Guide of the Revolution',
-    juche: 'Great Leader', natsyn: 'National Chief', technosoc: 'Chairman of the Network', nrx: 'Chief Executive', ancap: 'Chair of Arbitration', natsoc: 'Führer', nazacc: 'Führer',
+    juche: 'Great Leader', natsyn: 'National Chief', technosoc: 'Chairman of the Network', nrx: 'Chief Executive', ancap: 'Chair of Arbitration', natsoc: 'Leader of the Movement', nazacc: 'Leader of the Movement',
   };
   ID.genLeader = (rng, ideo) => ({ name: rng.pick(FIRST) + ' ' + rng.pick(LAST), age: rng.int(38, 62), title: TITLES[ideo] || 'Head of State', traits: ID.rollTraits ? ID.rollTraits(rng, ideo) : [] });
   /* the sum of a leader's AI leanings: agg (war appetite), peace (willingness to settle), reform, purge */

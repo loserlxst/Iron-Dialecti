@@ -337,7 +337,7 @@ js/ui/main.js         boot, main loop, pointer and wheel input
 tools/                load.js (loads the sim in index.html's order), metrics.js (events, pacing, trees, tables),
                       simulate.js, soak.js, budget.js, probe.js, fates.js, history.js, encircle.js (pockets and
                       landings), coups.js (coup balance and the player's coup), forced.js (one state forced into an ideology),
-                      settle.js (settling islands by sea) (headless, Node)
+                      settle.js (settling islands by sea), inworld.js (no real-world references in the text) (headless, Node)
 ```
 
 The `sim` layer never touches the DOM, so whole campaigns run in Node for balance testing.

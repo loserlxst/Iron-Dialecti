@@ -38,8 +38,8 @@
   tree('trot', 'tr', [
     ['fourth', 'The Fourth International', 'A world party for a world revolution, with sections in every country that will have one.', [['sig', 10], seedAbroad(10, 3), ['note', 'Your movement grows in three hostile states']]],
     ['redarmy', 'The Red Army of the world', 'An army that belongs to no nation: its oath is to the international working class.', [['mod', 'atk', 0.05, PERM, 'Red Army of the world'], ['troops', 0.05], ['sig', 6]]],
-    ['soviets', 'Workers’ democracy', 'Rival platforms in every soviet, free elections in the unions, the bureaucrats on short contracts.', [['particip', 10], ['bureau', -10], ['sig', 4], ['mod', 'eff', 0.02, PERM, 'Workers’ democracy']]],
-    ['revwar', 'The doctrine of revolutionary war', 'Every offensive is a political campaign; every captured town gets a soviet the same day.', [['mod', 'atk', 0.04, PERM, 'Revolutionary war'], ['glory', 5]]],
+    ['soviets', 'Workers’ democracy', 'Rival platforms in every council, free elections in the unions, the bureaucrats on short contracts.', [['particip', 10], ['bureau', -10], ['sig', 4], ['mod', 'eff', 0.02, PERM, 'Workers’ democracy']]],
+    ['revwar', 'The doctrine of revolutionary war', 'Every offensive is a political campaign; every captured town gets a council the same day.', [['mod', 'atk', 0.04, PERM, 'Revolutionary war'], ['glory', 5]]],
     ['transit', 'The transitional programme', 'Demands that every worker understands and no capitalist can grant: a sliding scale of wages, control of production.', [['mod', 'prod', 0.04, PERM, 'Transitional programme'], ['sup', 'workers', 6]]],
     ['world', 'World revolution', 'The revolution is either international or it is nothing. This state is its first base, not its final shape.', [['sig', 10], seedAbroad(8, 4)]],
     ['south', 'The international of the south', 'The revolution moves to the countries where it was least expected and most needed.', [seedAbroad(12, 4), ['fervor', 10], ['note', 'Your movement grows in four hostile states']]],
@@ -151,7 +151,7 @@
     ['modern', 'The modern monarchy', 'Television in the palace, and the palace on television.', [['tradition', 6], ['mod', 'ls', 2, PERM, 'Modern monarchy']]],
   ]);
   tree('absmon', 'ab', [
-    ['durbar', 'The coronation durbar', 'Every prince, governor and bishop of the realm kneels in one great hall.', [['tradition', 10], ['sig', 10]]],
+    ['durbar', 'The coronation assembly', 'Every prince, governor and high priest of the realm kneels in one great hall.', [['tradition', 10], ['sig', 10]]],
     ['chancery', 'The imperial chancery', 'Ranks, uniforms and ministries, run from the sovereign’s own cabinet.', [['mod', 'eff', 0.04, PERM, 'Imperial chancery'], ['sup', 'bureaucracy', 6]]],
     ['guards', 'The guards’ privileges', 'The guards regiments are paid double and answer only to the throne.', [['sup', 'military', 8], ['mod', 'def', 0.05, PERM, 'Guards’ privileges']]],
     ['censor', 'The censor’s office', 'Every book, play and newspaper read before it is read.', [['mod', 'unrest', -4, PERM, 'The censor'], ['sup', 'intelligentsia', -6]]],

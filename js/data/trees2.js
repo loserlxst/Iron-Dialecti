@@ -70,7 +70,7 @@
       ['Self-management', 'Every enterprise run by an elected council, with a market between them.', [['mod', 'eff', 0.04, 240, 'Self-management'], ['particip', 6]]],
       ['Trade with all', 'Trade treaties with every bloc.', [n2('Cassine', 'treaty'), n2('Karsova', 'treaty')]]],
     ['The working commonwealth', 'A free federation that works: proof, it says, that the councils can last.', [['legitmod', 6, 120, 'The working commonwealth'], ['mod', 'ls', 3, 240, 'Self-management']]]);
-  br('Drava', 1946, ['The colonels’ accounts', 'Drava lost two wars in thirty years. The officers, the bishops and the émigrés each say they know why.', [['sup', 'military', 4]]],
+  br('Drava', 1946, ['The colonels’ accounts', 'Drava lost two wars in thirty years. The officers, the high priests and the émigrés each say they know why.', [['sup', 'military', 4]]],
     [['Revanche', 'Every lost province on the classroom map, and a new army to take them back.', [['claimsAll'], ['mod', 'atk', 0.05, 240, 'Revanche']]],
       ['The southern ally', 'A treaty with Varanth, the other loser of the century.', [n2('Varanth', 'treaty'), ['op', 'Varanth', 10]]],
       ['Mobilise the émigrés', 'The diaspora in every neighbouring state organised and funded.', [['subvertNb', 8]]]],
@@ -187,7 +187,7 @@
     ['The western republic', 'A member of the west, with its own ideas.', [['legitmod', 6, 120, 'The western republic'], ['mod', 'prod', 0.05, 240, 'Western markets']]],
     [['The eastern turn', 'Leave the alliance; trade with Karsova.', [n2('Karsova', 'treaty'), ['op', 'Cassine', -15]]],
       ['The Old Lands brotherhood', 'Lead the region instead of guarding its border.', [['op', 'Khemra', 12], ['op', 'Baskhar', 12], ['op', 'Sahrem', 12]]],
-      ['The pious revival', 'Let the mosques back into politics.', [['sup', 'clergy', 10], ['drift', 'revival', 8]]]],
+      ['The pious revival', 'Let the shrines back into politics.', [['sup', 'clergy', 10], ['drift', 'revival', 8]]]],
     ['Leader of the Old Lands', 'The old imperial capital speaks for the region again.', [['legitmod', 6, 120, 'Leader of the Old Lands'], ['glory', 10]]]);
   br('Khemra', 1965, ['The river and the millions', 'Thirty million people on the river, and a million more every year. The dam is not enough.', [['mod', 'food', 0.02, 240, 'Planning']]],
     [['Reclaim the desert', 'New valleys irrigated from the lake.', [['mod', 'food', 0.06, 240, 'Reclaimed desert']]],
@@ -220,7 +220,7 @@
     [['Reconstruction', 'After every war, the builders.', [['build', B.CITY, 1], ['mod', 'trade', 0.04, 240, 'Reconstruction']]],
       ['The airline', 'A national airline to three continents.', [['mod', 'trade', 0.05, 240, 'The airline']]],
       ['The university of the region', 'Students from every Old Lands state.', [['mod', 'sci', 0.05, 240, 'The university'], ['opAll', 3]]]],
-    ['The Paris of the Old Lands', 'Glamorous, fragile, and loved.', [['legitmod', 6, 120, 'The Paris of the Old Lands'], ['mod', 'trade', 0.06, 240, 'Glamour']]],
+    ['The Jewel of the Old Lands', 'Glamorous, fragile, and loved.', [['legitmod', 6, 120, 'The Jewel of the Old Lands'], ['mod', 'trade', 0.06, 240, 'Glamour']]],
     [['The militia state', 'Each confession its own state within the state.', [['nq', -15], ['mod', 'def', 0.06, 240, 'Militias']]],
       ['Foreign patrons', 'Each militia its own foreign friend.', [n2('Varanth', 'arms'), n2('Khemra', 'arms')]],
       ['The green line', 'A front through the capital.', [['mod', 'def', 0.08, 240, 'The green line'], ['mod', 'trade', -0.06, 240, 'The green line']]]],
@@ -230,7 +230,7 @@
       ['Desalination', 'Water from the sea.', [['mod', 'food', 0.06, 240, 'Desalination']]],
       ['Universities for the princesses', 'Women’s universities, over the scholars’ objections.', [['mod', 'sci', 0.05, 240, 'Women’s universities'], ['sup', 'clergy', -6]]]],
     ['The kingdom of tomorrow', 'Oil turned into a country.', [['legitmod', 6, 120, 'The kingdom of tomorrow'], ['mod', 'ls', 3, 240, 'Oil wealth']]],
-    [['The guardians of the faith abroad', 'Mosques and schools on three continents.', [['subvertNb', 6], ['sup', 'clergy', 8]]],
+    [['The guardians of the faith abroad', 'Shrines and schools on three continents.', [['subvertNb', 6], ['sup', 'clergy', 8]]],
       ['The religious police', 'Morals enforced in every street.', [['mod', 'unrest', -3, 240, 'The religious police'], ['sup', 'intelligentsia', -6]]],
       ['Aid for the brethren', 'Money for fighters of the faith abroad.', [n2('Amaran', 'aid'), ['opAll', -3]]]],
     ['The fortress of the faith', 'The faith is the state, and the state is rich.', [['legitmod', 6, 120, 'The fortress of the faith'], ['sup', 'clergy', 10]]]);
@@ -239,8 +239,8 @@
       ['The steel mill', 'Karsova builds it, the Shah opens it.', [n2('Karsova', 'treaty'), ['build', B.FACTORY, 2]]],
       ['The gendarme’s navy', 'A fleet for the gulf.', [['mod', 'navy', 0.4, 240, 'The gulf fleet']]]],
     ['The fifth power', 'In ten years, the Shah says.', [['legitmod', 6, 120, 'The fifth power'], ['mod', 'prod', 0.05, 240, 'Industry']]],
-    [['The bazaar republic', 'Let the merchants and the mosques run the economy.', [['sup', 'capital', 6], ['sup', 'clergy', 6]]],
-      ['Cooperatives of the faithful', 'Charity and credit through the mosques.', [['mod', 'ls', 2, 240, 'Charity']]],
+    [['The bazaar republic', 'Let the merchants and the shrines run the economy.', [['sup', 'capital', 6], ['sup', 'clergy', 6]]],
+      ['Cooperatives of the faithful', 'Charity and credit through the shrines.', [['mod', 'ls', 2, 240, 'Charity']]],
       ['Neither east nor west', 'Leave the alliance.', [['opAll', -3], ['sig', 10]]]],
     ['The independent plateau', 'Nobody’s gendarme.', [['legitmod', 6, 120, 'The independent plateau'], ['mod', 'def', 0.06, 240, 'Independence']]]);
 
@@ -258,7 +258,7 @@
     T.push({ id: pre + 'lb', name: b[0], desc: b[1], fx: b[2], x: 1, y: 5, days: 180, req: [last.id], excl: [pre + 'la'], year: 1958, ideos: [ideo] });
   };
   late('ml', ['The thaw', 'Rehabilitate the purged and let the poets publish.', [['sup', 'intelligentsia', 8], ['discipline', -6], ['mod', 'unrest', -3, 240, 'The thaw']]], ['Stability of cadres', 'Nobody is removed; nobody is promoted.', [['discipline', 8], ['mod', 'coup', -0.3, 240, 'Stability of cadres'], ['bureau', 6]]]);
-  late('trot', ['The world party', 'Sections in fifty countries.', [['subvertNb', 8], ['opAll', -4]]], ['The workers’ state reformed', 'Soviets with real elections.', [['particip', 10], ['sup', 'workers', 6]]]);
+  late('trot', ['The world party', 'Sections in fifty countries.', [['subvertNb', 8], ['opAll', -4]]], ['The workers’ state reformed', 'Councils with real elections.', [['particip', 10], ['sup', 'workers', 6]]]);
   late('council', ['The federation of federations', 'Councils linked across borders.', [['subvertNb', 6], ['particip', 6]]], ['Councils and computers', 'The plan computed by the councils.', [['mod', 'eff', 0.05, 240, 'Computed councils']]]);
   late('mao', ['Continuing revolution', 'Bombard the headquarters again.', [['fervor', 15], ['discipline', -10]]], ['Four modernisations', 'Agriculture, industry, defence, science.', [['mod', 'prod', 0.06, 240, 'Four modernisations'], ['fervor', -10]]]);
   late('marketsoc', ['Worker shareholders', 'Every worker owns shares in the firm.', [['sup', 'workers', 6], ['mod', 'prod', 0.04, 240, 'Shares']]], ['The open market', 'Competition between cooperatives.', [['mod', 'eff', 0.05, 240, 'Competition']]]);
@@ -268,7 +268,7 @@
   late('liberal', ['Deregulation', 'Fewer rules, more markets.', [['mod', 'prod', 0.05, 240, 'Deregulation'], ['sup', 'workers', -6]]], ['The civil liberties act', 'Rights entrenched.', [['sup', 'intelligentsia', 8], ['mod', 'legit', 3, 240, 'Rights']]]);
   late('socdem', ['The full welfare state', 'Cradle to grave.', [['mod', 'ls', 3, 240, 'Welfare state'], ['gold', -80]]], ['The third way', 'Markets with a conscience.', [['mod', 'conf', 6, 240, 'Third way'], ['sup', 'capital', 6]]]);
   late('minarchy', ['The charter cities', 'Cities run by companies.', [['mod', 'trade', 0.06, 240, 'Charter cities']]], ['The citizens’ militia', 'Every citizen armed.', [['mod', 'def', 0.08, 240, 'Citizen militia']]]);
-  late('ancap', ['Private space', 'Rockets built on contract, launched from a private pad, insured at Lloyd’s rates.', [['mod', 'sci', 0.06, 240, 'Private space'], ['gold', -100]]], ['The insurance state', 'Every risk priced, every resident insured, every agency audited by the insurers.', [['mod', 'unrest', -3, 240, 'The insurance state'], ['sig', 6]]]);
+  late('ancap', ['Private space', 'Rockets built on contract, launched from a private pad, insured at the exchange’s rates.', [['mod', 'sci', 0.06, 240, 'Private space'], ['gold', -100]]], ['The insurance state', 'Every risk priced, every resident insured, every agency audited by the insurers.', [['mod', 'unrest', -3, 240, 'The insurance state'], ['sig', 6]]]);
   late('conmon', ['The people’s monarchy', 'The crown on television.', [['tradition', 6], ['legitmod', 4, 120, 'The people’s monarchy']]], ['A crowned republic', 'The crown as a ceremony.', [['particip', 8], ['tradition', -6]]]);
   late('absmon', ['The white revolution', 'Reform from the throne.', [['mod', 'sci', 0.06, 240, 'Reform'], ['sup', 'clergy', -6]]], ['The eternal throne', 'Nothing changes.', [['tradition', 10], ['mod', 'coup', -0.2, 240, 'The guard']]]);
   late('theocracy', ['The council of scholars', 'Rule by the learned.', [['mod', 'eff', 0.04, 240, 'Scholars']]], ['Missions to the world', 'Preachers everywhere.', [['subvertNb', 6]]]);
@@ -287,7 +287,7 @@
   late('natsyn', ['The revolution postponed', 'The employers keep the syndicates.', [['sup', 'capital', 10], ['mod', 'conf', 6, 240, 'Peace with the employers'], ['drift', 'corporatist', 10]]], ['The second revolution', 'The squads march again.', [['fervor', 12], ['sup', 'capital', -8], ['sig', 8]]]);
   late('technosoc', ['The world network', 'Every revolution wired to every other.', [['sig', 12], ['subvertNb', 10]]], ['Fully automated socialism', 'The machines make abundance at home.', [['mod', 'ls', 3, 240, 'Automated abundance'], ['mod', 'prod', 0.05, 240, 'Automated abundance']]]);
   late('nrx', ['The patchwork', 'A hundred city-companies.', [['mod', 'trade', 0.08, 240, 'The patchwork'], ['drift', 'minarchy', 10]]], ['The machine sovereign', 'The board hands its decisions to its computers.', [['mod', 'eff', 0.06, 240, 'The machine sovereign'], ['mod', 'sci', 0.08, 240, 'The machine sovereign'], ['grievance', 6]]]);
-  late('natsoc', ['The new order', 'The conquered lands organised for the Reich.', [['mod', 'prod', 0.05, 240, 'The new order'], ['opAll', -6]]], ['The Leader’s succession', 'A successor named, and the party’s grip made permanent.', [['flag', 'heir'], ['mod', 'coup', -0.3, 240, 'The succession settled']]]);
+  late('natsoc', ['The new order', 'The conquered lands organised for the Realm.', [['mod', 'prod', 0.05, 240, 'The new order'], ['opAll', -6]]], ['The Leader’s succession', 'A successor named, and the party’s grip made permanent.', [['flag', 'heir'], ['mod', 'coup', -0.3, 240, 'The succession settled']]]);
   late('nazacc', ['Nothing left standing', 'Burn what cannot be held.', [['sig', 20], ['mod', 'prod', -0.1, 120, 'Nothing left standing']]], ['The last weapon', 'Everything into one final blow.', [['sig', 15], ['mod', 'atk', 0.1, 24, 'The last weapon'], ['gold', -200]]]);
 
   /* ================================================================ fewer flat steps */

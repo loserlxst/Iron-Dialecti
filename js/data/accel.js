@@ -368,6 +368,6 @@
     ] });
   E.push({ id: 'nz_ashes', sys: 1, tone: 'bad', sfx: 'defeat', kicker: 'The fire goes out',
     title: 'Ashes',
-    text: (n, G, c) => 'There was nothing left to burn. The surviving generals arrested the Bunker this morning and asked the enemy for terms; the radio, for the first time in years, played no anthem at all. What was ' + (c.was || 'the Reich') + ' is now ' + n.name + ', a ruin governed by officers who did not want it. The fire is out.',
+    text: (n, G, c) => 'There was nothing left to burn. The surviving generals arrested the Bunker this morning and asked the enemy for terms; the radio, for the first time in years, played no anthem at all. What was ' + (c.was || 'the Realm') + ' is now ' + n.name + ', a ruin governed by officers who did not want it. The fire is out.',
     opts: [{ label: 'It is over', fx: [] }] });
 })();

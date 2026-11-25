@@ -39,7 +39,7 @@
   add({ id: 'st_white_crown', date: [1919, 3], nation: 'Aurelia', cond: (G) => { const a = by(G, 'Aurelia'); return a && (a.ideo === 'absmon' || a.ideo === 'conmon') && !a.civil; } });
   story({ id: 'st_white_crown', title: 'The crown survives', text: 'The red flags are down, the councils dispersed, the ringleaders hanged or fled across the border. The court asks what kind of empire it has saved.',
     opts: [
-      { label: 'A crusade against the councils abroad', sf: 'white_crusade', tip: 'War on the nearest red state.', fx: [['glory', 8], ['fn', (G, n) => { let t = null; for (const k in G.border[n.id] || {}) { const o = G.nations[+k]; if (o && o.alive && (fam(o) === 'socialist' || fam(o) === 'anarchist') && !ID.atWar(G, n.id, o.id)) { t = o; break; } } if (t && !ID.Diplomacy.warBlock(G, n, t)) ID.Diplomacy.startWar(G, n, t, 'liberate'); }], ['note', 'War on a neighbouring red state, if there is one']] },
+      { label: 'A holy war against the councils abroad', sf: 'white_crusade', tip: 'War on the nearest red state.', fx: [['glory', 8], ['fn', (G, n) => { let t = null; for (const k in G.border[n.id] || {}) { const o = G.nations[+k]; if (o && o.alive && (fam(o) === 'socialist' || fam(o) === 'anarchist') && !ID.atWar(G, n.id, o.id)) { t = o; break; } } if (t && !ID.Diplomacy.warBlock(G, n, t)) ID.Diplomacy.startWar(G, n, t, 'liberate'); }], ['note', 'War on a neighbouring red state, if there is one']] },
       { label: 'A constitution from above', hist: 1, sf: 'white_constitution', fx: [['ideology', 'conmon', 'reform'], ['sup', 'intelligentsia', 8]] },
       { label: 'Restore the old order', sf: 'white_reaction', fx: [['tradition', 10], ['grievance', 10], ['sup', 'clergy', 6], ['sup', 'workers', -8]] },
     ] });
@@ -87,7 +87,7 @@
       else { ID.addMod(k, 'def', 0.1, 6, 'The front was ready'); ID.headline(G, { kicker: 'The line holds', title: 'Karsova was ready', sub: 'No pact, no illusions: the frontier armies were dug in and waiting.', a: k.id, tone: 'war' }); }
       if (F(G, 'great_purge')) ID.news(G, 'Karsova’s generals are young, frightened and inexperienced: the purge is paid for at the front.', 'war', k.id); } });
   add({ id: 'st_leader_dies', date: [1953, 3], nation: 'Karsova', cond: (G) => { const k = by(G, 'Karsova'); return k && (k.ideo === 'ml' || k.ideo === 'personalist'); } });
-  story({ id: 'st_leader_dies', title: 'The Leader is dead', text: 'He died alone on the floor of his dacha; the guards were too frightened to open the door. Now four men sit around the table in the Kremlin of the north, and each has a list.',
+  story({ id: 'st_leader_dies', title: 'The Leader is dead', text: 'He died alone on the floor of his dacha; the guards were too frightened to open the door. Now four men sit around the table in the citadel of the north, and each has a list.',
     opts: [
       { label: 'Collective leadership', hist: 1, sf: 'collective', fx: [['fn', (G, n) => ID.Politics.newLeader(G, n, 'dies')], ['drift', 'marketsoc', 10], ['grievance', -10], ['stab', -4]] },
       { label: 'The security chief takes the chair', sf: 'beria', fx: [['fn', (G, n) => ID.Politics.newLeader(G, n, 'dies')], ['ideology', 'personalist', 'succession'], ['grievance', 10]] },
@@ -99,7 +99,7 @@
   story({ id: 'st_league', title: 'The League of Free Nations', text: 'The President came home from the peace conference with a covenant: an assembly of nations, collective security, an end to secret treaties. The Senate has to ratify it, and the Senate wants to come home too.',
     opts: [
       { label: 'Ratify the covenant', hist: 1, sf: 'league', fx: [['opAll', 8], ['mandate', -4]] },
-      { label: 'A return to normalcy', sf: 'isolation', tip: 'Cassine will stay out of the next European war, unless it is attacked.', fx: [['mod', 'prod', 0.04, 120, 'Normalcy'], ['opAll', -4]] },
+      { label: 'A return to normalcy', sf: 'isolation', tip: 'Cassine will stay out of the next war on the western continent, unless it is attacked.', fx: [['mod', 'prod', 0.04, 120, 'Normalcy'], ['opAll', -4]] },
     ] });
   add({ id: 'st_infamy', date: [1941, 12], title: 'A date that will live in infamy', cond: (G) => { const c = by(G, 'Cassine'), h = by(G, 'Hesperia'); return F(G, 'isolation') && c && h && authLike(h) && !ID.atWar(G, c.id, h.id); },
     run: (G) => { ID.headline(G, { kicker: 'Without warning', title: 'The fleet is burning', sub: 'Dravan and Hesperian bombers strike Cassine’s fleet at anchor. Isolation is over.', tone: 'war' }); ID.storyWar(G, 'Drava', 'Cassine', 'claims', 'The admirals say the Cassine fleet can be destroyed at anchor.'); ID.storyWar(G, 'Hesperia', 'Cassine', 'claims', 'Our allies have struck. Cassine is already at war with us in all but name.'); } });
@@ -171,7 +171,7 @@
       { label: 'Guarantee Pavon', sf: 'guarantee', tip: 'An alliance with Pavon. If Hesperia moves, you are at war.', fx: [['ally', 'Pavon'], ['op', 'Hesperia', -25], ['mod', 'atk', 0.04, 36, 'Rearmament']] },
     ] });
   add({ id: 'st_red_decade', date: [1931, 1], title: 'The red decade', cond: (G) => ID.alive(G).filter((n) => fam(n) === 'socialist' || fam(n) === 'anarchist').length >= 3,
-    run: (G) => { for (const n of ID.alive(G)) if (fam(n) === 'liberal' && n.depression) { const tgt = G.rng.pick(['ml', 'council', 'demsoc']); ID.docSeed(G, n, tgt, 10, 3, 0); } ID.headline(G, { kicker: 'After the crash', title: 'The red decade', sub: 'With the factories shut and the banks broken, the young read Marx in every capital of the free world.', tone: 'rev' }); } });
+    run: (G) => { for (const n of ID.alive(G)) if (fam(n) === 'liberal' && n.depression) { const tgt = G.rng.pick(['ml', 'council', 'demsoc']); ID.docSeed(G, n, tgt, 10, 3, 0); } ID.headline(G, { kicker: 'After the crash', title: 'The red decade', sub: 'With the factories shut and the banks broken, the young read the revolutionary pamphlets in every capital of the free world.', tone: 'rev' }); } });
   add({ id: 'st_axis', date: [1936, 11], title: 'The axis of steel', cond: (G) => { const h = by(G, 'Hesperia'); return h && authLike(h) && ID.alive(G).filter((n) => authLike(n) && n !== h).length >= 2; },
     run: (G) => { const h = by(G, 'Hesperia'), m = ID.alive(G).filter((n) => authLike(n) && n !== h && !n.civilOf).map((n) => n.base).slice(0, 3); ID.storyBloc(G, 'Hesperia', m); ID.headline(G, { kicker: 'An axis', title: 'The axis of steel', sub: 'Hesperia and the dictatorships sign a pact against the reds and the democracies alike.', tone: 'war' }); } });
   add({ id: 'st_satellite', date: [1957, 10], title: 'A star that moves', cond: (G) => ID.alive(G).some((n) => n.tech.mil >= 6),

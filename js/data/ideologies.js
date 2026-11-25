@@ -96,7 +96,7 @@
     drift: [
       { to: 'ml', label: 'Thermidor', why: 'An isolated workers’ state with fading fervour hands power to its own bureaucracy.',
         pressure: (n) => (n.bureau - 35) * 0.02 + b(n.isolated) * 0.5 + b(n.fervor < 35) * 0.4 - 0.4 },
-      { to: 'council', label: 'The soviets take back power', why: 'Workers’ control and a weak apparatus let the councils govern in fact.',
+      { to: 'council', label: 'The councils take back power', why: 'Workers’ control and a weak apparatus let the councils govern in fact.',
         pressure: (n) => b(S(n, 'workers') > 70 && L(n, 'labor', 'control')) * 0.5 + b(n.bureau < 20) * 0.3 - 0.3 },
     ],
     objective: { name: 'Permanent Revolution', desc: 'Carry the revolution abroad six times without letting your own state bureaucratise, until two fifths of humanity live under socialism.',
@@ -142,7 +142,7 @@
     axes: { econ: -0.85, auth: 0.75, trad: -0.6, intl: 0.2 }, rivals: ['trot'],
     econ: { model: 'plan', share: 0.58, eff: 1.0, dist: 0.11, rural: 1 },
     budget: { welfare: 0.16, security: 0.08, science: 0.06, arms: 0.18, heavy: 0.16 },
-    control: { type: 'party', body: 'Politburo', auth: 3.2, warVote: 0, cap: 1, lawCost: 10, griev: 1.0 },
+    control: { type: 'party', body: 'Political Bureau', auth: 3.2, warVote: 0, cap: 1, lawCost: 10, griev: 1.0 },
     elections: 0,
     recruit: { allowed: ['peoples', 'levee'], def: 'peoples' },
     doctrine: { atk: 0.95, def: 1.15, home: 1.3, morale: 'peasants', styles: { advance: 0.9, assault: 1.2, blitz: 0.55, infiltrate: 1.5, siege: 0.7 } },
@@ -468,7 +468,7 @@
     ],
     objective: { name: 'The City of God', desc: 'Win three holy wars, keep the clergy with you, and bring a quarter of humanity under the rule of the faith.',
       parts: (n, G) => [['Holy wars won', n.cnt.holyWars || 0, 3], ['Clergy support at 75 or above', b(S(n, 'clergy') >= 75), 1], ['World population under theocracy', ID.popShare(G, (i) => i.id === 'theocracy'), 0.25, '%']] },
-    perks: ['Holy war: +20% attack against secular and atheist states, and no justification needed.', 'Divine sanction is your steadiest legitimacy source.', 'Missionaries spread your movement in pious provinces abroad.'],
+    perks: ['Holy war: +20% attack against secular and atheist states, and no justification needed.', 'Divine sanction is your steadiest legitimacy source.', 'Preachers spread your movement in pious provinces abroad.'],
     flaws: ['Research at −25%.', 'Modernisation erodes the order: factories and cities breed unbelief.', 'If the clergy ever turn on you, there is nothing underneath.'],
   });
 
@@ -491,7 +491,7 @@
     dip: { export: 0.3, agg: 0.1, trade: 0.4, cb: [] },
     flags: { partisans: 1, antiIndustry: 1, depressionProof: 1, noCoup: 1, stabFloor: 18 },
     drift: [
-      { to: 'natpop', label: 'Blood and soil', why: 'War and a frightened countryside turn the village’s defence into a nation’s crusade.',
+      { to: 'natpop', label: 'Blood and soil', why: 'War and a frightened countryside turn the village’s defence into a nation’s holy war.',
         pressure: (n) => b(war(n)) * 0.4 + b(S(n, 'peasants') < 45) * 0.4 - 0.4 },
       { to: 'liberal', label: 'The towns take over', why: 'Once workers, owners and the educated outweigh the peasants, the republic is theirs.',
         pressure: (n) => b(P(n, 'workers') + P(n, 'capital') + P(n, 'intelligentsia') > 45) * 0.7 - 0.4 },
@@ -776,7 +776,7 @@
         pressure: (n) => b(L(n, 'security', 'terror')) * 0.4 + b(n.charisma > 70) * 0.3 + b(P(n, 'military') > 30) * 0.2 - 0.45 },
       { to: 'junta', label: 'The army takes the party', why: 'Officers who carried the party to power decide they no longer need it.',
         pressure: (n) => b(P(n, 'military') > 32) * 0.4 + b(n.discipline < 40) * 0.4 + b(lost(n)) * 0.2 - 0.45 },
-      { to: 'revival', label: 'Faith instead of the nation', why: 'The secular nation lost its wars; the mosques and the young look elsewhere.',
+      { to: 'revival', label: 'Faith instead of the nation', why: 'The secular nation lost its wars; the shrines and the young look elsewhere.',
         pressure: (n) => b(lost(n)) * 0.5 + b(S(n, 'clergy') > 55) * 0.3 + b(n.flags.discredited) * 0.4 - 0.5 },
     ],
     objective: { name: 'One Nation', desc: 'Unite two other states of the nation with yours in a union that lasts, hold every province the party claims, and keep the party’s unity at 70.',
@@ -947,7 +947,7 @@
   });
 
   def({
-    id: 'natsoc', name: 'National Socialism', family: 'authoritarian', color: [88, 28, 24], title: '{A} Reich', banner: 'leader',
+    id: 'natsoc', name: 'National Socialism', family: 'authoritarian', color: [88, 28, 24], title: '{A} Realm', banner: 'leader',
     short: 'A racial nation, one Leader, and a war for living space paid for on credit that only conquest can repay.',
     theory: 'National Socialism fused the nationalist right’s grievances with a racial theory of history: nations are races, races struggle for living space, and the nation is betrayed from within by enemies it names by birth. One Leader embodies the national will and stands above the law; party, army, industry and police compete to anticipate his wishes, and every competition pushes the regime further. Rearmament is paid for with hidden debts that only plunder can settle, so the regime must expand or go bankrupt. Its history is one of cumulative radicalisation: every success removed a restraint, and the persecution of those it declared enemies ended in the crimes for which it is remembered.',
     axes: { econ: 0.2, auth: 1.0, trad: 0.5, intl: -1.0 }, rivals: ['ml', 'trot', 'technosoc', 'liberal', 'socdem', 'demsoc', 'ansyn', 'ancom', 'council'],
@@ -979,7 +979,7 @@
   });
 
   def({
-    id: 'nazacc', name: 'Nazi Accelerationism', family: 'authoritarian', color: [70, 22, 14], title: '{A} Reich of the Last Days', banner: 'fire',
+    id: 'nazacc', name: 'Nazi Accelerationism', family: 'authoritarian', color: [70, 22, 14], title: '{A} Realm of the Last Days', banner: 'fire',
     short: 'A regime that has abandoned every aim but destruction. It burns what it conquers and must keep conquering, or burn out.',
     theory: 'The last stage of a radicalised fascist regime. When the war cannot be won and the debts cannot be paid, it gives up the pretence of building anything and makes destruction itself the programme; later imitators would call the idea accelerationism: hasten the collapse, welcome the chaos, burn the old world down. In practice it is a fire, not a state. It wins astonishing victories while there is something left to consume, cannot make peace because peace would expose that it wants nothing, and turns on its allies and finally on its own people when the fuel runs out. No regime of this kind has outlived its war.',
     axes: { econ: 0.2, auth: 1.0, trad: 0.2, intl: -1.0 }, rivals: ['ml', 'trot', 'technosoc', 'liberal', 'socdem', 'demsoc', 'ansyn', 'ancom', 'council', 'conmon'],
@@ -1075,7 +1075,7 @@
       pressure: (n) => b(S(n, 'peasants') < 45) * 0.3 + b(n.flags.dependent || n.flags.wasDependent) * 0.4 + b(n.tech.ind < 3) * 0.2 - 0.5 }],
     ['theocracy', { to: 'revival', label: 'The pulpit leaves the palace', why: 'Preachers who no longer need the ruler take the faith to the slums, and the slums answer.',
       pressure: (n) => b(P(n, 'workers') > 18) * 0.3 + b(n.flags.dependent || n.flags.wasDependent) * 0.3 + b(S(n, 'clergy') < 55) * 0.3 - 0.5 }],
-    ['absmon', { to: 'revival', label: 'The turban against the crown', why: 'A modernising king who sold the oil and silenced the mosques finds the mosques were the last thing holding him up.',
+    ['absmon', { to: 'revival', label: 'The pulpit against the crown', why: 'A modernising king who sold the oil and silenced the shrines finds the shrines were the last thing holding him up.',
       pressure: (n) => b(L(n, 'religion', 'secular')) * 0.4 + b(S(n, 'clergy') < 40) * 0.3 + b(n.flags.oilSold) * 0.2 - 0.55 }],
   ]) { const I = list.find((x) => x.id === from); if (I) I.drift.push(d); }
 

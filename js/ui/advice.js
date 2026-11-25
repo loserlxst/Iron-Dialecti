@@ -37,12 +37,12 @@
   const SRC_HELP = {
     mandate: ['the electoral mandate is spent', ['call_election'], 'Win the next election, or call one while you are ahead.'],
     fervor: ['revolutionary fervour has gone cold', ['propaganda_drive', 'party_purge', 'cultural_revolution'], 'Victories, purges and campaigns rekindle it; bureaucracy smothers it.'],
-    tradition: ['tradition has worn thin', ['royal_progress', 'harvest_festival', 'missionaries'], 'Ceremony, the church and the old families restore it.'],
+    tradition: ['tradition has worn thin', ['royal_progress', 'harvest_festival', 'missionaries'], 'Ceremony, the temple and the old families restore it.'],
     prosperity: ['the people are not prospering', [], 'Raise living standards: more welfare spending, lower taxes, food in the shops.'],
     victory: ['there have been no victories', [], 'Win a war, even a small one, against someone you can beat.'],
     discipline: ['party discipline is slack', ['party_purge'], 'A purge, or a stronger bureaucracy, tightens it.'],
     particip: ['nobody takes part any more', ['open_ledger', 'end_emergency', 'recall_delegates'], 'Lift emergency rule, open the books, let the councils meet.'],
-    divine: ['the faith does not bless this regime', ['missionaries', 'holy_war'], 'The clergy’s favour and a state church supply it.'],
+    divine: ['the faith does not bless this regime', ['missionaries', 'holy_war'], 'The clergy’s favour and a state temple supply it.'],
     order: ['the streets are not quiet', ['martial_law', 'amnesty'], 'Bring unrest down, by force or by concession.'],
     competence: ['the government looks incompetent', [], 'Grow the economy and avoid crises: each one costs you here.'],
     charisma: ['the Leader has lost his shine', ['cult_campaign', 'propaganda_drive', 'plebiscite'], 'A cult campaign, a victory, a free hand for the propaganda ministry.'],
@@ -159,7 +159,7 @@
     /* money */
     const cap = ID.Economy.debtCap(n);
     if (n.debt > cap * 0.75) add(72, 'Debt near its limit', 'You owe ' + Math.round(n.debt) + ' against a limit of ' + Math.round(cap) + '. At the limit the creditors stop lending and the slump follows.', [measure(G, n, 'c_budget'), go('Economy', 'eco')]);
-    else if (n.net < 0 && n.gold < 80) add(60, 'The treasury is running dry', 'Spending exceeds revenue by ' + Math.round(-n.net) + ' a month and ' + Math.round(n.gold) + ' gold is left. Raise taxes, cut the budget, or find money in a hurry.', [measure(G, n, 'c_budget'), dec(G, n, 'print_money'), dec(G, n, 'war_loan'), go('Economy', 'eco')]);
+    else if (ID.balance(n) < 0 && n.gold < 80) add(60, 'The treasury is running dry', 'Spending exceeds revenue by ' + Math.round(-ID.balance(n)) + ' a month and ' + Math.round(n.gold) + ' gold is left. Raise taxes, cut the budget, or find money in a hurry.', [measure(G, n, 'c_budget'), dec(G, n, 'print_money'), dec(G, n, 'war_loan'), go('Economy', 'eco')]);
     if (n.inflation > 40) add(n.inflation > 60 ? 62 : 44, 'Inflation ' + Math.round(n.inflation), 'Prices are running away. It erodes living standards and business confidence every month.', [measure(G, n, 'c_currency'), go('Economy', 'eco')]);
 
     /* war weariness */
@@ -201,7 +201,7 @@
     const loyal = ID.FACTION_IDS.filter((f) => UI.seen(n, f) >= 62 && n.fp[f] > 10);
     if (loyal.length) out.push(loyal.map((f) => ID.factionName(n, f)).join(' and ') + ' are loyal');
     if (n.grain > 5) out.push('the granaries are full');
-    if (n.net > 5) out.push('the treasury gains ' + Math.round(n.net) + ' a month');
+    if (ID.balance(n) > 5) out.push('the treasury gains ' + Math.round(ID.balance(n)) + ' a month');
     if (n.stab >= 60) out.push('the state is stable');
     return out.slice(0, 3);
   }

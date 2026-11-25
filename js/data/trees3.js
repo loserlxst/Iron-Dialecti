@@ -220,7 +220,7 @@
       ['The royal tours', 'The royal family visits every friendly capital.', [['opAll', 3]]],
       ['The modern monarchy', 'An old crown with a modern face.', [M('unrest', -2, 'The modern monarchy')]]],
     [['The estates modernised', 'Tractors on the old estates.', [M('food', 0.04, 'Modern estates')]],
-      ['The church schools', 'Schools run by the church, paid for by the state.', [['sup', 'clergy', 4], M('sci', 0.02, 'Church schools')]],
+      ['The temple schools', 'Schools run by the temple, paid for by the state.', [['sup', 'clergy', 4], M('sci', 0.02, 'Temple schools')]],
       ['The old order holds', 'The world changes. {N} changes slowly.', [L(3, 'The old order')]]]);
   nb(F.authoritarian, 1960, ['The regime’s second decade', 'The regime settles in for the long term.', [['discipline', 4]]],
     [['The armoured units', 'Tanks for the regime’s army.', [['techUp', 'mil']]],

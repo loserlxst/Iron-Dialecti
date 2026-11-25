@@ -3,6 +3,10 @@
   'use strict';
   const ID = (globalThis.ID = globalThis.ID || {});
   ID.PATCH_NOTES = [
+    { date: '25 November 2026', title: 'The treasury tells the truth, and the world keeps to itself', items: [
+      'Fixed: the monthly balance on the top band only counted taxes and the budget. Oil money, concessions abroad, tribute paid and received, payments from dependencies, repairs, loans and debt repayments now count too, so the number matches what your treasury really does. The Treasury tooltip lists each of them.',
+      'The world is now self-contained. Dispatches, programmes and stories no longer mention real countries, peoples, cities or religions: the faithful pray in temples and shrines, the comparisons are to Tessaly and Norvik, and titles such as Reich and Führer are gone.',
+    ] },
     { date: '25 November 2026', title: 'Prisoners, and smaller fixes', items: [
       'Troops taken prisoner in a pocket are now held until the peace, and six in ten of them come home when it is signed.',
       'States that have settled an island keep expanding into their own hinterland at the same time.',

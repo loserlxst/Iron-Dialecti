@@ -682,7 +682,7 @@
       const t = n.trib; if (!t) continue;
       const to = G.nations[t.to];
       if (G.tick >= t.until || !to || !to.alive || ID.atWar(G, n.id, t.to)) { n.trib = null; continue; } // paid off, or the treaty is torn up by war
-      const take = Math.max(0, n.rev || 0) * t.share; n.gold -= take; to.gold += take; n.a.tribPaid = take;
+      const take = Math.max(0, n.rev || 0) * t.share; ID.flow(n, 'Tribute to ' + to.base, -take); ID.flow(to, 'Tribute from ' + n.base, take); n.a.tribPaid = take;
     }
     // capitulation of the nearly-destroyed
     for (const n of ns) {

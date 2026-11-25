@@ -3,7 +3,7 @@
    identity, inner circle, national question, the whole national tree (programmes, projects, destinies) and the
    national chapters of the storyline.
 
-   TESSALY — Techno-Socialist Accelerationism. The Swiss-like mountain cantons were taken from within in 1909 by
+   TESSALY — Techno-Socialist Accelerationism. The mountain cantons were taken from within in 1909 by
    their watchmakers, telegraphists and dam-builders; every peak carries a transmitter. National question: the
    Wire and the Valleys (speed against consent). Four roads: the planetary signal, the federation of free
    signals, the Thermidor in the mountains (Juche), the automated cantons. Neighbours: Verano’s syndicates (one
@@ -295,7 +295,7 @@
       { label: 'Write it off', fx: [['sig', -10], ['op', 'Antara', 10]] },
     ] });
   beat({ id: 'st_mx_race', date: [1947, 4], nation: 'Meridia', cond: (G) => nxOk(G) && !!by(G, 'Tessaly') });
-  story({ id: 'st_mx_race', title: 'The red engine', text: 'Our agents report that Tessaly is building a calculating engine of its own, under a mountain, and intends to give the drawings away. If it does, the most valuable thing the company owns will be worth nothing by Christmas.',
+  story({ id: 'st_mx_race', title: 'The red engine', text: 'Our agents report that Tessaly is building a calculating engine of its own, under a mountain, and intends to give the drawings away. If it does, the most valuable thing the company owns will be worth nothing by midwinter.',
     opts: [
       { label: 'Buy their engineers', hist: 1, tip: 'Ten times their wage and a villa by the sea.', fx: [['tech', 300], on('Tessaly', (G, n, t) => { ID.addMod(t, 'sci', -0.05, 60, 'Engineers bought by Meridia'); ID.addOpBoth(G, n.id, t.id, -15); })] },
       { label: 'Patent everything first', fx: [['gold', 200], ['sig', 8], ['op', 'Tessaly', -10]] },

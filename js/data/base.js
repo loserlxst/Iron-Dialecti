@@ -114,10 +114,10 @@
     religion: {
       name: 'Faith', desc: 'The relation of altar and state.',
       opts: {
-        statechurch: { name: 'State church', trad: 0.08, sup: { clergy: 16, peasants: 5, intelligentsia: -6 }, desc: 'The clergy bless the order and the order pays the clergy.' },
+        statechurch: { name: 'State faith', trad: 0.08, sup: { clergy: 16, peasants: 5, intelligentsia: -6 }, desc: 'The clergy bless the order and the order pays the clergy.' },
         tolerance: { name: 'Toleration', trad: 0, sup: { intelligentsia: 3 }, desc: 'The state takes no side among the faiths.' },
         secular: { name: 'Secular state', trad: -0.04, sup: { clergy: -10, intelligentsia: 6 }, desc: 'Religion removed from schools and law.' },
-        atheism: { name: 'State atheism', trad: -0.1, fervor: 0.04, sup: { clergy: -30, peasants: -9 }, desc: 'The church is an enemy institution and treated as one.' },
+        atheism: { name: 'State atheism', trad: -0.1, fervor: 0.04, sup: { clergy: -30, peasants: -9 }, desc: 'The temple is an enemy institution and treated as one.' },
       },
     },
     trade: {

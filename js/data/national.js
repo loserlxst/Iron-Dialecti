@@ -32,7 +32,7 @@
       acts: [
         { id: 'au_q_sell', name: 'Sell crown land to the villages', desc: 'The imperial estates go to auction, lot by lot, with credit for any village that bids.', cd: 24, dv: -10, fx: [['gold', 80], ['sup', 'peasants', 6], ['tradition', -3]] },
         { id: 'au_q_bank', name: 'The peasant land bank', desc: 'Cheap mortgages for any peasant who wants to buy his landlord out.', cost: { gold: 100 }, cd: 36, dv: -8, fx: [['mod', 'food', 0.04, 60, 'Peasant land bank'], ['sup', 'peasants', 4]] },
-        { id: 'au_q_punish', name: 'Punitive expeditions', desc: 'Cossacks to the villages that burned their manor. Floggings, fines and a gallows in the square.', cost: { auth: 15 }, cd: 24, dv: 6, fx: [['mod', 'unrest', -6, 12, 'Punitive expeditions'], ['grievance', 10], ['sup', 'peasants', -8]] },
+        { id: 'au_q_punish', name: 'Punitive expeditions', desc: 'Mounted troops to the villages that burned their manor. Floggings, fines and a gallows in the square.', cost: { auth: 15 }, cd: 24, dv: 6, fx: [['mod', 'unrest', -6, 12, 'Punitive expeditions'], ['grievance', 10], ['sup', 'peasants', -8]] },
       ],
       hi: 'nq_au_hi', hiAt: 90, hiIf: (n) => n.stab < 55, lo: 'nq_au_lo', loAt: 15, loIf: (n) => is(n, 'absmon', 'conmon') },
   };
@@ -60,7 +60,7 @@
       acts: [
         { id: 'ca_q_trust', name: 'Break up a trust', desc: 'The attorney-general files against the railroad combine.', cost: { auth: 10 }, cd: 24, dv: -8, fx: [['sup', 'capital', -6], ['corr', -3]] },
         { id: 'ca_q_exchange', name: 'Open the exchange to the world', desc: 'Foreign capital may list, lend and buy without asking.', cd: 24, dv: 8, fx: [['gold', 100], ['sup', 'capital', 5]] },
-        { id: 'ca_q_settle', name: 'Settlement houses and night schools', desc: 'Reading rooms, clinics and English classes in every mill town.', cost: { gold: 60 }, cd: 18, dv: -5, fx: [['sup', 'intelligentsia', 4], ['sup', 'workers', 3]] },
+        { id: 'ca_q_settle', name: 'Settlement houses and night schools', desc: 'Reading rooms, clinics and language classes in every mill town.', cost: { gold: 60 }, cd: 18, dv: -5, fx: [['sup', 'intelligentsia', 4], ['sup', 'workers', 3]] },
       ],
       hi: 'nq_ca_hi', hiAt: 88, lo: 'nq_ca_lo', loAt: 15 },
   };
@@ -344,7 +344,7 @@
       acts: [
         { id: 'ir_q_conc', name: 'Grant a new concession', desc: 'Another field, another twenty years, another advance on the royalties.', cd: 24, dv: 12, fx: [['gold', 150], ['sup', 'clergy', -6]] },
         { id: 'ir_q_nat', name: 'Nationalise the oil', desc: 'The wells belong to the faithful. The companies may send their lawyers.', cost: { auth: 20 }, cd: 120, dv: -40, fx: [['mod', 'rev', 0.06, PERM, 'National oil'], ['fn', (G, n) => { for (const o of ID.alive(G)) if (o !== n && (fam(o) === 'liberal' || o.ideo === 'merchant')) ID.addOp(G, o.id, n.id, -20); }], ['note', 'Liberal and merchant states’ opinion of you −20'], ['sup', 'clergy', 6]] },
-        { id: 'ir_q_eng', name: 'Train our own engineers', desc: 'A petroleum institute in the holy city, with a mosque beside the laboratory.', cost: { gold: 80 }, cd: 36, dv: -10, fx: [['mod', 'sci', 0.05, PERM, 'Petroleum institute']] },
+        { id: 'ir_q_eng', name: 'Train our own engineers', desc: 'A petroleum institute in the holy city, with a shrine beside the laboratory.', cost: { gold: 80 }, cd: 36, dv: -10, fx: [['mod', 'sci', 0.05, PERM, 'Petroleum institute']] },
       ],
       hi: 'nq_ir_hi', hiAt: 92, lo: 'nq_ir_lo', loAt: 10 },
   };

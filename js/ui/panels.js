@@ -113,7 +113,7 @@
     const rows = [['Output per month', Math.round(n.gdp) + '', 'Farms ' + Math.round(n.agr) + ' + industry ' + Math.round(n.ind) + ', times efficiency, plus trade ' + Math.round(n.tradeInc) + '.'],
       ['Efficiency', '<span class="' + (n.eff < 0.85 ? 'bad' : n.eff > 1.02 ? 'good' : '') + '">' + Math.round(n.eff * 100) + '%</span>', 'Set by your economy model: confidence, distortion, morale or overload.'],
       ['Revenue', n.rev.toFixed(1)], ['Spending', n.exp.toFixed(1), 'Programmes, plus upkeep of ' + (n.a.upkeep || 0).toFixed(1) + ' for troops, buildings and administration. Administration grows faster than territory.'],
-      ['Balance', UI.sg(n.net, 1)], ['Treasury', Math.round(n.gold) + '']];
+      ['Balance', UI.sg(ID.balance(n), 1), 'Revenue minus spending' + (Object.keys(n.a.flow || {}).length ? ', plus last month’s money outside the budget: ' + Object.entries(n.a.flow).map(([k, v]) => k + ' ' + UI.sg(v, 1)).join(', ') : '') + '.'], ['Treasury', Math.round(n.gold) + '']];
     if (n.debt > 1) rows.push(['Debt', '<span class="' + (n.debt > E.debtCap(n) * 0.75 ? 'bad' : 'warn') + '">' + Math.round(n.debt) + ' / ' + Math.round(E.debtCap(n)) + '</span>', 'Interest is 0.6% a month. Past the limit you must default, squeeze or print.']);
     if (n.inflation > 1) rows.push(['Inflation', '<span class="' + (n.inflation > 40 ? 'bad' : 'warn') + '">' + Math.round(n.inflation) + '</span>', 'Eats living standards. Over 60 is hyperinflation.']);
     rows.push(['Living standards', '<span class="' + (n.ls < 38 ? 'bad' : n.ls > 65 ? 'good' : '') + '">' + Math.round(n.ls) + '</span>', 'Output per head against the world, plus welfare, minus famine, inflation and war.']);

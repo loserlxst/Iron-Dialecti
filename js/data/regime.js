@@ -25,22 +25,22 @@
   const CAB = ['Minister of War', 'Minister of the Interior', 'Minister of Finance', 'Party Chairman', 'Foreign Minister'];
   const DEL = ['Commander of the Militias', 'Delegate for Public Safety', 'Delegate for Production', 'Editor of the People’s Press', 'Delegate for External Relations'];
   R.body = {
-    ml: B('Politburo', 'Party Congress', 60, PARTY, 'purge'),
-    trot: B('Revolutionary Council', 'Congress of the International', 48, ['Commissar for War', 'Chief of the Cheka', 'Chairman of the Economic Council', 'Secretary of the International', 'Commissar for Foreign Affairs'], 'purge'),
+    ml: B('Political Bureau', 'Party Congress', 60, PARTY, 'purge'),
+    trot: B('Revolutionary Council', 'Congress of the International', 48, ['Commissar for War', 'Chief of Revolutionary Security', 'Chairman of the Economic Council', 'Secretary of the International', 'Commissar for Foreign Affairs'], 'purge'),
     mao: B('Standing Committee', 'Plenum of the Central Committee', 48, ['Vice-Chairman for the Army', 'Director of Public Security', 'Head of the Planning Commission', 'Head of the Cultural Group', 'Foreign Minister'], 'purge'),
     cybernetic: B('Co-ordinating Board', 'Plan Revision', 48, ['Director of Defence Systems', 'Director of Data Integrity', 'Director of Production Flows', 'Director of Public Feedback', 'Director of External Exchange'], 'purge'),
     council: B('Presidium of the Councils', 'Congress of Councils', 36, DEL, 'recall'),
     ansyn: B('National Committee', 'Union Congress', 36, ['Secretary of the Defence Committees', 'Secretary for Public Safety', 'Secretary of the Industrial Federations', 'Editor of the Union Daily', 'Secretary for International Solidarity'], 'recall'),
     ancom: B('Federal Liaison Committee', 'Federal Assembly', 36, DEL, 'recall'),
     agrarian: B('Peasant Executive', 'Peasant Congress', 36, ['Commander of the Green Guard', 'Delegate for Order', 'Delegate for the Co-operatives', 'Editor of the Village Press', 'Delegate for Foreign Affairs'], 'recall'),
-    marketsoc: B('Politburo', 'Party Congress', 60, ['Minister of Defence', 'Minister of State Security', 'Chairman of the Reform Commission', 'Head of Propaganda', 'Foreign Minister'], 'dismiss'),
+    marketsoc: B('Political Bureau', 'Party Congress', 60, ['Minister of Defence', 'Minister of State Security', 'Chairman of the Reform Commission', 'Head of Propaganda', 'Foreign Minister'], 'dismiss'),
     demsoc: B('Cabinet', 'Government Programme', 48, CAB, 'dismiss'),
     liberal: B('Cabinet', 'Government Programme', 48, ['Secretary of War', 'Attorney-General', 'Secretary of the Treasury', 'Party Chairman', 'Secretary of State'], 'dismiss'),
     socdem: B('Cabinet', 'Government Programme', 48, CAB, 'dismiss'),
     minarchy: B('Council of Freeholders', 'Annual Moot', 36, ['Captain of the Militia', 'High Sheriff', 'Keeper of the Accounts', 'Editor of the Freeholder', 'Envoy Abroad'], 'dismiss'),
     conmon: B('Privy Council', 'Speech from the Throne', 48, ['Minister of War', 'Home Secretary', 'Chancellor of the Exchequer', 'Leader of the House', 'Foreign Secretary'], 'dismiss'),
     merchant: B('Signoria', 'Great Council of the Houses', 48, ['Admiral of the Fleet', 'Head of the Council of Ten', 'Treasurer of the Houses', 'Chancellor of the Republic', 'First Ambassador'], 'dismiss'),
-    absmon: B('Court', 'Imperial Council', 48, ['Minister of War', 'Chief of the Gendarmes', 'Minister of Finance', 'Procurator of the Holy Synod', 'Chancellor'], 'disgrace'),
+    absmon: B('Court', 'Imperial Council', 48, ['Minister of War', 'Chief of the Gendarmes', 'Minister of Finance', 'Procurator of the High Council of Priests', 'Chancellor'], 'disgrace'),
     theocracy: B('Council of the Learned', 'Assembly of the Learned', 48, ['Commander of the Guardians', 'Keeper of Morals', 'Keeper of the Treasury', 'Chief Jurist', 'Envoy of the Faithful'], 'disgrace'),
     junta: B('Junta', 'Junta in Session', 36, ['Chief of the General Staff', 'Director of Internal Security', 'Minister of the Economy', 'Minister of National Guidance', 'Foreign Minister'], 'purge'),
     corporatist: B('Grand Council', 'Grand Chamber', 48, ['Marshal of the Army', 'Chief of Police', 'Minister of Corporations', 'Party Secretary', 'Foreign Minister'], 'purge'),
@@ -76,7 +76,7 @@
     trot: [
       L('tr_export', 'Export the revolution', 'Money, rifles and agitators for every party abroad that asks.', 'trot', { atk: 0.05, opp: 0.02 }, [['subvertNb', 10]], 0.5, (n) => (n.nwars ? 0.6 : 1.5)),
       L('tr_base', 'Build the base', 'A revolution needs factories. The world can wait a five-year plan.', 'ml', { prod: 0.06, stab: 2 }, [], -0.4, (n) => (n.stab < 40 ? 2 : 0.8)),
-      L('tr_demo', 'Workers’ democracy', 'Open the soviets to every platform. Let the argument be the revolution.', 'council', { legit: 3, eff: 0.02, auth: -0.1 }, [['particip', 8]], 0, () => 0.8),
+      L('tr_demo', 'Workers’ democracy', 'Open the councils to every platform. Let the argument be the revolution.', 'council', { legit: 3, eff: 0.02, auth: -0.1 }, [['particip', 8]], 0, () => 0.8),
     ],
     mao: [
       L('mz_politics', 'Politics in command', 'Red before expert. Every question is a political question.', 'mao', { def: 0.04, legit: 3, eff: -0.02 }, [['fervor', 8]], 0.6, () => 1.3),
@@ -144,9 +144,9 @@
       L('me_buy', 'Buy the neighbours', 'Loans to every court that might otherwise be hostile.', 'liberal', { stab: 1 }, [['gold', -100], ['opAll', 6]], 0, () => 0.8),
     ],
     absmon: [
-      L('ab_unbound', 'Autocracy unbound', 'No duma, no charter, no apologies. The sovereign’s word is law.', 'absmon', { auth: 0.25, unrest: -3, legit: -2 }, [], 0.5, () => 1.2),
+      L('ab_unbound', 'Autocracy unbound', 'No assembly, no charter, no apologies. The sovereign’s word is law.', 'absmon', { auth: 0.25, unrest: -3, legit: -2 }, [], 0.5, () => 1.2),
       L('ab_concede', 'Concessions from above', 'A charter, a parliament with limited powers, a minister for the land question.', 'conmon', { legit: 3, stab: 2, auth: -0.15 }, [['sup', 'intelligentsia', 6]], -0.4, (n) => (n.stab < 35 ? 2 : 0.6)),
-      L('ab_old', 'The old ways', 'The church, the village commune and the nobility: what held for three centuries will hold.', 'theocracy', { stab: 2, sci: -0.05 }, [['tradition', 8]], 0.2, () => 0.9),
+      L('ab_old', 'The old ways', 'The temple, the village commune and the nobility: what held for three centuries will hold.', 'theocracy', { stab: 2, sci: -0.05 }, [['tradition', 8]], 0.2, () => 0.9),
     ],
     theocracy: [
       L('th_pure', 'Purity of faith', 'The faithful must be guarded against every corruption.', 'theocracy', { unrest: -3, sci: -0.05 }, [], 0.5, () => 1.3),
@@ -156,7 +156,7 @@
     junta: [
       L('ju_order', 'Order and progress', 'Roads, schools and discipline. Politics can wait for the next generation.', 'junta', { eff: 0.04, prod: 0.03, unrest: -2 }, [], 0.2, () => 1.3),
       L('ju_barracks', 'Prepare the return to barracks', 'A constitution, elections in three years, and an amnesty for the officers.', 'liberal', { legit: 4, coup: 0.2, auth: -0.15 }, [], -0.4, (n) => (n.age > 120 ? 1 : 0.2)),
-      L('ju_crusade', 'The national crusade', 'The army will finish what the politicians lost.', 'natpop', { atk: 0.06, legit: 2, wePace: -0.1 }, [], 0.3, (n) => (n.claims && n.claims.length ? 1.5 : 0.6)),
+      L('ju_crusade', 'The national holy war', 'The army will finish what the politicians lost.', 'natpop', { atk: 0.06, legit: 2, wePace: -0.1 }, [], 0.3, (n) => (n.claims && n.claims.length ? 1.5 : 0.6)),
     ],
     corporatist: [
       L('cp_autarky', 'Autarky', 'Everything the nation needs, made in the nation.', 'corporatist', { prod: 0.05, trade: -0.06 }, [], 0.3, () => 1.3),

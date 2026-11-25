@@ -398,16 +398,17 @@
     const atom = E.atomMonth(G, n, rev);
     const exp = welfare + security + science + arms + heavy + upkeep + ops + interest + importCost + atom;
     n.rev = rev; n.exp = exp; n.net = rev - exp; n.a.upkeep = upkeep; n.a.secSpend = security;
+    n.a.flow = n.a.flowNow || null; n.a.flowNow = null; // last month's flows outside the budget (ID.flow)
     n.gold += n.net;
     if (n.gold < 0) {
       if (DEBT_OK[model]) {
-        n.debt += -n.gold; n.gold = 0; n.inflation += 0.4;
+        n.debt += -n.gold; ID.flow(n, 'Borrowed', -n.gold); n.inflation += 0.4;
         if (n.debt > E.debtCap(n) && !n.flags.debtCrisis) {
           n.flags.debtCrisis = 1; ID.logGrief(n, G.tick, 'The state could no longer service its debt.');
           if (n.id === G.player) ID.Events.queue(G, n, 'debt_crisis'); else { n.debt *= 0.4; n.conf -= 25; n.sm.capital -= 15; ID.addMod(n, 'rev', -0.15, 24, 'Default'); n.flags.debtCrisis = 0; }
         }
       } else { n.a.shortage = Math.min(1, -n.gold / Math.max(1, rev)); n.gold = 0; }
-    } else { n.a.shortage = 0; if (n.debt > 0 && n.gold > 120) { const pay = Math.min(n.debt, (n.gold - 120) * 0.25); n.debt -= pay; n.gold -= pay; } }
+    } else { n.a.shortage = 0; if (n.debt > 0 && n.gold > 120) { const pay = Math.min(n.debt, (n.gold - 120) * 0.25); n.debt -= pay; ID.flow(n, 'Debt repaid', -pay); } }
     n.inflation = Math.max(0, n.inflation - 1.2 + (n.nwars && PRIVATE[model] ? 0.5 : 0));
 
     /* investment funds: private capital or the plan build factories on their own */

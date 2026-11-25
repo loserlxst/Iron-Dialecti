@@ -128,5 +128,20 @@ ok(G3.blist.every((i) => G3.hp[i] === 100), 'an old save loads with every buildi
 months(G3, 2);
 ok(ID.alive(G3).length > 0, 'an old save runs on');
 
+// the balance shown on the top band is what the treasury really does each month (budget plus ID.flow: oil,
+// tribute, dependencies, repairs, debt), counted over two years for every state
+{
+  const G4 = ID.newGame({ seed: 5, scenario: 'meridia', headless: true }); G4.rng.s = 77; months(G4, 120);
+  const real = {}, shown = {};
+  for (const n of ID.alive(G4)) {
+    let v = n.gold; real[n.id] = 0; shown[n.id] = 0;
+    Object.defineProperty(n, 'gold', { get() { return v; }, set(x) { if (/E\.month|ID\.flow/.test(new Error().stack.split('\n')[2])) real[n.id] += x - v; v = x; }, configurable: true });
+  }
+  let worst = 0, who = '';
+  for (let m = 0; m < 24; m++) { months(G4, 1); for (const n of ID.alive(G4)) if (shown[n.id] != null) shown[n.id] += ID.balance(n); }
+  for (const n of ID.alive(G4)) { if (real[n.id] == null) continue; const d = Math.abs(real[n.id] - shown[n.id]) / 24 / Math.max(5, Math.abs(real[n.id] / 24)); if (d > worst) { worst = d; who = n.base; } }
+  ok(worst < 0.15, 'the monthly balance shown matches the treasury (worst gap ' + Math.round(worst * 100) + '%, ' + who + ')');
+}
+
 console.log(fails ? fails + ' FAILED' : 'all passed');
 process.exit(fails ? 1 : 0);

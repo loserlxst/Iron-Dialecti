@@ -52,7 +52,7 @@
         fx: [['nq', 10], ['opAll', -12], ['fn', (G, n) => { for (const o of ID.alive(G)) { if (o === n) continue; const d = ID.dipOf(G, n.id, o.id); if (d) d.alliance = 0; } }], ['mod', 'legit', 6, PERM, 'Alone and right'], ['auth', 15]] },
       { id: 'sx_pv_self', name: 'Self-reliance', desc: 'What the country eats, it grows; what it fires, it makes. Every import is a hostage.', x: 1, y: 1, req: ['sx_pv_count'],
         fx: [['law', 'trade', 'autarky'], ['mod', 'food', 0.08, PERM, 'Self-reliance'], ['mod', 'prod', 0.05, PERM, 'Self-reliance'], ['sup', 'peasants', 5]] },
-      { id: 'sx_pv_line', name: 'The only correct line', desc: 'Moscow has betrayed, Peking has betrayed, the whole world has betrayed. Pavon alone has not. The party proclaims it.', x: 0.5, y: 2, req: ['sx_pv_break', 'sx_pv_self'], days: 180,
+      { id: 'sx_pv_line', name: 'The only correct line', desc: 'Karsova has betrayed, Suyan has betrayed, the whole world has betrayed. Pavon alone has not. The party proclaims it.', x: 0.5, y: 2, req: ['sx_pv_break', 'sx_pv_self'], days: 180,
         fx: [['ideology', 'antirev', 'reform'], ['nq', 8]] },
       { id: 'sx_pv_700', name: 'Seven hundred thousand', desc: 'A concrete dome on every hill, at every crossroads, in every schoolyard and on every beach, all facing outward.', x: 0.5, y: 3, req: ['sx_pv_line'], days: 240,
         fx: [['fn', (G, n) => { n.nq.bunkers = (n.nq.bunkers || 0) + 40; }], ['note', 'Bunkers +40'], ['mod', 'def', 0.15, PERM, 'Seven hundred thousand bunkers'], ['mod', 'cityDef', 0.3, PERM, 'Seven hundred thousand bunkers'], ['mod', 'prod', -0.06, PERM, 'Concrete instead of houses']] },
@@ -135,7 +135,7 @@
     key: 'cosmos', base: 'Karsova', parent: 'ml', tab: 'Red Star',
     when: (G, n) => yr(G) >= 1940 && ['ml', 'trot', 'mao'].indexOf(n.ideo) >= 0 && n.stab >= 40 && (n.tech.ind + n.tech.mil + n.tech.agr) >= 12,
     reveal: { art: 'space', title: 'A novel from 1908',
-      text: 'The rocket engineers of the Karsovan design bureaus have a book they pass from hand to hand: a novel written by an old Bolshevik before the revolution, about a communist society on another planet. Its author believed that communism’s real task was to conquer nature itself: space, then age, then death. The engineers believe it is time. They have drawings, and a request for a budget the size of the army’s.',
+      text: 'The rocket engineers of the Karsovan design bureaus have a book they pass from hand to hand: a novel written by an old revolutionary before the revolution, about a communist society on another planet. Its author believed that communism’s real task was to conquer nature itself: space, then age, then death. The engineers believe it is time. They have drawings, and a request for a budget the size of the army’s.',
       yes: 'The common task begins', no: 'File the drawings' },
     tree: [
       { id: 'sx_ka_blood', name: 'The institute of the common task', desc: 'An institute for the prolongation of life, with laboratories, a sanatorium and a free hand.', x: 0.5, y: 0, days: 120,

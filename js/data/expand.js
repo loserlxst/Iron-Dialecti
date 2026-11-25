@@ -129,7 +129,7 @@
     ['quiet', 'The quiet prosperity', 'Nothing dramatic has happened in Tessaly for years. The Tessalians would like to keep it that way.', [['mod', 'ls', 2, PERM, 'Quiet prosperity'], ['mod', 'def', 0.05, PERM, 'Quiet prosperity'], ['mod', 'stab', 2, PERM, 'Quiet prosperity']]],
   ]);
   home('Verano', 've', [
-    ['ateneo', 'An ateneo in every village', 'A library, a stage and a schoolroom in the old church. Literacy is the first expropriation.', [['particip', 8], ['sup', 'intelligentsia', 5], ['mod', 'sci', 0.04, PERM, 'The ateneos']]],
+    ['ateneo', 'An ateneo in every village', 'A library, a stage and a schoolroom in the old temple. Literacy is the first expropriation.', [['particip', 8], ['sup', 'intelligentsia', 5], ['mod', 'sci', 0.04, PERM, 'The ateneos']]],
     ['supply', 'The supply committees', 'Every town elects the people who count the flour. Nobody gets fat, and nobody starves.', [['mod', 'food', 0.08, PERM, 'Supply committees'], ['sup', 'peasants', 5]]],
     ['militia', 'The militia schools', 'Officers elected by their columns, trained by veterans, answerable to the congress.', [['troops', 0.08], ['mod', 'atk', 0.04, PERM, 'Militia schools'], ['sup', 'military', 4]]],
     ['roses', 'Bread and Roses', 'Bread, because people must eat. Roses, because they must not live only to eat.', [['mod', 'stab', 3, PERM, 'Bread and Roses'], ['mod', 'unrest', -3, PERM, 'Bread and Roses'], ['fervor', 8]]],
@@ -166,7 +166,7 @@
   ]);
   home('Hesperia', 'he', [
     ['evening', 'The Evenings of Labour', 'Choirs, cycling clubs and seaside camps, all under the chambers’ banner. Leisure is organised too.', [['sup', 'workers', 5], ['mod', 'ls', 1, PERM, 'Evenings of Labour']]],
-    ['coin', 'The strong currency', 'Peg the lira to gold at the old rate, whatever it costs the exporters. Iron money for an iron state.', [['inflation', -15], ['sup', 'capital', 6], ['sup', 'workers', -4]]],
+    ['coin', 'The strong currency', 'Peg the currency to gold at the old rate, whatever it costs the exporters. Iron money for an iron state.', [['inflation', -15], ['sup', 'capital', 6], ['sup', 'workers', -4]]],
     ['works', 'The great public works', 'Drain the marshes, build the motorways, and put a new town where the mosquitoes used to be.', [['gold', -120], ['mod', 'prod', 0.03, PERM, 'Public works'], ['sup', 'workers', 6], ['sup', 'peasants', 3]]],
     ['order', 'Order and bread', 'The trains run, the bread is baked, and nobody asks too loudly what else the state has been doing.', [['mod', 'stab', 3, PERM, 'Order and bread'], ['legitmod', 4, 120, 'Order and bread']]],
   ]);
@@ -190,7 +190,7 @@
   ]);
   home('Antara', 'an', [
     ['milk', 'Half a litre of milk', 'Every child in the republic, every morning, free. The first promise, and the one nobody can argue with.', [['gold', -60], ['mod', 'ls', 2, PERM, 'Half a litre of milk'], ['sup', 'workers', 4]]],
-    ['talks', 'Talks with the centre', 'Sit down with the Christian democrats and the small shopkeepers. Explain that socialism has room for them.', [['sup', 'capital', 5], ['sup', 'clergy', 5], ['sup', 'workers', -3], ['mandate', 6]]],
+    ['talks', 'Talks with the centre', 'Sit down with the pious democrats and the small shopkeepers. Explain that socialism has room for them.', [['sup', 'capital', 5], ['sup', 'clergy', 5], ['sup', 'workers', -3], ['mandate', 6]]],
     ['jap', 'The price committees', 'Neighbourhood committees to watch the shops and the hoarders. Bread at the official price, or questions.', [['mod', 'food', 0.05, PERM, 'Price committees'], ['sup', 'workers', 5], ['sup', 'capital', -6]]],
     ['ballot', 'The long ballot', 'Every election won, every election respected. The road is slow because it has to be walked by everyone.', [['mod', 'stab', 3, PERM, 'The long ballot'], ['mandate', 8]]],
   ]);

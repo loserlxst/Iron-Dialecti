@@ -34,10 +34,10 @@
 
   /* ================================================================ the two continents */
   T('au_d_crown',
-    ['The second coronation', 'The new emperor walks from the cathedral to the palace on a carpet of petitions. He reads none of them.', [['tradition', 12], L(5, 'The second coronation'), ['sup', 'clergy', 8], ['sup', 'workers', -4]]],
+    ['The second coronation', 'The new emperor walks from the great temple to the palace on a carpet of petitions. He reads none of them.', [['tradition', 12], L(5, 'The second coronation'), ['sup', 'clergy', 8], ['sup', 'workers', -4]]],
     ['Protector of the faithful abroad', 'Every believer across our borders is now an Aurelian subject in waiting.', [['claimsAll'], ['subvertNb', 8], ['threat', 6]]],
     ['Emperor of two seas', 'The southern fleet anchors where the old maps always said it should.', [['claim', 'Varanth'], M('navy', 0.4, 'The imperial fleet'), M('atk', 0.06, 'Imperial legions'), ['glory', 12], E('Emperor of Two Seas')]],
-    ['The emperor’s railways', 'Iron from the capital to the eastern ice, built by conscripts and named after saints.', [['build', B.FACTORY, 2], M('prod', 0.05, 'The emperor’s railways')]],
+    ['The emperor’s railways', 'Iron from the capital to the eastern ice, built by conscripts and named after the prophets.', [['build', B.FACTORY, 2], M('prod', 0.05, 'The emperor’s railways')]],
     ['The little father', 'Land for the peasants, by grace of the crown, so that they never need ask anyone else for it.', [['law', 'land', 'smallholder'], ['sup', 'peasants', 10], M('unrest', -4, 'The little father'), E('The Little Father')]]);
   T('au_d_commonwealth',
     ['The assembly of the provinces', 'Eleven provinces send deputies to the capital as equals for the first time. Several bring interpreters.', [['particip', 8], L(5, 'The assembly of the provinces'), M('unrest', -3, 'Provincial self-rule')]],
@@ -175,7 +175,7 @@
   T('ka_d_union',
     ['One plan for the union', 'Every republic’s factories in one ledger, every ledger in one office.', [M('prod', 0.06, 'One plan'), ['build', B.FACTORY, 2], ['bureau', 6]]],
     ['The socialist camp', 'Treaties of friendship with every red government, and advisers to keep them friendly.', [['subvertNb', 10], n2('Suyan', 'bloc'), ['threat', 6]]],
-    ['The union of all soviets', 'Any people that rises may join. Some have been helped to rise.', [['claimsAll'], M('atk', 0.06, 'The red army'), ['glory', 12], E('Fortress of the World Revolution')]],
+    ['The union of all councils', 'Any people that rises may join. Some have been helped to rise.', [['claimsAll'], M('atk', 0.06, 'The red army'), ['glory', 12], E('Fortress of the World Revolution')]],
     ['The atomic programme', 'A closed city in the forest, a thousand scientists, and a deadline from the Leader.', [['techUp', 'mil'], M('sci', 0.06, 'The closed cities')]],
     ['The second superpower', 'Rockets, reactors and a parade that takes six hours.', [['build', B.SILO, 1], M('def', 0.08, 'Strategic parity'), ['threat', 10], E('The Second Superpower')]]);
   T('ka_d_commune',
@@ -253,7 +253,7 @@
     ['Export the faith', 'Preachers, money and printing presses for the faithful of every neighbouring state.', [['subvertNb', 10], ['threat', 6]]],
     ['Commander of the faithful', 'The faithful of three countries pray toward our holy city, and answer to its council.', [['claimsAll'], ['glory', 10], M('def', 0.06, 'Martyrs’ brigades'), E('Commander of the Faithful')]],
     ['The pious foundations', 'The oil money given to the shrines, and the shrines running the hospitals and the schools.', [M('ls', 2, 'Pious foundations'), M('unrest', -3, 'Charity')]],
-    ['The just economy', 'No interest, no usury, and a tax on wealth collected by the mosque.', [M('rev', 0.06, 'Religious tax'), L(5, 'The just economy'), E('The Just Realm')]]);
+    ['The just economy', 'No interest, no usury, and a tax on wealth collected by the shrine.', [M('rev', 0.06, 'Religious tax'), L(5, 'The just economy'), E('The Just Realm')]]);
   T('ir_d_shah',
     ['The royal fund', 'The crown’s share of every barrel goes into a fund only the shah may open.', [['gold', 250], M('rev', 0.06, 'The oil crown')]],
     ['The great army', 'Jets, tanks and advisers bought for cash, in quantity.', [M('atk', 0.06, 'The great army'), ['equip', 0.1], ['threat', 6]]],
@@ -364,7 +364,7 @@
 
   /* ================================================================ the old lands */
   T('va_d_empire',
-    ['The sword of the founder', 'The new sultan girded at the old mosque by the straits. The bells of the other faiths ring too, by order.', [['tradition', 12], L(5, 'The sword'), ['sup', 'clergy', 6]]],
+    ['The sword of the founder', 'The new sultan girded at the old shrine by the straits. The bells of the other faiths ring too, by order.', [['tradition', 12], L(5, 'The sword'), ['sup', 'clergy', 6]]],
     ['The provinces recalled', 'Envoys to every land the empire once ruled, with gifts and with maps.', [['subvertNb', 10], ['claim', 'Baskhar'], ['claim', 'Tyrrha']]],
     ['The empire of many peoples', 'The old provinces return as autonomous districts. Most of them were not asked.', [['claimsAll'], M('atk', 0.05, 'The imperial army'), ['glory', 12], E('Shadow of God on Earth')]],
     ['The straits fortified', 'Guns on both shores of the straits, and a toll for every hull.', [['build', B.FORT, 2], M('rev', 0.05, 'Strait dues')]],
@@ -398,7 +398,7 @@
     ['The clinics become ministries', 'The brotherhood’s doctors, teachers and accountants take over the state’s offices.', [M('eff', 0.04, 'The brotherhood’s clerks'), ['sup', 'clergy', 10], ['corr', -6]]],
     ['The call abroad', 'Brotherhood branches in every country of the Old Lands.', [['subvertNb', 10], ['threat', 6]]],
     ['The guided nation', 'The faith as law from the delta to the desert, and preached beyond both.', [['claimsAll'], ['glory', 10], E('The Guided Nation')]],
-    ['Charity as policy', 'The alms tax collected by the state and spent by the mosque.', [M('ls', 2, 'Charity'), M('unrest', -3, 'Charity')]],
+    ['Charity as policy', 'The alms tax collected by the state and spent by the shrine.', [M('ls', 2, 'Charity'), M('unrest', -3, 'Charity')]],
     ['The virtuous republic', 'No bars, no casinos, no bribes, and very little argument.', [L(6, 'Virtue'), ['law', 'press', 'censored'], ['corr', -6], E('The Virtuous Republic')]]);
 
   T('bk_d_republic',
@@ -460,7 +460,7 @@
 
   T('sa_d_kingdom',
     ['The custodian’s treasury', 'The pilgrims’ fees and the oil royalties in one treasury.', [['gold', 200], ['sup', 'clergy', 8]]],
-    ['The banker of the faith', 'Mosques, schools and charities funded abroad, through banks of our own.', [['subvertNb', 8], ['opAll', 3], ['gold', -100], M('trade', 0.03, 'The faithful’s banks')]],
+    ['The banker of the faith', 'Shrines, schools and charities funded abroad, through banks of our own.', [['subvertNb', 8], ['opAll', 3], ['gold', -100], M('trade', 0.03, 'The faithful’s banks')]],
     ['The voice of the faithful', 'Every faithful government asks Sahrem’s opinion first.', [['glory', 10], M('trade', 0.06, 'The faithful bloc'), E('Banker of the Faith')]],
     ['The pilgrimage expanded', 'A new airport, new hotels, a million pilgrims a year.', [M('trade', 0.06, 'The pilgrimage'), ['build', B.CITY, 1]]],
     ['The holy cities rebuilt', 'Marble courts large enough for every pilgrim alive.', [L(6, 'The custodian'), M('unrest', -4, 'Piety'), E('Builder of the Holy Cities')]]);
@@ -564,7 +564,7 @@
     ['The anointing', 'The ruler anointed with the oil of the old kings.', [['tradition', 10], ['sup', 'clergy', 8], L(5, 'The anointing')]],
     ['The knightly orders', 'The old orders of knighthood revived, with rifles.', [M('atk', 0.05, 'The orders'), ['subvertNb', 6]]],
     ['Defender of the faith', 'The faithful of every neighbouring land look to {N}.', [['claimsAll'], ['glory', 10], E('Defender of the Faith')]],
-    ['The parish state', 'Schools, alms and registers run by the church.', [M('unrest', -3, 'The parishes'), M('ls', 1, 'Charity')]],
+    ['The parish state', 'Schools, alms and registers run by the temple.', [M('unrest', -3, 'The parishes'), M('ls', 1, 'Charity')]],
     ['The realm at prayer', 'An old, pious, unchanging country.', [L(6, 'The realm at prayer'), M('unrest', -3, 'Piety'), E('The Realm at Prayer')]]);
   T('fc_d_crown',
     ['The imperial court', 'A court of a thousand titles.', [['tradition', 12], ['sup', 'capital', 4]]],
@@ -619,11 +619,11 @@
 
   /* ================================================================ the middle of each road, and the finales */
   X('au_d_crown',
-    ['The congress of the faithful', 'Bishops of every border church meet in the capital and bless our maps.', [['subvertNb', 8], ['sup', 'clergy', 6]]],
+    ['The congress of the faithful', 'High priests of every border temple meet in the capital and bless our maps.', [['subvertNb', 8], ['sup', 'clergy', 6]]],
     ['The southern army', 'Railways to the southern frontier, a depot at every junction.', [['build', B.FORT, 1], M('speed', 0.05, 'The southern railways')]],
     ['The emperor’s bank', 'A crown bank lends to every province at the emperor’s rate.', [M('rev', 0.04, 'The crown bank'), ['gold', 100]]],
     ['Parish schools', 'A school in every village, teaching letters, sums and loyalty.', [M('sci', 0.04, 'Parish schools'), ['sup', 'peasants', 6], ['tradition', 4]]],
-    ['The imperial jubilee', 'Fifty years of the restored crown, celebrated in every church and barracks.', [L(4, 'The jubilee'), ['glory', 8], ['opAll', 3]]],
+    ['The imperial jubilee', 'Fifty years of the restored crown, celebrated in every temple and barracks.', [L(4, 'The jubilee'), ['glory', 8], ['opAll', 3]]],
     ['The heir of the restoration', 'The heir is trained for war, for prayer and for the ledger.', [M('coup', -0.2, 'A trained heir'), ['tradition', 8], M('eff', 0.03, 'The heir’s ministers'), E('The Restored Throne')]]);
   X('au_d_commonwealth',
     ['Schools in every tongue', 'Primers printed in fourteen languages, and teachers for all of them.', [M('sci', 0.04, 'Schools in every tongue'), ['sup', 'intelligentsia', 6]]],
@@ -709,7 +709,7 @@
     ['Relay stations abroad', 'Communes in other countries host a node of the mesh.', [['subvertNb', 6], M('trade', 0.03, 'The foreign nodes')]],
     ['The federal bandwidth', 'A treaty that gives every free commune a share of the wire.', [n2('Vess', 'treaty'), n2('Norvik', 'treaty')]],
     ['The citizens’ terminals', 'Every household votes, argues and drafts laws from the kitchen table.', [['particip', 6], M('sci', 0.03, 'Citizens’ terminals')]],
-    ['The open budget', 'Every franc the cantons spend, published on the wire the day it is spent.', [['corr', -10], L(3, 'The open budget')]],
+    ['The open budget', 'Every coin the cantons spend, published on the wire the day it is spent.', [['corr', -10], L(3, 'The open budget')]],
     ['The mesh congress', 'A congress with no hall, no chair and no closing date.', [['glory', 6], ['opAll', 3]]],
     ['Nobody at the centre', 'Fifty years without a capital, and the trains still run.', [M('eff', 0.04, 'No centre'), L(4, 'Nobody at the centre'), E('The Federation With No Centre')]]);
 
@@ -868,7 +868,7 @@
     ['The trusted century', 'The country that started two wars is now the one every neighbour calls first.', [M('trade', 0.04, 'Trust'), M('unrest', -2, 'Trust'), E('The Forgiven Nation')]]);
 
   X('ir_d_holy',
-    ['The faithful’s militias', 'A militia of volunteers in every mosque, answering to the council.', [M('regen', 0.1, 'The faithful’s militias'), ['threat', 4]]],
+    ['The faithful’s militias', 'A militia of volunteers in every shrine, answering to the council.', [M('regen', 0.1, 'The faithful’s militias'), ['threat', 4]]],
     ['The pilgrims’ road', 'Pilgrims from every neighbouring land travel to the holy city, and take its sermons home.', [M('trade', 0.03, 'Pilgrims'), ['subvertNb', 4]]],
     ['The seminaries', 'Seminaries that teach law, medicine and the faith together.', [['sup', 'clergy', 6], M('sci', 0.02, 'Seminaries')]],
     ['The alms granaries', 'Grain collected as alms and stored against the dry years.', [M('food', 0.04, 'Alms granaries')]],
@@ -904,7 +904,7 @@
     ['The Marshal’s centenary', 'A hundred years since his birth. The general staff unveils the largest statue yet.', [['charisma', 6], ['glory', 6]]],
     ['The staff’s succession', 'The seven generals become seven different generals, and the empty chair stays empty.', [M('coup', -0.2, 'The staff’s succession'), L(3, 'Continuity'), E('The Staff Eternal')]]);
   X('pa_d_republic',
-    ['The valley budgets', 'Each valley spends its own taxes, and publishes the accounts on the church door.', [['corr', -6], M('eff', 0.02, 'Valley budgets')]],
+    ['The valley budgets', 'Each valley spends its own taxes, and publishes the accounts on the temple door.', [['corr', -6], M('eff', 0.02, 'Valley budgets')]],
     ['The referendum', 'Any law may be put to the whole people if enough valleys ask.', [['particip', 6], L(2, 'The referendum')]],
     ['The ski resorts', 'The Marshal’s hunting lodges turned into hotels for foreign skiers.', [M('trade', 0.03, 'Ski resorts'), ['gold', 60]]],
     ['The tunnel under the pass', 'A tunnel through the mountain that once kept the world out.', [['build', B.CITY, 1], M('prod', 0.03, 'The tunnel')]],
@@ -1148,7 +1148,7 @@
   X('za_d_revolution',
     ['The volunteers’ brigades', 'Volunteers sworn to the revolution, in brigades of their own.', [M('atk', 0.03, 'The volunteers'), M('regen', 0.1, 'Volunteer brigades')]],
     ['The missile programme', 'Missiles that can reach every enemy capital in the region.', [['techUp', 'mil'], ['threat', 6]]],
-    ['The construction crusade', 'Volunteers build roads, clinics and wells in every village.', [['build', B.CITY, 1], M('food', 0.02, 'The construction crusade')]],
+    ['The construction campaign', 'Volunteers build roads, clinics and wells in every village.', [['build', B.CITY, 1], M('food', 0.02, 'The construction campaign')]],
     ['The martyrs’ foundation', 'Pensions and houses for the families of the fallen.', [['sup', 'peasants', 4], M('ls', 1, 'The martyrs’ foundation')]],
     ['The anniversary of the revolution', 'Every city marches on the day the Shah left.', [['fervor', 8], ['glory', 4]]],
     ['The guardianship’s succession', 'The jurist dies. The council names another, and the revolution goes on.', [M('coup', -0.2, 'Succession'), L(3, 'Succession'), E('The Lasting Guardianship')]]);
@@ -1226,7 +1226,7 @@
   X('fc_d_holy',
     ['The orders’ estates', 'Lands granted to the knightly orders, farmed for the faith.', [M('food', 0.03, 'The orders’ estates'), ['sup', 'clergy', 4]]],
     ['The crusading fleet', 'Ships blessed for the defence of the faithful overseas.', [M('navy', 0.2, 'The crusading fleet'), ['threat', 4]]],
-    ['The cathedral schools', 'Schools in the shadow of every cathedral.', [M('sci', 0.02, 'Cathedral schools'), ['tradition', 4]]],
+    ['The temple schools', 'Schools in the shadow of every great temple.', [M('sci', 0.02, 'Temple schools'), ['tradition', 4]]],
     ['The pilgrimage roads', 'Roads and hostels for the pilgrims.', [M('trade', 0.03, 'Pilgrimage roads')]],
     ['The holy jubilee', 'A year of pardons and processions.', [['tradition', 8], L(3, 'The holy jubilee')]],
     ['The faith kept', 'The realm prays as it prayed a century ago.', [M('unrest', -2, 'The faith kept'), ['glory', 4], E('Keeper of the Faith')]]);
@@ -1241,7 +1241,7 @@
     ['The crown’s engineers', 'A royal corps of engineers for roads, bridges and power.', [M('sci', 0.03, 'The crown’s engineers')]],
     ['The royal export fair', 'A fair under the king’s patronage, for {A} goods.', [M('trade', 0.04, 'The royal fair')]],
     ['The royal charities', 'Charities in every town, under the royal family’s name.', [M('ls', 1, 'Royal charities'), M('unrest', -1, 'Royal charities')]],
-    ['The crown on the radio', 'The king speaks to the nation every Christmas.', [L(2, 'The crown on the radio'), ['sup', 'workers', 4]]],
+    ['The crown on the radio', 'The king speaks to the nation every midwinter.', [L(2, 'The crown on the radio'), ['sup', 'workers', 4]]],
     ['The silver jubilee', 'Twenty-five years of the modern crown.', [L(3, 'The silver jubilee'), ['tradition', 4]]],
     ['A crown for a new century', 'An old crown that has learned every new trick.', [M('eff', 0.02, 'A modern crown'), M('unrest', -2, 'A modern crown'), E('A Crown for the New Century')]]);
   X('fu_d_greater',

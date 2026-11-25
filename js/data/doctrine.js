@@ -147,7 +147,7 @@
     high: 'High momentum wins votes and frightens investors.',
     acts: [
       { id: 'ds_march', name: 'March for the programme', desc: 'A million people in the avenue, with banners from every union and every neighbourhood.', cost: { gold: 30 }, cd: 18, sig: 12, fx: [['particip', 6], ['sup', 'capital', -4]], ai: (n, v) => v < 45 },
-      { id: 'ds_talks', name: 'Talks with the centre', desc: 'Sit down with the Christian democrats, the shopkeepers and the professional officers. Explain that the programme has room for them.', cost: { auth: 10 }, cd: 24, sig: -8, fx: [['sup', 'capital', 8], ['sup', 'clergy', 6], ['sup', 'military', 4]], ai: (n) => S(n, 'military') < 40 || S(n, 'capital') < 30 },
+      { id: 'ds_talks', name: 'Talks with the centre', desc: 'Sit down with the pious democrats, the shopkeepers and the professional officers. Explain that the programme has room for them.', cost: { auth: 10 }, cd: 24, sig: -8, fx: [['sup', 'capital', 8], ['sup', 'clergy', 6], ['sup', 'military', 4]], ai: (n) => S(n, 'military') < 40 || S(n, 'capital') < 30 },
       { id: 'ds_particip', name: 'Workers’ participation', desc: 'Elected workers on the board of every nationalised firm.', cost: { auth: 10 }, cd: 36, sig: 8, fx: [['sup', 'workers', 6], ['mod', 'prod', 0.02, 36, 'Participation'], ['sup', 'capital', -6]], ai: (n) => S(n, 'workers') < 50 },
     ],
     war: { name: 'Citizens in arms', desc: 'Defending the republic unites it; conquering for it does not. War weariness grows a fifth slower, home defence is a little stronger, and offensives abroad cost a little more.', dp: { wePace: 0.8, homeDef: 1.08, aloss: 1.05 } },
@@ -272,7 +272,7 @@
 
   const FAV = {
     nobles: { name: 'the old nobility', fx: { legit: 3, stab: 2, prod: -0.02 } },
-    church: { name: 'the church', fx: { unrest: -3, sci: -0.04, legit: 2 } },
+    church: { name: 'the temple', fx: { unrest: -3, sci: -0.04, legit: 2 } },
     generals: { name: 'the generals', fx: { atk: 0.06, coup: -0.15, rev: -0.03 } },
     reformers: { name: 'the reformers', fx: { eff: 0.05, prod: 0.03, legit: -2, opp: -0.05 } },
   };
@@ -288,7 +288,7 @@
     high: 'A strong royal will: obedient ministers and quiet streets.',
     acts: [
       favAct('nobles', 'the old nobility', 'The great families take the ministries again. Tradition is served; so are they.', [['sup', 'peasants', -4], ['tradition', 4]]),
-      favAct('church', 'the church', 'The metropolitan sits on the council; censorship of books passes to the synod.', [['sup', 'clergy', 8], ['sup', 'intelligentsia', -6]]),
+      favAct('church', 'the temple', 'The high priest sits on the council; censorship of books passes to the priests’ council.', [['sup', 'clergy', 8], ['sup', 'intelligentsia', -6]]),
       favAct('generals', 'the generals', 'The war ministry gets what it asks for, and the general staff a seat beside the throne.', [['sup', 'military', 8], ['gold', -40]]),
       favAct('reformers', 'the reformers', 'A modernising minister with a plan for railways, schools and a land bank.', [['sup', 'intelligentsia', 6], ['sup', 'capital', 4], ['tradition', -6]]),
       { id: 'am_dismiss', name: 'Dismiss the ministers', desc: 'The whole cabinet goes at once, blamed for everything that went wrong. The sovereign is above reproach.', cost: {}, cd: 36, sig: 8, fx: [['auth', 10], ['stab', 2], ['corr', -4], ['sup', 'bureaucracy', -8]], ai: (n) => n.stab < 40 },

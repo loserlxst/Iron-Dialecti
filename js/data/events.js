@@ -157,12 +157,12 @@
       { label: 'A distant command', fx: [['prestige', -20], ['sup', 'military', -8]] },
       { label: 'Arrest him', can: (n) => hardSec(n), fx: [['prestige', -40], ['sup', 'military', -16], ['grievance', 6], ['mod', 'atk', -0.05, 12, 'Arrested commander']] },
     ] });
-  ev({ id: 'bishops_letter', title: 'A pastoral letter', text: 'Read from every pulpit on Sunday: the bishops warn the faithful against "those who would build the city without God".', cd: 72,
+  ev({ id: 'bishops_letter', title: 'A pastoral letter', text: 'Read from every pulpit on Sunday: the high priests warn the faithful against "those who would build the city without God".', cd: 72,
     w: (n) => (S(n, 'clergy') < 40 && Pw(n, 'clergy') > 7 && !law(n, 'religion', 'statechurch') ? 5 : 0),
     opts: [
       { label: 'Negotiate a concordat', fx: [['sup', 'clergy', 14], ['sup', 'intelligentsia', -6], ['tradition', 4]] },
       { label: 'Ignore it', fx: [['legitmod', -4, 12, 'Denounced from the pulpit'], ['sup', 'peasants', -4]] },
-      { label: 'Arrest the bishops', can: (n) => !law(n, 'security', 'liberties'), fx: [['sup', 'clergy', -18], ['sup', 'peasants', -8], ['grievance', 6], ['fervor', 4]] },
+      { label: 'Arrest the high priests', can: (n) => !law(n, 'security', 'liberties'), fx: [['sup', 'clergy', -18], ['sup', 'peasants', -8], ['grievance', 6], ['fervor', 4]] },
     ] });
   ev({ id: 'student_protests', title: 'The universities are out', text: 'Lecture halls are occupied and the students have a list of demands that begins with the rector and ends with the government.', cd: 60,
     w: (n) => (S(n, 'intelligentsia') < 42 && n.nb[1] >= 2 ? 5 : 0),
@@ -570,7 +570,7 @@
   conc('peasants', 'Cancel rural debts', 'Wipe out what the villages owe.', { gold: 50, auth: 6 }, [['sup', 'peasants', 12], ['sup', 'capital', -6]]);
   conc('capital', 'Tax holiday', 'A year of relief for business.', { auth: 8 }, [['sup', 'capital', 14], ['sup', 'workers', -5], ['mod', 'rev', -0.08, 12, 'Tax holiday']]);
   conc('military', 'New colours, new pay', 'Raise pay and honour the regiments.', { gold: 80, auth: 6 }, [['sup', 'military', 12], ['prestige', 4]]);
-  conc('clergy', 'Endow the church', 'Lands and stipends for the clergy.', { gold: 50, auth: 6 }, [['sup', 'clergy', 12], ['sup', 'intelligentsia', -5], ['tradition', 2]]);
+  conc('clergy', 'Endow the temples', 'Lands and stipends for the clergy.', { gold: 50, auth: 6 }, [['sup', 'clergy', 12], ['sup', 'intelligentsia', -5], ['tradition', 2]]);
   conc('intelligentsia', 'Academy charter', 'Autonomy and funds for the academies.', { gold: 50, auth: 6 }, [['sup', 'intelligentsia', 12], ['grievance', -3], ['sup', 'bureaucracy', -3]]);
   conc('bureaucracy', 'Promotions and privileges', 'Ranks, flats and special shops.', { gold: 50, auth: 6 }, [['sup', 'bureaucracy', 12], ['corr', 5], ['bureau', 4]]);
 
@@ -652,7 +652,7 @@
     ideos: ['absmon', 'conmon'], fx: [['tradition', 5], ['sup', 'clergy', 4], ['sup', 'peasants', 4], ['mod', 'unrest', -3, 12, 'Royal progress']] });
   dec({ id: 'holy_war', name: 'Preach the holy war', desc: 'The guardians call the faithful to arms.', cost: { auth: 20 }, cd: 60,
     ideos: ['theocracy'], fx: [['mod', 'atk', 0.12, 24, 'Zeal'], ['sup', 'clergy', 6], ['opAll', -5], ['fervor', 10]] });
-  dec({ id: 'missionaries', name: 'Send missionaries', desc: 'Preachers cross the borders to the pious poor.', cost: { gold: 50 }, cd: 24,
+  dec({ id: 'missionaries', name: 'Send preachers', desc: 'Preachers cross the borders to the pious poor.', cost: { gold: 50 }, cd: 24,
     ideos: ['theocracy'], fx: [['fn', (G, n) => { for (const k in G.border[n.id] || {}) { const o = G.nations[+k]; if (!o.alive || o.ideo === 'theocracy') continue; for (let p = 1; p < G.provinces.length; p++) { const Pr = G.provinces[p]; if (Pr.owner === o.id && Pr.urban < 0.3 && G.rng.chance(0.4)) { if (Pr.oppStr < 30) { Pr.opp = 'theocracy'; Pr.sponsor = n.id; } if (Pr.opp === 'theocracy') Pr.oppStr = Math.min(100, Pr.oppStr + 12); } } } }], ['note', 'Theocratic movements grow in rural provinces next door']] });
   dec({ id: 'harvest_festival', name: 'Great harvest festival', desc: 'Every village sends its best to the capital.', cost: { gold: 30 }, cd: 24,
     ideos: ['agrarian'], fx: [['tradition', 4], ['sup', 'peasants', 5], ['particip', 3]] });

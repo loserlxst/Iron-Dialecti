@@ -144,7 +144,7 @@
     const K = Sv.KIND[n.dep.kind], dp = n.dep, era = ID.eraOf(G.tick);
     // tribute: a share of revenue and of what the oil earns
     const take = Math.max(0, (n.rev || 0) + (n.a.oilInc || 0)) * dp.share;
-    if (take > 0) { n.gold -= take; over.gold += take; n.a.tribute = take; } else n.a.tribute = 0;
+    if (take > 0) { ID.flow(n, 'Tribute to ' + over.base, -take); ID.flow(over, 'Tribute from ' + n.base, take); n.a.tribute = take; } else n.a.tribute = 0;
     // the garrison: protection and quiet, and the reminder of who rules
     if (dp.gar > 0) { Sv.setMod(n, 'def', 0.1 * dp.gar, 'The ' + over.adj + ' garrison'); Sv.setMod(n, 'unrest', -3 * dp.gar, 'The ' + over.adj + ' garrison'); }
     if (K.aid) { n.gold += 4; Sv.setMod(n, 'trade', 0.04, 'A friend with a base'); }
@@ -245,8 +245,8 @@
       let v = P.oil * price;
       if (n.a.embargoed && G.tick < n.a.embargoed) v *= n.a.embargoBuyer ? 0.6 : 0.3;
       const co = P.oilCo && P.oilCo !== n.id ? alive(G, P.oilCo) : null;
-      if (co && !ID.atWar(G, co.id, n.id)) { const c = v * (P.oilShare || 0.7); co.gold += c; co.a.oilCoInc += c; v -= c; }
-      n.gold += v; n.a.oilInc += v;
+      if (co && !ID.atWar(G, co.id, n.id)) { const c = v * (P.oilShare || 0.7); ID.flow(co, 'Oil concessions abroad', c); co.a.oilCoInc += c; v -= c; }
+      ID.flow(n, 'Oil', v); n.a.oilInc += v;
     }
   }
   Sv.discover = function (G, P) {
@@ -254,7 +254,7 @@
     const n = alive(G, P.owner); if (!n) return;
     n.flags.oil = 1;
     ID.news(G, 'Oil is struck in ' + n.name + '.', 'eco', n.id);
-    if (n.id === G.player) ID.headline(G, { kicker: 'A gusher', title: 'Oil in ' + n.base, sub: 'A column of black oil higher than the minarets. Foreign companies will be at the door within the week.', a: n.id, tone: 'good' });
+    if (n.id === G.player) ID.headline(G, { kicker: 'A gusher', title: 'Oil in ' + n.base, sub: 'A column of black oil higher than the shrine towers. Foreign companies will be at the door within the week.', a: n.id, tone: 'good' });
     else if (ID.Press && ID.eraOf(G.tick) >= 1) ID.Press.add(G, { w: 2, kind: 'eco', a: n.id, key: 'oil' + n.id, gap: 3600, title: 'Oil in ' + n.base, text: 'Drillers working for ' + (P.oilCo && G.nations[P.oilCo] ? 'a ' + G.nations[P.oilCo].adj + ' company' : 'the government') + ' have struck oil in ' + n.name + '. Geologists say the field is large. Diplomats say the country has just become interesting.' });
     // whoever already holds sway takes the concession
     if (!P.oilCo) { const over = Sv.over(G, n); if (over) { P.oilCo = over.id; P.oilShare = 0.75; } }

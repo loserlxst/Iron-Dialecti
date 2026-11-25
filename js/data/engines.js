@@ -268,7 +268,7 @@
       const x = n.sigx; if (x.q == null) x.q = 1; if (x.ineq == null) x.ineq = 20;
       const m = MS_SHARE[x.q];
       keep(n, 'The market share', 'prod', m * 0.16);
-      n.gold += (n.ind || 0) * m * 0.015;
+      ID.flow(n, 'Market sales', (n.ind || 0) * m * 0.015);
       x.ineq = clamp(x.ineq + m * 1.6 - 0.45, 0, 100);
       keep(n, 'Inequality', 'unrest', Math.max(0, x.ineq - 40) * 0.08);
       n.corr = clamp(n.corr + Math.max(0, x.ineq - 50) * 0.01, 0, 100); // the princelings

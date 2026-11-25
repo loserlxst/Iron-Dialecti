@@ -47,7 +47,7 @@
   vary('bread_riots', [
     ['The market is sacked', 'A dealer raised the price of flour twice in one morning. By noon his stall was firewood and the crowd had moved on to the grain merchants’ warehouses by the river.'],
     ['Queues in the industrial suburbs', 'The night shift came off to find the bakeries empty again. They did not go home. They went, eleven thousand of them, to the town hall, and they have taken the mayor’s keys.'],
-    ['The hunger march', 'Columns of the unemployed and their families are walking on the capital from the mill towns, sleeping in church halls. They are orderly, hungry, and three days away.', ['Feed them from the state granaries', 'Turn them back at the bridges', 'Blame the speculators']],
+    ['The hunger march', 'Columns of the unemployed and their families are walking on the capital from the mill towns, sleeping in temple halls. They are orderly, hungry, and three days away.', ['Feed them from the state granaries', 'Turn them back at the bridges', 'Blame the speculators']],
   ]);
   vary('student_protests', [
     ['A professor is dismissed', 'The ministry removed a popular professor for a lecture nobody has read. The students have barricaded the faculty, the staff are divided, and the engineering school has sent delegates with a printing press.'],
@@ -169,7 +169,7 @@
       { label: 'Let the owners rebuild as they can', fx: [['sup', 'capital', 2], ['sup', 'workers', -4], ['mod', 'trade', -0.05, 18, 'The burnt port']] },
     ] });
   ev({ id: 'v_winter', tone: 'bad', theme: 'nature', title: 'The winter of the wolves', cd: 130,
-    text: 'The coldest winter in sixty years. The canals froze in November, coal cannot be moved, and in the hill villages the wolves are coming down to the churchyards.',
+    text: 'The coldest winter in sixty years. The canals froze in November, coal cannot be moved, and in the hill villages the wolves are coming down to the graveyards.',
     w: () => 1.2,
     opts: [
       { label: 'Requisition coal for the towns', fx: [['sup', 'workers', 5], ['sup', 'capital', -5], ['gold', -30]] },
@@ -249,7 +249,7 @@
       { label: 'Build a national stadium', fx: [['gold', -70], ['legitmod', 3, 36, 'The national stadium'], ['sup', 'workers', 4]] },
     ] });
   ev({ id: 'v_pilgrims', tone: 'mixed', theme: 'faith', title: 'The pilgrimage', cd: 130,
-    text: 'A shepherd girl has seen something on a hillside, and a hundred thousand people have come to stand where she stood. The bishop is cautious, the innkeepers are not, and the prefect wants to know whether it is a religious matter or a public order one.',
+    text: 'A shepherd girl has seen something on a hillside, and a hundred thousand people have come to stand where she stood. The high priest is cautious, the innkeepers are not, and the prefect wants to know whether it is a religious matter or a public order one.',
     w: (n) => (n.tradition > 35 ? 1.4 : 0.5),
     opts: [
       { label: 'Send the ruler to kneel there', fx: [['sup', 'clergy', 8], ['sup', 'peasants', 5], ['sup', 'intelligentsia', -5], ['tradition', 3]] },
@@ -265,7 +265,7 @@
       { label: 'Seize the copies', fx: [['sup', 'intelligentsia', -5], ['grievance', 4]] },
     ] });
   ev({ id: 'v_airship', tone: 'good', sfx: 'good', theme: 'crowd', title: 'The airship comes', cd: 300, once: 1,
-    text: 'A foreign airship, the length of two cathedrals, is crossing the country on a goodwill flight. Schools are closed so the children can watch it pass. The general staff is watching it too.',
+    text: 'A foreign airship, the length of two great temples, is crossing the country on a goodwill flight. Schools are closed so the children can watch it pass. The general staff is watching it too.',
     w: (n, G) => (ID.eraOf(G.tick) <= 1 ? 1.1 : 0),
     opts: [
       { label: 'A reception at the aerodrome', fx: [['opAll', 3], ['sup', 'intelligentsia', 3]] },
@@ -384,7 +384,7 @@
     ] });
   // session 10: the dispatches that still came round most often get more faces
   vary('bumper_harvest', [
-    ['The granaries overflow', 'The co-operatives have run out of sacks and the railways out of wagons. In the south they are storing wheat in the churches.'],
+    ['The granaries overflow', 'The co-operatives have run out of sacks and the railways out of wagons. In the south they are storing wheat in the temples.'],
     ['A year of plenty', 'The old men say they have not seen a harvest like it since they were boys. The price of bread has fallen for the first time in a decade.'],
   ]);
   vary('record_year', [

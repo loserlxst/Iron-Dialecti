@@ -258,7 +258,7 @@
         [1, 2, 3, 4, 5].map((s) => '<button class="b spd spdn" data-act="speed" data-a="' + s + '" id="b-spd' + s + '"' + tip('<b>Speed ' + s + '</b> <span class="dim">(key ' + s + ')</span><br>' + ID.SPEEDS[s] + ' days per second') + '>' + s + '</button>').join('') + '</div>';
     }
     const set = (id, html) => { const el = document.getElementById(id); if (el && el.innerHTML !== html) el.innerHTML = html; };
-    const net = n.net;
+    const net = ID.balance(n);
     set('sv-gold', ID.fmt(n.gold) + '<small class="' + (net >= 0 ? 'good' : 'bad') + '">' + (net >= 0 ? '+' : '−') + Math.abs(net).toFixed(net > -10 && net < 10 ? 1 : 0) + '</small>');
     set('sv-ind', ID.fmt(n.ind) + '<small' + (n.a.wrecks ? ' class="bad">' + n.a.wrecks + ' wrecked' : '>' + n.nb[B.FACTORY] + ' works') + '</small>');
     const hv = ID.Economy.harvest(n);
@@ -291,9 +291,11 @@
       '<div class="kv"><span>Last month</span><b></b>' + row('Factories made', a.armsMade || 0, 'good') + row('Bought abroad', a.armsImp || 0, 'good') + row('Captured', a.lootM || 0, 'good') + row('Aged out (1/24)', -(a.arsAged || 0)) + row('Burned at war' + (n.nwars ? ' (' + (ID.Combat.POSTURE[n.posture] || {}).name + ')' : ''), -(a.burn || 0), 'bad') + row('Lost with the fallen', -(a.arsLost || 0), 'bad') + row('Shells and bombs', -(a.shellsM || 0), 'bad') + '</div>' +
       '<span class="dim">Arms are limited by your ' + (lim === 'factories' ? '<span class="warn">factories (' + cap.toFixed(1) + ' a month)</span>: build or repair them, or buy from friendly partners' : 'arms budget (' + paid.toFixed(1) + ' a month): raise its share') + '. At war the army burns about ' + Math.round(E.ARS.war * E.ARS.player * 100) + '% of a month’s needs each month it fights (offensive ×1.3, dig in ×0.7), plus the kit of every soldier lost; build the arsenal up before you need it.</span>';
   };
+  /* Last month's money outside the budget (oil, tribute, repairs, debt), as kv rows. */
+  UI.flowRows = (n) => Object.entries(n.a.flow || {}).filter((e) => Math.abs(e[1]) >= 0.05).map(([k, v]) => '<span>' + esc(k) + '</span><b>' + UI.sg(v, 1) + '</b>').join('');
   UI.topTips = function () {
     const G = UI.G, n = P(), I = ID.ideo(n); const st = (id, html) => { const el = document.getElementById('st-' + id); if (el) el.setAttribute('data-tip', html); };
-    st('gold', '<h5>Treasury</h5>Gold in hand and the monthly balance.' + '<hr><div class="kv"><span>Revenue</span><b>' + n.rev.toFixed(1) + '</b><span>Spending</span><b>' + n.exp.toFixed(1) + '</b><span>of which upkeep</span><b>' + (n.a.upkeep || 0).toFixed(1) + '</b>' + (n.debt > 1 ? '<span>Debt</span><b class="bad">' + Math.round(n.debt) + ' / ' + Math.round(ID.Economy.debtCap(n)) + '</b>' : '') + '</div><hr><span class="dim">' + esc(ID.ECON[I.econ.model].name) + ': ' + esc(ID.ECON[I.econ.model].levers) + '</span>');
+    st('gold', '<h5>Treasury</h5>Gold in hand and the monthly balance.' + '<hr><div class="kv"><span>Revenue</span><b>' + n.rev.toFixed(1) + '</b><span>Spending</span><b>' + n.exp.toFixed(1) + '</b><span>of which upkeep</span><b>' + (n.a.upkeep || 0).toFixed(1) + '</b>' + UI.flowRows(n) + '<span>Balance</span><b>' + UI.sg(ID.balance(n), 1) + '</b>' + (n.debt > 1 ? '<span>Debt</span><b class="bad">' + Math.round(n.debt) + ' / ' + Math.round(ID.Economy.debtCap(n)) + '</b>' : '') + '</div><hr><span class="dim">' + esc(ID.ECON[I.econ.model].name) + ': ' + esc(ID.ECON[I.econ.model].levers) + '</span>');
     st('ind', '<h5>Industry</h5>Monthly industrial output from ' + n.nb[B.FACTORY] + ' factories and ' + n.nb[B.CITY] + ' cities. Every factory also adds to the workers’ political power.<hr><div class="kv"><span>Industrial capacity</span><b>' + Math.round(n.a.ic || 0) + '</b><span>Arms it can make</span><b>' + (n.a.armsCap || 0).toFixed(1) + '/mo</b><span>Efficiency</span><b>' + Math.round(n.eff * 100) + '%</b><span>Total output</span><b>' + Math.round(n.gdp) + '</b><span>World rank</span><b>#' + ID.rankOf(G, n, 'ind') + '</b></div>' +
       '<span class="dim">Capacity = factories by condition × 12 × (1 + 0.1 × industrial technology) × ore.</span>' + (n.a.wrecks || n.a.damaged ? '<hr><span class="bad">' + (n.a.wrecks ? n.a.wrecks + ' wrecked' : '') + (n.a.wrecks && n.a.damaged ? ', ' : '') + (n.a.damaged ? n.a.damaged + ' damaged' : '') + '</span> buildings: damaged ones mend by themselves (paid from the treasury); wrecked ones need rebuilding (select them, or use the alert).' : ''));
     const gm = ID.Economy.grainMonths(n), hv = ID.Economy.harvest(n);
@@ -528,7 +530,7 @@
     if (n.famine) add('<b>Famine</b>: food at ' + Math.round(n.foodBal * 100) + '%', 'eco', true); else if (n.foodBal < 1) add('<b>Food short</b>: ' + Math.round(n.foodBal * 100) + '% of need', 'eco', true);
     else if (gml < 12) add(n.grain < 0.05 ? '<b>Granaries empty</b>: buying grain abroad' : '<b>Granaries emptying</b>: ' + Math.round(gml) + ' months left', 'eco', n.grain >= 0.05 && gml < 4);
     if (n.debt > ID.Economy.debtCap(n) * 0.75) add('<b>Debt</b> near its limit', 'eco', true);
-    else if (n.net < 0 && n.gold < 60) add('<b>Treasury</b> running dry', 'eco');
+    else if (ID.balance(n) < 0 && n.gold < 60) add('<b>Treasury</b> running dry', 'eco');
     if (n.inflation > 40) add('<b>Inflation ' + Math.round(n.inflation) + '</b>', 'eco', n.inflation > 60);
     if (n.depression) add('<b>Slump</b>: ' + n.depression + ' months to run', 'eco');
     if (n.pactBroken) add('<b>The pact has broken down</b>', 'eco', true);

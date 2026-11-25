@@ -1168,6 +1168,22 @@ went (`Coup.rowsText`, the `plot_uncovered` dispatch and its variants, two unuse
   islands settled 44% by 1915, 88% by 1920, 91% by 1925, 100% by 1940 (colonial powers no longer stall at home, so
   they reach the islands sooner); simulate (8 random runs) largest state 19% on average.
 
+## Session 15: the true balance, and a self-contained world
+
+- **Balance** (`ID.flow`, `ID.balance` in `sim/world.js`): money that moves outside the budget goes through
+  `ID.flow(n, label, v)`, which changes the treasury and writes this month's ledger (`n.a.flowNow`, moved to
+  `n.a.flow` by `Economy.month`). Used by oil and concessions (`sovereignty.js`), dependency and peace tribute (both
+  sides), repairs (`structMonth`), market socialism's sales, borrowing and debt repayment. `ID.balance(n)` = budget net
+  + last month's flows: the top band, the Treasury tooltip (one row per flow), the Economy panel, alerts and the Report
+  read it. Before, a Norvik with oil concessions and a tributary showed +42.9 while gaining 66; now it shows +66.1.
+  `tools/structures.js` checks that the shown balance matches the treasury for every state over two years (2%).
+- **In-world text**: 120 strings rewritten (only text strings, never ids, so saves keep working): one generic faith
+  (temples, shrines, high priests, preachers, holy war) instead of Christian and Islamic terms; Britain → Norvik,
+  Switzerland → Tessaly, Moscow/Peking → Karsova/Suyan, Paris → "the Jewel"; Reich → Realm, Führer → Leader of the
+  Movement, Politburo → Political Bureau, Cheka, Duma, cossacks, soviets, Marx, the Kremlin, Lloyd's, currencies.
+  Kept on purpose: royal and princely titles (sultan, emir, shah, sheikh), personal names, NRX's "the Cathedral", and
+  the ideology names themselves. `node tools/inworld.js` fails on any real-world reference in a text string.
+
 ## Session 15: browser pass and what is left
 
 Checked in the desktop app's browser pane at 800×600 and at phone width (375×812), with no console errors: *Settle*

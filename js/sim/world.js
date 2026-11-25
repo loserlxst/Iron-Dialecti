@@ -189,7 +189,7 @@
       const t = G.bld[i]; let h = G.hp[i];
       if (h > 0 && h < 100 && !countOnly) {
         const pts = Math.min(100 - h, ID.repairRate(G, n)), cost = ID.repairCost(t, pts);
-        if (n.gold >= cost) { n.gold -= cost; n.a.repairPaid += cost; h = G.hp[i] = h + Math.round(pts); if (t === B.FORT) G.fortsDirty = true; if (!G.headless) G.dirty.push(i); }
+        if (n.gold >= cost) { ID.flow(n, 'Repairs', -cost); n.a.repairPaid += cost; h = G.hp[i] = h + Math.round(pts); if (t === B.FORT) G.fortsDirty = true; if (!G.headless) G.dirty.push(i); }
       }
       n.a.nbe[t] += h / 100;
       if (!h) n.a.wrecks++; else if (h < 100) n.a.damaged++;
@@ -298,6 +298,11 @@
   /* A front-page moment for the interface to stage. Ignored when no one is watching. */
   ID.headline = function (G, o) { if (G.headless || !G.player) return; (G.headlines || (G.headlines = [])).push(Object.assign({ t: G.tick }, o)); if (G.headlines.length > 4) G.headlines.shift(); };
   ID.isMajor = (G, n) => n && ID.rankOf && ID.rankOf(G, n, 'power') <= 4;
+  /* Recurring money that moves outside the budget (oil, tribute, dependencies, repairs, debt service): it changes the
+     treasury and is written in this month's ledger, so the balance the player sees is what the treasury really does.
+     n.a.flowNow fills during a month; Economy.month moves it to n.a.flow (last month's), read by ID.balance. */
+  ID.flow = (n, label, v) => { if (!v) return; n.gold += v; const L = n.a.flowNow || (n.a.flowNow = {}); L[label] = (L[label] || 0) + v; };
+  ID.balance = (n) => { let s = n.net || 0; const L = n.a.flow; if (L) for (const k in L) s += L[k]; return s; };
   ID.chron = function (G, type, text, a, b) { G.chronicle.push({ t: G.tick, type, text, a: a || 0, b: b || 0 }); };
   ID.fx = function (G, type, i, data) { if (!G.headless && G.fx.length < 400) G.fx.push({ type, i, t: 0, d: data }); };
   ID.sfx = function (G, name) { if (!G.headless && G.sfx.length < 12) G.sfx.push(name); };
