@@ -51,7 +51,7 @@
      equipment did; at war, unless the arms flow rises, it drains over about two years. */
   /* food: granaries in months of need; each working city's market adds CITY_FOOD to the harvest (up to CITY_FOOD_MAX);
      population stops growing when the harvest is under GROW_AT of need, so it settles where the land feeds it */
-  E.NEED = 0.3; E.GRAIN_MAX = 6; E.GRAIN_START = 3; E.CITY_FOOD = 0.04; E.CITY_FOOD_MAX = 0.25; E.GROW_AT = 1.05;
+  E.NEED = 0.3; E.GRAIN_START = 3; E.CITY_FOOD = 0.04; E.CITY_FOOD_MAX = 0.25; E.GROW_AT = 1.05;
   E.harvest = (n) => (n.a.harvest != null ? n.a.harvest : n.foodBal);
 
   /* The grain year. Each spring the coming harvest is forecast (input randomness: the player learns it six months
@@ -216,8 +216,7 @@
      next plan is built on, closed only by growing into it or by exposure (plan_exposed). War checks the arms books. */
   E.QUOTA = { tol: 0.98, risk: 0.012, warArms: 4 };
   E.QUOTA_NAME = { ind: 'Industry', grain: 'The harvest', arms: 'Arms output' };
-  // the plan's grain figure forgives half of a bad year's weather (the planners blame the sky, and the sky is half right)
-  E.quotaReal = (n, k) => (k === 'ind' ? n.ind : k === 'grain' ? E.harvest(n) / Math.sqrt(Math.min(1, E.wxOf(n.wx ? n.wx.cur : 'fair').m)) : n.a.armsMade || 0);
+  E.quotaReal = (n, k) => (k === 'ind' ? n.ind : k === 'grain' ? E.harvest(n) : n.a.armsMade || 0);
   // industry follows the curve plans actually grow on (slow while the new factories are built): (y/5)^2 of the way
   E.quotaTarget = (p, k, y) => (k === 'ind' ? p.base + (p.target - p.base) * Math.pow(Math.min(5, Math.max(1, y)) / 5, 2) : p[k]);
   E.quotaFmt = (k, v) => (k === 'grain' ? Math.round(v * 100) + '%' : k === 'ind' ? Math.round(v) + '' : Math.round(v * 10) / 10 + '');
@@ -248,7 +247,9 @@
     for (const k of ['ind', 'grain', 'arms']) {
       const real = E.quotaReal(n, k), t = E.quotaTarget(p, k, y);
       if (n.paper && n.paper[k] && real >= n.paper[k]) delete n.paper[k]; // grown into the lie: the books balance
-      if (real < t * E.QUOTA.tol) miss.push({ k, real, t });
+      // the grain quota forgives half of a bad year's weather (the planners blame the sky, and the sky is half right)
+      const sky = k === 'grain' ? Math.sqrt(Math.min(1, E.wxOf(n.wx ? n.wx.cur : 'fair').m)) : 1;
+      if (real < t * E.QUOTA.tol * sky) miss.push({ k, real, t });
     }
     if (n.paper && !Object.keys(n.paper).length) { n.paper = null; n.paperSince = null; n.a.buried = 0; } // grown into: the plan built on it stands
     n.cnt.quotaYears = (n.cnt.quotaYears || 0) + 1;
@@ -353,7 +354,7 @@
     n.a.harvest = bal;
     /* granaries: surplus fills them (in months of need, up to the policy's store), a shortfall draws them down before anyone goes hungry */
     if (n.grain == null) n.grain = E.GRAIN_START;
-    if (bal >= 1) n.grain = Math.min(pol.store, n.grain + (bal - 1));
+    if (bal >= 1) { if (n.grain < pol.store) n.grain = Math.min(pol.store, n.grain + (bal - 1)); } // tops up to the policy's limit, never throws grain away
     else { const draw = Math.min(n.grain, 1 - bal); n.grain -= draw; bal += draw; }
     if (pol === E.POLICY.stock && n.grain > 6) {
       // when the world goes hungry and grain is dear, full granaries sell part of their store at that price

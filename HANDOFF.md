@@ -1198,7 +1198,9 @@ notes and the Iron Dialectic lesson that famine must be a clock, not a cliff.
   `n.a.foodCap` raises `ID.popCap`), stock (stores 12, half the growth, `Grain storage` cost above 6 months, sells
   a month of store at the world price when it is above ×1.25, stability +2 at 9 months). The growth bonus fades above
   7% of the world's land. Need per person `E.NEED` 0.30 (was 0.24). The plan's grain quota forgives half of a bad
-  year (`E.quotaReal`).
+  year (in the yearly check only; `E.quotaReal`, the Economy panel and the exposure risk see the real harvest).
+  Changing policy never throws stored grain away: the store only tops up to the new limit. `tools/food.js` also checks
+  the weather (changes only in September, no failed year after a bad one, odds as in the table) and a policy switch.
 - **AI** (`AI.grain`): stock before a forecast poor/failed harvest, when losing a war or under autarky; export when
   rich in grain and short of gold, when the world pays ×1.3, or as a merchant republic; else feed.
 - **UI**: Grain section in the Economy panel (`UI.grainCard`: this year, the forecast from March to September, stores,

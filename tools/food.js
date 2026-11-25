@@ -38,9 +38,10 @@ const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0) + '%';
     let fam = 0; const g0 = n.gold - n.debt, sold = { v: 0 };
     const weather = (m) => { let s = 0, k = 0; for (const x of ID.alive(G)) { const w = wx(x, m); x.wx = { cur: w, next: w, last: w }; s += E.wxOf(w).m; k++; } G.world.grainP = E.GRAIN_PRICE * Math.min(2, Math.max(0.6, 1 + (1 - s / k) * 5)); };
     n.grainPol = pol; weather(0); E.month(G, n); if (prep) prep(G, n);
+    n.grain = E.POLICY[pol].store; // a state that has run under its policy for a while
     const p0 = n.pop;
     for (let m = 0; m < months; m++) { weather(m); n.grainPol = pol; for (let d = 0; d < 30; d++) { G.tick++; ID.Combat.tickPop(G, n); } E.month(G, n); if (n.famine) fam++; sold.v += (n.a.flow && n.a.flow['Grain sold from store']) || 0; }
-    return { gold: n.gold - n.debt - g0, pop: n.pop / p0, fam, sold: sold.v, grain: n.grain, price: E.grainPrice(G) / E.GRAIN_PRICE, trades: n.laws.trade + ' ' + (n.a.routes || []).filter((r) => r.border || r.sea).length };
+    return { gold: n.gold - n.debt - g0, pop: n.pop / p0, fam, sold: sold.v, grain: n.grain };
   };
   const fair = () => 'fair';
   const A = {}; for (const p of ['export', 'feed', 'stock']) A[p] = play(p, 120, fair);
@@ -53,8 +54,32 @@ const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0) + '%';
   ok(B.stock.fam === 0 && B.export.fam > 0, 'a failed and a poor year without imports: stock starves ' + B.stock.fam + ' months, feed ' + B.feed.fam + ', export ' + B.export.fam);
   // the world's harvest fails while ours is fair: full granaries sell at the high price
   const C = play('stock', 48, (x, m) => (x.id === id ? 'fair' : m < 24 ? 'fair' : 'failed'), (G, n) => { n.laws.trade = 'free'; });
-  console.log('   (world famine: grain ' + C.grain.toFixed(1) + ', price ×' + (C.price || 0).toFixed(2) + ', trades ' + C.trades + ')');
   ok(C.sold > 0, 'a world famine: full granaries sell ' + Math.round(C.sold) + ' gold of grain at the high price');
+  // the weather itself: forecast in March, in by September, never a failed year after a bad one, odds as in the table
+  {
+    const G = ID.newGame({ scenario: 'random', headless: true, difficulty: 'iron', seed: 31 }), seen = {}; let wrongMonth = 0, afterBad = 0, years = 0;
+    const prev = {};
+    for (let m = 0; m < 12 * 40; m++) {
+      for (let d = 0; d < 30; d++) ID.Game.tick(G);
+      const mo = Math.floor(G.tick / 30) % 12;
+      for (const x of ID.alive(G)) {
+        const w = x.wx; if (!w) continue;
+        if (prev[x.id] != null && prev[x.id] !== w.cur) { if (mo !== 8) wrongMonth++; else { years++; seen[w.cur] = (seen[w.cur] || 0) + 1; if (w.cur === 'failed' && (w.last === 'poor' || w.last === 'failed')) afterBad++; } }
+        else if (mo === 8 && prev[x.id] != null) { years++; seen[w.cur] = (seen[w.cur] || 0) + 1; }
+        prev[x.id] = w.cur;
+      }
+    }
+    ok(wrongMonth === 0, 'the harvest changes only in September');
+    ok(afterBad === 0, 'a failed harvest never follows a poor or failed one');
+    const off = E.WX.map((x) => Math.abs((seen[x.k] || 0) / years - x.p)), worst = Math.max(...off);
+    ok(worst < 0.06, 'each kind of harvest comes about as often as its chance (worst gap ' + Math.round(worst * 100) + ' points over ' + years + ' harvests)');
+  }
+  // switching policy never throws stored grain away
+  {
+    const G = ID.newGame({ scenario: 'random', headless: true, difficulty: 'iron', seed: 31 }), x = ID.alive(G)[0];
+    x.grainPol = 'stock'; x.grain = 12; x.grainPol = 'feed'; E.month(G, x);
+    ok(x.grain > 11, 'from twelve months under stock to feed: the grain stays (' + x.grain.toFixed(1) + ' months)');
+  }
   if (fails) process.exit(1);
 }
 let lsSum = 0, stabSum = 0, popEnd = 0, troopsEnd = 0, months = 0, famine = 0, short = 0, starts = 0, grainSum = 0;
